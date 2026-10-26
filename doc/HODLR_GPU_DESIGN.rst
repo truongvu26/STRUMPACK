@@ -33,7 +33,9 @@ ButterflyPACK's GPU block ABI is in GPU_INTERFACE/bpack_gpu.h. Register the
 d_/z_c_bpack_set_gpu_block_evaluator after construct_init and before
 construct_element_compute, independently for F11 and F22. Check the header
 and both registration symbols in a separate configure-time capability probe.
-Retain the existing hybrid GPU ABI probe. Device construction should have
+F12/F21 rectangular BF handles are not Bmatrix objects; this registration
+cannot be applied to them. Their GPU implementation needs a separate backend
+interface. Retain the existing hybrid GPU ABI probe. Device construction should have
 its own explicit selection; HODLR_use_gpu=1/2 continues to select arithmetic
 and factor/solve placement rather than implicitly promising GPU construction.
 
@@ -44,6 +46,15 @@ maps i to upd[i], or upd[CB_iperm[i]] when STRUMPACK_PERMUTE_CB is enabled,
 matching the existing host callbacks. Keep the reverse child-update maps
 and parent destination offsets separately. Check conversion to the current
 32-bit ButterflyPACK interface and refuse overflowing problem sizes.
+
+Implement the launches in an optional CUDA translation unit with explicit
+real/complex instantiations and a host-only dispatch interface. A separate
+proposed evaluator build option enables that target and checks its CUDA
+compiler and registration ABI; STRUMPACK_USE_CUDA can remain OFF for dense
+fronts. Linking the precompiled evaluator must not require installed C++
+consumers to enable CUDA as a language. Keep CUDA-specific types out of the
+ordinary public host headers. Existing factor-only GPU consumers retain their
+current capability detection and runtime dependencies.
 
 The callback fills out[r+c*ld], including noncompact leading dimensions.
 It must support empty blocks, duplicate indices, unsymmetric matrices and
@@ -231,6 +242,27 @@ Current limits: actual dependency work
        multiply/extraction/inverse kernels, or an explicitly labeled CPU
        fallback. Keep the existing error until such backend support exists.
 
+A constrained OpenMP extension can retain a single ordered GPU owner while
+allowing CPU-only parallel work; it must distinguish CPU thread count from
+concurrent GPU callers and verify MPI progress ordering. It is not necessary
+to promise concurrent GPU execution in the first threading extension.
+
+The matvec handoff also needs an exported backend capability or an explicit
+finalize/upload symbol. The existing matvec-compute symbol already exists in
+libraries without that handoff, so linking it alone cannot prove support.
+Keep configuration/runtime rejection for older GPU dependencies.
+
 Implement capability changes separately so their numerical and concurrency
 coverage can be reviewed independently. None of these conditions is resolved
 by changing a command-line validator alone.
+
+Validation added after profiling
+--------------------------------
+
+Job 60338444 validates the fixed four-rank/two-GPU configuration with two
+ranks per GPU, host-staged MPI and OMP_NUM_THREADS=1, using the metadata-fixed
+ButterflyPACK dependency cf51315. Both sparse Poisson (multiple fronts,
+three RHS) and real/complex direct-interface RHS checks pass. UUIDs and
+backend share counts are recorded. This lifts the validation-only restriction
+for that fixed configuration; communicator expansion/rebinding and the other
+three capability guards remain outside this support claim.

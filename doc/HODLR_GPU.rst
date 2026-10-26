@@ -46,9 +46,11 @@ device sharing and the exchange arena on the solver communicator. Explicit
 standalone HODLRMatrix users must call HODLRMatrix<T>::initialize_gpu(comm) before
 starting independent matrix work. HODLRMatrix<T>::gpu_available() queries
 the linked backend without creating a device context. Rank/GPU binding should initially use one
-MPI rank per GPU. Multiple ranks sharing a GPU and expanding solver groups
-are not claimed as validated by this interface: the backend's sharing cache
-is process-wide and initialized on first use.
+MPI rank per GPU. The profiling follow-up validates two ranks per GPU for a fixed four-rank
+solver group on one node with the metadata-fixed dependency; see
+HODLR_GPU_PROFILE.rst. Expanding solver groups or changing bindings after
+initialization remain unsupported: the backend sharing cache is process-wide
+and initialized on first use.
 
 F11/F22 and rectangular F12/F21 retain shared process-tree ownership within
 each front; independent fronts retain independent communication contexts.
@@ -104,4 +106,6 @@ under a timeout to catch hidden world collectives.
 
 Previous Poisson GPU numerical evidence is preserved in the original
 STRUMPACK checkout's hodlr_rhs_gpu_fix_report.txt (jobs 60043836/60043857).
-Large Poisson validation is not repeated for this consolidation.
+Final-code sparse validation was refreshed in jobs 60333919 and 60336439.
+Repeated performance trials, CUDA tracing and the device-evaluator design
+are documented in HODLR_GPU_PROFILE.rst and HODLR_GPU_DESIGN.rst.

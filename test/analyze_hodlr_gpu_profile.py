@@ -26,13 +26,15 @@ def read_case(root, label):
     error = scalar(text, r'# relative error = .* = (\S+)')
     residual = scalar(text, r'# COMPONENTWISE SCALED RESIDUAL = (\S+)')
     fronts = scalar(text, r'nr of HODLR Frontal matrices = (\d+)', int)
-    if error >= 1.e-8 or residual >= 1.e-6 or fronts < 2:
+    if not 0 <= error < 1.e-8 or not 0 <= residual < 1.e-6 or fronts < 2:
         raise ValueError(label + ': numerical or multiple-front check failed')
     result = dict(case=label, relative_error=error, scaled_residual=residual,
                   hodlr_fronts=fronts,
                   refinement_iterations=scalar(text, r'number of Krylov iterations = (\d+)', int))
     for phase in ('factor', 'solve'):
         result[phase + '_seconds'] = scalar(text, r'#\s+- ' + phase + r' time = (\S+)')
+    if result['factor_seconds'] <= 0 or result['solve_seconds'] <= 0:
+        raise ValueError(label + ': invalid wall time')
     result['factor_plus_solve_seconds'] = result['factor_seconds'] + result['solve_seconds']
     return result
 

@@ -1,0 +1,629 @@
+{
+  "status": "PASS",
+  "scope": {
+    "grids": [
+      40,
+      60
+    ],
+    "rhs": 3,
+    "mpi_ranks": 4,
+    "openmp_threads": 1,
+    "gpu_mode": 1,
+    "gpu_model": "NVIDIA A100-SXM4-40GB",
+    "gpu_aware_mpi": false,
+    "strumpack_dense_cuda": false
+  },
+  "baseline_source_commit": "872543e1c58bbe02dca8a552f0856698ba01f5dc",
+  "baseline_executable_sha256": "fa05f78a43f057c3da829a70cea2f4baafdf842aff7282498e6eefbd50ef77ad",
+  "baseline_butterflypack_commit": "8d8b38b64a8d301bb0cb59b0618c0d97f7354d99",
+  "optimized_butterflypack_commit": "cf51315da7fa3c196e5002ed1578123cab5ecfe5",
+  "initial_baseline": [
+    {
+      "grid": 40,
+      "mode": 0,
+      "factor_seconds": {
+        "median": 4.593,
+        "minimum": 4.58995,
+        "maximum": 4.66122
+      },
+      "solve_seconds": {
+        "median": 0.0760498,
+        "minimum": 0.0597872,
+        "maximum": 0.0962983
+      },
+      "factor_plus_solve_seconds": {
+        "median": 4.6892983,
+        "minimum": 4.6497372,
+        "maximum": 4.7372698
+      },
+      "refinement_iterations": [
+        3,
+        5,
+        3
+      ],
+      "maximum_relative_error": 2.77389e-11,
+      "maximum_scaled_residual": 4.81369e-09
+    },
+    {
+      "grid": 40,
+      "mode": 1,
+      "factor_seconds": {
+        "median": 6.46081,
+        "minimum": 6.07111,
+        "maximum": 6.92789
+      },
+      "solve_seconds": {
+        "median": 0.07353,
+        "minimum": 0.0663347,
+        "maximum": 0.106526
+      },
+      "factor_plus_solve_seconds": {
+        "median": 6.5271447,
+        "minimum": 6.177636,
+        "maximum": 7.0014199999999995
+      },
+      "refinement_iterations": [
+        3,
+        5,
+        3
+      ],
+      "maximum_relative_error": 1.61822e-11,
+      "maximum_scaled_residual": 1.22125e-09
+    },
+    {
+      "grid": 60,
+      "mode": 0,
+      "factor_seconds": {
+        "median": 38.0039,
+        "minimum": 37.6061,
+        "maximum": 38.1073
+      },
+      "solve_seconds": {
+        "median": 0.51129,
+        "minimum": 0.510477,
+        "maximum": 0.654307
+      },
+      "factor_plus_solve_seconds": {
+        "median": 38.515190000000004,
+        "minimum": 38.116577,
+        "maximum": 38.761607000000005
+      },
+      "refinement_iterations": [
+        9,
+        7,
+        7
+      ],
+      "maximum_relative_error": 3.7288e-10,
+      "maximum_scaled_residual": 2.01723e-08
+    },
+    {
+      "grid": 60,
+      "mode": 1,
+      "factor_seconds": {
+        "median": 40.6476,
+        "minimum": 39.8907,
+        "maximum": 40.6758
+      },
+      "solve_seconds": {
+        "median": 0.644674,
+        "minimum": 0.64075,
+        "maximum": 0.646796
+      },
+      "factor_plus_solve_seconds": {
+        "median": 41.288349999999994,
+        "minimum": 40.537496000000004,
+        "maximum": 41.320474000000004
+      },
+      "refinement_iterations": [
+        8,
+        8,
+        8
+      ],
+      "maximum_relative_error": 2.1196e-10,
+      "maximum_scaled_residual": 5.80199e-09
+    }
+  ],
+  "diagnostic_source_commit": "501ad00687cc02b7926d571937daec35c790ae35",
+  "inclusive_phase_timers": {
+    "detailed_cpu": {
+      "H_compress": {
+        "sum_rank_seconds": 6.783,
+        "min_rank_seconds": 1.619,
+        "max_rank_seconds": 1.754,
+        "mean_rank_seconds": 1.696
+      },
+      "H_compress_22": {
+        "sum_rank_seconds": 66.75,
+        "min_rank_seconds": 16.09,
+        "max_rank_seconds": 17.27,
+        "mean_rank_seconds": 16.69
+      },
+      "LRBF_compress": {
+        "sum_rank_seconds": 67.28,
+        "min_rank_seconds": 15.68,
+        "max_rank_seconds": 18.27,
+        "mean_rank_seconds": 16.82
+      },
+      "Compute_Schur": {
+        "sum_rank_seconds": 8.839,
+        "min_rank_seconds": 2.019,
+        "max_rank_seconds": 2.302,
+        "mean_rank_seconds": 2.21
+      },
+      "Factor": {
+        "sum_rank_seconds": 0.586,
+        "min_rank_seconds": 0.09679,
+        "max_rank_seconds": 0.1679,
+        "mean_rank_seconds": 0.1465
+      },
+      "extract_sep_2d": {
+        "sum_rank_seconds": 0.881,
+        "min_rank_seconds": 0.2052,
+        "max_rank_seconds": 0.235,
+        "mean_rank_seconds": 0.2203
+      },
+      "get_submatrix_2d": {
+        "sum_rank_seconds": 19.52,
+        "min_rank_seconds": 4.739,
+        "max_rank_seconds": 5.044,
+        "mean_rank_seconds": 4.88
+      },
+      "extract_Schur": {
+        "sum_rank_seconds": 21.05,
+        "min_rank_seconds": 5.116,
+        "max_rank_seconds": 5.354,
+        "mean_rank_seconds": 5.262
+      },
+      "bf_comm": {
+        "sum_rank_seconds": 9.145,
+        "min_rank_seconds": 2.167,
+        "max_rank_seconds": 2.368,
+        "mean_rank_seconds": 2.286
+      }
+    },
+    "detailed_gpu": {
+      "H_compress": {
+        "sum_rank_seconds": 12.96,
+        "min_rank_seconds": 3.087,
+        "max_rank_seconds": 3.306,
+        "mean_rank_seconds": 3.239
+      },
+      "H_compress_22": {
+        "sum_rank_seconds": 70.38,
+        "min_rank_seconds": 17.2,
+        "max_rank_seconds": 18.07,
+        "mean_rank_seconds": 17.59
+      },
+      "LRBF_compress": {
+        "sum_rank_seconds": 66.99,
+        "min_rank_seconds": 15.55,
+        "max_rank_seconds": 18.17,
+        "mean_rank_seconds": 16.75
+      },
+      "Compute_Schur": {
+        "sum_rank_seconds": 7.895,
+        "min_rank_seconds": 1.882,
+        "max_rank_seconds": 2.049,
+        "mean_rank_seconds": 1.974
+      },
+      "Factor": {
+        "sum_rank_seconds": 4.343,
+        "min_rank_seconds": 0.9897,
+        "max_rank_seconds": 1.148,
+        "mean_rank_seconds": 1.086
+      },
+      "extract_sep_2d": {
+        "sum_rank_seconds": 0.8759,
+        "min_rank_seconds": 0.2051,
+        "max_rank_seconds": 0.2358,
+        "mean_rank_seconds": 0.219
+      },
+      "get_submatrix_2d": {
+        "sum_rank_seconds": 19.6,
+        "min_rank_seconds": 4.742,
+        "max_rank_seconds": 5.028,
+        "mean_rank_seconds": 4.9
+      },
+      "extract_Schur": {
+        "sum_rank_seconds": 21.09,
+        "min_rank_seconds": 5.104,
+        "max_rank_seconds": 5.354,
+        "mean_rank_seconds": 5.272
+      },
+      "bf_comm": {
+        "sum_rank_seconds": 9.203,
+        "min_rank_seconds": 2.168,
+        "max_rank_seconds": 2.384,
+        "mean_rank_seconds": 2.301
+      }
+    }
+  },
+  "cuda_before": {
+    "solver_factor_plus_solve_seconds": 44.975531,
+    "ranks": [
+      {
+        "rank": 0,
+        "gpu_active_union_seconds": 0.123548148,
+        "kernel_count": 9122,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 97,
+          "seconds": 3.442174414
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost",
+          "calls": 0,
+          "seconds": 0
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 967,
+            "bytes": 44254096,
+            "seconds": 0.003234378
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2346,
+            "bytes": 427267992,
+            "seconds": 0.020258174
+          }
+        ]
+      },
+      {
+        "rank": 1,
+        "gpu_active_union_seconds": 0.116494803,
+        "kernel_count": 8686,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 94,
+          "seconds": 3.344182708
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost",
+          "calls": 0,
+          "seconds": 0
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 926,
+            "bytes": 42666656,
+            "seconds": 0.003121489
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2271,
+            "bytes": 418487368,
+            "seconds": 0.019746487
+          }
+        ]
+      },
+      {
+        "rank": 2,
+        "gpu_active_union_seconds": 0.118370433,
+        "kernel_count": 8758,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 94,
+          "seconds": 3.336135605
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost",
+          "calls": 0,
+          "seconds": 0
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 936,
+            "bytes": 42464632,
+            "seconds": 0.003096362
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2279,
+            "bytes": 421164080,
+            "seconds": 0.019839999
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "gpu_active_union_seconds": 0.108703574,
+        "kernel_count": 8069,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 85,
+          "seconds": 2.98811594
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost",
+          "calls": 0,
+          "seconds": 0
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 848,
+            "bytes": 40346144,
+            "seconds": 0.002896925
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2082,
+            "bytes": 403891904,
+            "seconds": 0.018834573
+          }
+        ]
+      }
+    ],
+    "notes": [
+      "GPU-active time is the union of kernel/copy/memset intervals, not an SM occupancy counter.",
+      "The denominator is the instrumented rank-zero sparse factor-plus-solve wall time.",
+      "These diagnostics enable hodlr_verbose, which also enables native construction checks; baseline timing is collected separately.",
+      "CUDA API durations measure host time; do not add them to GPU intervals or inclusive STRUMPACK timers.",
+      "MPI tracing is disabled; communication evidence comes from STRUMPACK internal timers."
+    ]
+  },
+  "same_allocation_ab": [
+    {
+      "variant": "old_cpu",
+      "factor_seconds": {
+        "median": 37.7519,
+        "minimum": 37.7498,
+        "maximum": 38.4062
+      },
+      "solve_seconds": {
+        "median": 0.529253,
+        "minimum": 0.429686,
+        "maximum": 0.579179
+      },
+      "factor_plus_solve_seconds": {
+        "median": 38.328979000000004,
+        "minimum": 38.181585999999996,
+        "maximum": 38.935452999999995
+      },
+      "refinement_iterations": [
+        7,
+        8,
+        6
+      ],
+      "maximum_relative_error": 2.02069e-10,
+      "maximum_scaled_residual": 1.63739e-08
+    },
+    {
+      "variant": "old_gpu",
+      "factor_seconds": {
+        "median": 41.286,
+        "minimum": 40.4551,
+        "maximum": 41.795
+      },
+      "solve_seconds": {
+        "median": 0.627252,
+        "minimum": 0.555719,
+        "maximum": 0.638217
+      },
+      "factor_plus_solve_seconds": {
+        "median": 41.841719000000005,
+        "minimum": 41.093317,
+        "maximum": 42.422252
+      },
+      "refinement_iterations": [
+        8,
+        7,
+        8
+      ],
+      "maximum_relative_error": 3.1153e-10,
+      "maximum_scaled_residual": 1.81246e-08
+    },
+    {
+      "variant": "new_gpu",
+      "factor_seconds": {
+        "median": 38.9808,
+        "minimum": 38.478,
+        "maximum": 39.48
+      },
+      "solve_seconds": {
+        "median": 0.673078,
+        "minimum": 0.569357,
+        "maximum": 0.707399
+      },
+      "factor_plus_solve_seconds": {
+        "median": 39.653878,
+        "minimum": 39.185399000000004,
+        "maximum": 40.04935699999999
+      },
+      "refinement_iterations": [
+        7,
+        8,
+        9
+      ],
+      "maximum_relative_error": 2.19687e-10,
+      "maximum_scaled_residual": 5.94438e-09
+    }
+  ],
+  "cuda_after": {
+    "solver_factor_plus_solve_seconds": 42.189074000000005,
+    "ranks": [
+      {
+        "rank": 0,
+        "gpu_active_union_seconds": 0.137022469,
+        "kernel_count": 10116,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 97,
+          "seconds": 0.150211125
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost_v3020",
+          "calls": 92,
+          "seconds": 0.001723082
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 1113,
+            "bytes": 45271420,
+            "seconds": 0.003439267
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2778,
+            "bytes": 428388072,
+            "seconds": 0.020764294
+          }
+        ]
+      },
+      {
+        "rank": 1,
+        "gpu_active_union_seconds": 0.126703999,
+        "kernel_count": 9601,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 94,
+          "seconds": 0.148400862
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost_v3020",
+          "calls": 89,
+          "seconds": 0.001352367
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 1065,
+            "bytes": 40183216,
+            "seconds": 0.003162655
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2679,
+            "bytes": 416245424,
+            "seconds": 0.020099253
+          }
+        ]
+      },
+      {
+        "rank": 2,
+        "gpu_active_union_seconds": 0.131096534,
+        "kernel_count": 9720,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 94,
+          "seconds": 0.15939063
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost_v3020",
+          "calls": 89,
+          "seconds": 0.001481105
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 1078,
+            "bytes": 43455500,
+            "seconds": 0.003287624
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2699,
+            "bytes": 422082848,
+            "seconds": 0.020371948
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "gpu_active_union_seconds": 0.119840709,
+        "kernel_count": 8935,
+        "cuda_malloc_host": {
+          "name": "cudaMallocHost_v3020",
+          "calls": 85,
+          "seconds": 0.15319151
+        },
+        "cuda_free_host": {
+          "name": "cudaFreeHost_v3020",
+          "calls": 80,
+          "seconds": 0.001620066
+        },
+        "memory_copies": [
+          {
+            "direction": "Device-to-Host",
+            "calls": 978,
+            "bytes": 41265396,
+            "seconds": 0.003087056
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 2466,
+            "bytes": 404853520,
+            "seconds": 0.019366213
+          }
+        ]
+      }
+    ],
+    "notes": [
+      "GPU-active time is the union of kernel/copy/memset intervals, not an SM occupancy counter.",
+      "The denominator is the instrumented rank-zero sparse factor-plus-solve wall time.",
+      "These diagnostics enable hodlr_verbose, which also enables native construction checks; baseline timing is collected separately.",
+      "CUDA API durations measure host time; do not add them to GPU intervals or inclusive STRUMPACK timers.",
+      "MPI tracing is disabled; communication evidence comes from STRUMPACK internal timers."
+    ]
+  },
+  "metadata_regression": {
+    "original": "expected failure",
+    "fixed": "PASS",
+    "fixed_output": "Metadata lifetime: PASS calls=32 peak_pinned_bytes=393216 live_pinned_bytes=0 live_events=0"
+  },
+  "shared_gpu_sparse": {
+    "case": "shared_sparse",
+    "relative_error": 2.26635e-11,
+    "scaled_residual": 2.44939e-09,
+    "hodlr_fronts": 24,
+    "refinement_iterations": 5,
+    "factor_seconds": 6.28968,
+    "solve_seconds": 0.267522,
+    "factor_plus_solve_seconds": 6.557201999999999,
+    "native_gpu_factors": 24,
+    "ranks_per_gpu": 2,
+    "gpu_uuids": [
+      "GPU-0a2d1525-cd97-1237-f819-9c5fe40aa441",
+      "GPU-7dee6bde-152b-8247-31bd-dcd4f7ca8159"
+    ]
+  },
+  "shared_gpu_api": "PASS",
+  "notes": [
+    "Baseline trials use the uninstrumented Release binary and fresh MPI processes.",
+    "Internal timers and Nsight tracing are separate diagnostic runs; their wall times are not baseline timings.",
+    "ButterflyPACK seeds adaptive CPU compression from clock/PID; factors and refinement work vary between trials.",
+    "Internal timer totals are inclusive and overlap; never add rows or interpret rank maxima as critical-path wall time.",
+    "Only 40^3 and 60^3, three RHS, four ranks, one rank per GPU are characterized.",
+    "Three alternating original-CPU/original-GPU/optimized-GPU trials share one allocation.",
+    "Baseline timing excludes internal timers, Nsight, native verbosity and CPU/GPU check mode.",
+    "Adaptive compression is time/PID seeded; numerical ranks and refinement iterations vary.",
+    "The traced run enables native verbosity and checks and is not a baseline timing sample.",
+    "Sharing is tested only for a fixed four-rank full-solver group on one node, two ranks per GPU.",
+    "Job 60337119 failed only after all baseline trials completed; failed MPI-interposed traces are excluded. Composite PASS refers to the validated measurement stages and successful diagnostic/A-B jobs."
+  ],
+  "slurm_jobs": [
+    {
+      "job_id": "60337119",
+      "state": "FAILED",
+      "elapsed_seconds": "404",
+      "exit_code": "255:0"
+    },
+    {
+      "job_id": "60337584",
+      "state": "COMPLETED",
+      "elapsed_seconds": "166",
+      "exit_code": "0:0"
+    },
+    {
+      "job_id": "60338444",
+      "state": "COMPLETED",
+      "elapsed_seconds": "467",
+      "exit_code": "0:0"
+    }
+  ]
+}
