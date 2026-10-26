@@ -110,11 +110,10 @@ for N/T/C products and three-RHS inverse application after moving the owner.
 The sparse check runs 40^3 Poisson with three RHS on one and four ranks,
 using the previously validated fixed two-ranks-per-GPU binding for the
 four-rank cases, and comparing the default hybrid path, eligible F11/F22
-device construction and
-a deliberately tiny cap forcing host fallback. The sparse configuration uses
+device construction and a deliberately tiny cap forcing host fallback. The sparse configuration uses
 compression thresholds of 1000 and HODLR leaf size 128. It checks finite forward
 error and scaled residual, actual evaluator use and explicit distributed
-fallback. Results are recorded separately after the batch completes.
+fallback. Completed evidence is recorded in HODLR_GPU_EVALUATOR.json.
 
 Initial diagnostic job 60340028 passed both focused tests and memcheck, but
 its sparse baseline failed before device evaluation. A deliberately low
@@ -129,3 +128,64 @@ cross-rank request preparation remain the next implementation stage. The
 collective preparation protocol in HODLR_GPU_DESIGN.rst is still required.
 OMP_NUM_THREADS>1, randomized matvec construction and nonzero butterfly
 levels remain guarded for the dependency reasons documented there.
+
+Completed validation
+---------------------
+
+PASS: interactive allocation 60341136, source b2b0a48a, node nid002313,
+two A100 40 GB GPUs, completed in 1m44s with exit 0:0. All focused tests and
+all six sparse cases pass. The source patch recorded by the job is empty.
+
+.. list-table:: Evaluator-enabled sparse cases, three RHS and 24 HODLR fronts
+   :header-rows: 1
+   :widths: 16 17 17 24 26
+
+   * - MPI ranks
+     - Device F11 blocks
+     - Device F22 blocks
+     - Relative forward error
+     - Scaled residual
+   * - 1
+     - 23
+     - 1
+     - 1.40345e-13
+     - 2.02270e-11
+   * - 4
+     - 21
+     - 1
+     - 3.11010e-11
+     - 8.74812e-9
+
+The four-rank case reports three distributed-front host fallbacks. Oversized
+images also fall back explicitly. The cap=1 cases report zero evaluator calls.
+The four-rank runs verify exactly two GPU UUID groups of two ranks and the
+backend's matching share count. Both the ordinary evaluator-disabled build
+and an installed host consumer without CUDA compilation build successfully.
+Compute Sanitizer reports zero device memory errors.
+
+The direct real/complex regression also checks padded sequential rectangular
+Butterfly extraction. Job 60340993 exposed an existing bug in
+ButterflyMatrix::set_extraction_meta_1grid: after setting Nalldat_loc from the
+requested output size, it reset that value to zero while clearing the row
+and column totals. F22 preparation then allocated a zero-sized output buffer
+and wrote past it. Commit b2b0a48a preserves the output count and adds the
+child-tile regression; both now pass in the full sparse path.
+
+Per-callback uploads total 801375696 bytes on one rank and 526767744 bytes
+across the four-rank case. Maximum payload scratch is about 5.2 MB per
+callback. These transfers demonstrate the cost of the bounded preparation
+bridge. Single verbose runs, adaptive compression and varying refinement
+iterations do not establish a speed benefit. Use the uninstrumented repeated
+workflow from HODLR_GPU_PROFILE.rst before making performance claims.
+
+Debug jobs 60340270 and 60340660 were cancelled while pending and ran no
+tests. The interactive queue was used after the debug queue delayed the
+validation; the completed computation itself took less than two minutes.
+Raw job folders, logs and build directories remain locally ignored.
+
+The same validation can run through an interactive allocation when the debug
+queue is busy; all device work, including device discovery, uses srun::
+
+  salloc -A m4872_g -C gpu -q interactive -N 1 --gpus-per-node=2 \
+    -n 4 -c 8 --mem=64G -t 00:05:00 \
+    bash test/validate_hodlr_gpu_front_perlmutter.sbatch

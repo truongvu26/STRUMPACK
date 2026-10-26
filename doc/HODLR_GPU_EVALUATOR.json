@@ -1,0 +1,200 @@
+{
+  "artifacts_directory": "profile_results/60341136",
+  "cases": {
+    "capped_1": {
+      "distributed_front_fallbacks": 0,
+      "evaluator_calls_sum": 0,
+      "evaluator_scratch_peak_bytes_max": 0,
+      "evaluator_upload_bytes_sum": 0,
+      "factor_seconds_diagnostic": 18.5015,
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 47,
+      "maximum_evaluator_calls": 0,
+      "native_gpu_baca_level_reports": 0,
+      "prepared_f11_blocks": 0,
+      "prepared_f22_blocks": 0,
+      "relative_error": 7.43869e-11,
+      "scaled_residual": 3.01425e-09,
+      "solve_seconds_diagnostic": 0.495778
+    },
+    "capped_4": {
+      "distributed_front_fallbacks": 3,
+      "evaluator_calls_sum": 0,
+      "evaluator_scratch_peak_bytes_max": 0,
+      "evaluator_upload_bytes_sum": 0,
+      "factor_seconds_diagnostic": 6.8484,
+      "gpu_uuid_rank_counts": {
+        "GPU-ae5650ef-a496-0eb1-4531-2c754505e1c3": 2,
+        "GPU-af4cbc15-600b-317b-6633-68a18301d05b": 2
+      },
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 42,
+      "maximum_evaluator_calls": 0,
+      "native_gpu_baca_level_reports": 0,
+      "prepared_f11_blocks": 0,
+      "prepared_f22_blocks": 0,
+      "relative_error": 8.7256e-12,
+      "scaled_residual": 3.47987e-10,
+      "solve_seconds_diagnostic": 0.151097
+    },
+    "evaluator_1": {
+      "distributed_front_fallbacks": 0,
+      "evaluator_calls_sum": 450,
+      "evaluator_scratch_peak_bytes_max": 5188496,
+      "evaluator_upload_bytes_sum": 801375696,
+      "factor_seconds_diagnostic": 19.0143,
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 23,
+      "maximum_evaluator_calls": 40,
+      "native_gpu_baca_level_reports": 27,
+      "prepared_f11_blocks": 23,
+      "prepared_f22_blocks": 1,
+      "relative_error": 1.40345e-13,
+      "scaled_residual": 2.0227e-11,
+      "solve_seconds_diagnostic": 0.317722
+    },
+    "evaluator_4": {
+      "distributed_front_fallbacks": 3,
+      "evaluator_calls_sum": 396,
+      "evaluator_scratch_peak_bytes_max": 5126416,
+      "evaluator_upload_bytes_sum": 526767744,
+      "factor_seconds_diagnostic": 7.03718,
+      "gpu_uuid_rank_counts": {
+        "GPU-ae5650ef-a496-0eb1-4531-2c754505e1c3": 2,
+        "GPU-af4cbc15-600b-317b-6633-68a18301d05b": 2
+      },
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 20,
+      "maximum_evaluator_calls": 40,
+      "native_gpu_baca_level_reports": 23,
+      "prepared_f11_blocks": 21,
+      "prepared_f22_blocks": 1,
+      "relative_error": 3.1101e-11,
+      "scaled_residual": 8.74812e-09,
+      "solve_seconds_diagnostic": 0.579154
+    },
+    "hybrid_1": {
+      "distributed_front_fallbacks": 0,
+      "evaluator_calls_sum": 0,
+      "evaluator_scratch_peak_bytes_max": 0,
+      "evaluator_upload_bytes_sum": 0,
+      "factor_seconds_diagnostic": 18.926,
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 0,
+      "maximum_evaluator_calls": 0,
+      "native_gpu_baca_level_reports": 0,
+      "prepared_f11_blocks": 0,
+      "prepared_f22_blocks": 0,
+      "relative_error": 4.74247e-11,
+      "scaled_residual": 6.77283e-09,
+      "solve_seconds_diagnostic": 0.232129
+    },
+    "hybrid_4": {
+      "distributed_front_fallbacks": 0,
+      "evaluator_calls_sum": 0,
+      "evaluator_scratch_peak_bytes_max": 0,
+      "evaluator_upload_bytes_sum": 0,
+      "factor_seconds_diagnostic": 6.81173,
+      "gpu_uuid_rank_counts": {
+        "GPU-ae5650ef-a496-0eb1-4531-2c754505e1c3": 2,
+        "GPU-af4cbc15-600b-317b-6633-68a18301d05b": 2
+      },
+      "hodlr_fronts": 24,
+      "image_cap_fallbacks": 0,
+      "maximum_evaluator_calls": 0,
+      "native_gpu_baca_level_reports": 0,
+      "prepared_f11_blocks": 0,
+      "prepared_f22_blocks": 0,
+      "relative_error": 1.57934e-10,
+      "scaled_residual": 2.35254e-08,
+      "solve_seconds_diagnostic": 0.309982
+    }
+  },
+  "checks": {
+    "compute_sanitizer_memcheck": "PASS: 0 errors",
+    "default_evaluator_disabled_build": "PASS",
+    "device_stream_stride_and_lifetime": "PASS",
+    "installed_host_consumer_without_cuda_language": "PASS",
+    "real_complex_n_t_c_and_three_rhs": "PASS",
+    "sequential_butterfly_schur_extraction_and_padding": "PASS"
+  },
+  "configuration_sha256": "3d2918b4649a38da32359d0044f3e22a2ffce9c0eba73b92298c65363265de3d",
+  "dependency_commit": "15f971a94ac232940e6df64ec8e77000c0ba4c21",
+  "dependency_metadata_code_fix": "cf51315",
+  "earlier_attempts": [
+    {
+      "focused_checks": "PASS",
+      "job": "60340028",
+      "reason": "Low threshold 64 created 281 HODLR fronts; hybrid baseline exhausted MPICH contexts (0/4096 free).",
+      "status": "FAILED"
+    },
+    {
+      "focused_checks": "PASS",
+      "hybrid_sparse_baseline": "PASS",
+      "job": "60340993",
+      "reason": "Sequential Butterfly extraction reset Nalldat_loc to zero; F22 preparation corrupted its temporary buffer. Fixed in b2b0a48a with real/complex extraction regression.",
+      "status": "FAILED"
+    },
+    {
+      "job": "60340270",
+      "reason": "Pending debug request replaced with smaller allocation; no tests ran.",
+      "status": "CANCELLED"
+    },
+    {
+      "job": "60340660",
+      "reason": "Pending debug request replaced with granted interactive allocation; no tests ran.",
+      "status": "CANCELLED"
+    }
+  ],
+  "executable_sha256": {
+    "testPoisson3dMPIDist": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
+    "test_HODLR_gpu_front_evaluator": "d90994efcd1bfd6ed3a60f26dae31dd66f3e6c0457f24878d8464d87d157d2d2",
+    "test_HODLR_gpu_front_integration": "8b00ebbbfa1be31d9ed523bc978f2cc002826b3b10f64f1f989ae993fd5f1056"
+  },
+  "gpu": [
+    {
+      "driver_version": "580.178.04",
+      "memory.total [MiB]": "40960 MiB",
+      "name": "NVIDIA A100-SXM4-40GB",
+      "uuid": "GPU-ae5650ef-a496-0eb1-4531-2c754505e1c3"
+    }
+  ],
+  "job": "60341136",
+  "limits": [
+    "Single-rank front preparation only; distributed fronts retain host construction.",
+    "Child and current-front Schur images are prepared on host and uploaded per callback.",
+    "Per-block cap does not bound total retained solver memory.",
+    "OMP_NUM_THREADS=1, element extraction and zero butterfly levels remain required.",
+    "Verbose diagnostic times and differing refinement counts do not establish a speed improvement."
+  ],
+  "problem": {
+    "compression_threshold": 1000,
+    "dense_cuda_backend": false,
+    "device_evaluator_build_option": true,
+    "evaluator_cap_bytes": 8388608,
+    "hodlr_fronts": 24,
+    "leaf_size": 128,
+    "omp_threads": 1,
+    "poisson_grid": [
+      40,
+      40,
+      40
+    ],
+    "relative_compression_tolerance": 1e-05,
+    "right_hand_sides": 3
+  },
+  "scheduler": {
+    "allocated_gpus": 2,
+    "elapsed": "00:01:44",
+    "exit_code": "0:0",
+    "node": "nid002313",
+    "qos": "gpu_interactive",
+    "ranks_per_gpu_in_four_rank_cases": 2,
+    "state": "COMPLETED"
+  },
+  "scope": "Bounded single-rank fronts; distributed host construction; three RHS",
+  "source_commit": "b2b0a48a36dcda582df19d8a84e5aeb5d14eacfc",
+  "source_patch_bytes": 0,
+  "status": "PASS",
+  "timing_scope": "Verbose functional diagnostics; not a speed benchmark"
+}
