@@ -929,3 +929,12 @@ if(STRUMPACK_USE_MPI)
   endif()
 
 endif()
+
+if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+  add_executable(test_HODLR_gpu_front_evaluator test_HODLR_gpu_front_evaluator.cu)
+  set_target_properties(test_HODLR_gpu_front_evaluator PROPERTIES
+    CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
+  target_link_libraries(test_HODLR_gpu_front_evaluator PRIVATE strumpack)
+  add_executable(test_HODLR_gpu_front_integration test_HODLR_gpu_front_integration.cpp)
+  target_link_libraries(test_HODLR_gpu_front_integration PRIVATE strumpack)
+endif()

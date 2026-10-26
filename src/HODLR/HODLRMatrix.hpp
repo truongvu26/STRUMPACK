@@ -52,11 +52,15 @@ namespace strumpack {
    */
   namespace HODLR {
 
+    class GPUFrontEvaluator;
+
     // Local-rank API wall times. Construction includes host compression/upload.
     struct BackendStatistics {
       double construction_seconds = 0., factor_seconds = 0.;
       double multiply_seconds = 0., inverse_seconds = 0.;
       std::size_t rhs_boundary_bytes = 0;
+      std::size_t evaluator_calls = 0, evaluator_upload_bytes = 0;
+      std::size_t evaluator_scratch_peak_bytes = 0;
     };
 
     struct ExtractionMeta {
@@ -103,6 +107,11 @@ namespace strumpack {
 
       const BackendStatistics& backend_statistics() const { return backend_stats_; }
       int gpu_backend() const { return gpu_mode_; }
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      // Register only after construct_init and before compress. The shared
+      // owner survives matrix moves and outlives the backend handle.
+      void set_gpu_front_evaluator(std::shared_ptr<GPUFrontEvaluator> state);
+#endif
 
       using real_t = typename RealType<scalar_t>::value_type;
       using mult_t = typename std::function
@@ -601,6 +610,10 @@ namespace strumpack {
       std::vector<int> dist_;         // begin rows of each rank
       std::vector<int> leafs_;        // leaf sizes of the tree
 
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      std::shared_ptr<GPUFrontEvaluator> gpu_front_evaluator_;
+      void finish_gpu_front_evaluation();
+#endif
       int gpu_mode_ = 0;
       bool backend_verbose_ = false;
       mutable BackendStatistics backend_stats_;

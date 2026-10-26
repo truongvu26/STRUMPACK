@@ -499,6 +499,7 @@ if(TPL_ENABLE_SZ3)
   endif()
 endif()
 
+option(STRUMPACK_USE_HODLR_GPU_EVALUATOR "Build the experimental bounded GPU front evaluator" OFF)
 option(STRUMPACK_REQUIRE_BPACK_GPU "Require the ButterflyPACK HODLR GPU interface" OFF)
 
 if(TPL_ENABLE_BPACK)
@@ -556,6 +557,34 @@ endif()
 
 if(STRUMPACK_REQUIRE_BPACK_GPU AND NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
   message(FATAL_ERROR "ButterflyPACK is missing required HODLR GPU entry points")
+endif()
+
+if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+    message(FATAL_ERROR "GPU front evaluation requires the ButterflyPACK GPU interface")
+  endif()
+  cmake_push_check_state(RESET)
+  if(TARGET ButterflyPACK::butterflypack)
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::butterflypack)
+  else()
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::dbutterflypack ButterflyPACK::zbutterflypack)
+  endif()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${MPI_CXX_LIBRARIES})
+  set(CMAKE_REQUIRED_INCLUDES ${MPI_CXX_INCLUDE_DIRS})
+  unset(STRUMPACK_HAVE_BPACK_GPU_EVALUATOR CACHE)
+  check_cxx_source_compiles("
+    #include <bpack_gpu.h>
+    int main() {
+      void* matrix=nullptr; int flags=0;
+      d_c_bpack_set_gpu_block_evaluator(&matrix,nullptr,nullptr,&flags);
+      z_c_bpack_set_gpu_block_evaluator(&matrix,nullptr,nullptr,&flags);
+      bpack_gpu_block_batch batch{}; return batch.count;
+    }" STRUMPACK_HAVE_BPACK_GPU_EVALUATOR)
+  cmake_pop_check_state()
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_EVALUATOR)
+    message(FATAL_ERROR "ButterflyPACK lacks the GPU block evaluator header or registration ABI")
+  endif()
+  enable_language(CUDA)
 endif()
 
 if(TPL_ENABLE_SLATE)

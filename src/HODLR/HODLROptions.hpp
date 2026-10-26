@@ -346,6 +346,11 @@ namespace strumpack {
        */
       int use_gpu() const { return use_gpu_; }
 
+      // Zero disables the experimental single-rank front evaluator. The cap
+      // bounds the complete prepared image, including dense Schur data.
+      void set_gpu_front_max_bytes(std::size_t bytes) { gpu_front_max_bytes_ = bytes; }
+      std::size_t gpu_front_max_bytes() const { return gpu_front_max_bytes_; }
+
       /**
        * Parse the command line options given by argc and argv.  The
        * options will not be modified. Run with --help to see an
@@ -377,6 +382,7 @@ namespace strumpack {
       bool less_adapt_ = true;
       int BF_entry_n15_ = 0;
       int use_gpu_ = 0;
+      std::size_t gpu_front_max_bytes_ = 0;
 
       void set_defaults() {
         this->type_ = structured::Type::HODLR;

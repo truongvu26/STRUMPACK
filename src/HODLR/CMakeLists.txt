@@ -23,3 +23,18 @@ if(STRUMPACK_USE_BPACK)
     ButterflyMatrix.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/HODLR)
 endif()
+
+if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+  # Isolate CUDA compilation from the ordinary host compiler's flags.
+  add_library(strumpack_hodlr_gpu_evaluator OBJECT GPUFrontEvaluator.cu)
+  set_target_properties(strumpack_hodlr_gpu_evaluator PROPERTIES
+    POSITION_INDEPENDENT_CODE ON CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
+  target_link_libraries(strumpack_hodlr_gpu_evaluator PRIVATE CUDA::cudart)
+  if(TARGET ButterflyPACK::butterflypack)
+    target_link_libraries(strumpack_hodlr_gpu_evaluator PRIVATE ButterflyPACK::butterflypack)
+  else()
+    target_link_libraries(strumpack_hodlr_gpu_evaluator PRIVATE ButterflyPACK::dbutterflypack)
+  endif()
+  target_sources(strumpack PRIVATE $<TARGET_OBJECTS:strumpack_hodlr_gpu_evaluator>)
+  install(FILES GPUFrontEvaluator.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/HODLR)
+endif()

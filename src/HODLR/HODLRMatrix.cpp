@@ -34,6 +34,9 @@
 #include "HODLRMatrix.hpp"
 #include "HODLRWrapper.hpp"
 #include <stdexcept>
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+#include "GPUFrontEvaluator.hpp"
+#endif
 #if defined(STRUMPACK_USE_OPENMP)
 #include <omp.h>
 #endif
@@ -366,6 +369,13 @@ namespace strumpack {
     template<typename scalar_t> void
     HODLRMatrix<scalar_t>::options_init
     (const opts_t& opts, const HODLRMatrix* process_tree_owner) {
+      if (opts.gpu_front_max_bytes()) {
+#if !defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+        throw std::invalid_argument("GPU front evaluator was not enabled at configure time");
+#endif
+        if (!opts.use_gpu() || (opts.lr_leaf()!=4 && opts.lr_leaf()!=5) || opts.BF_entry_n15()!=0)
+          throw std::invalid_argument("GPU front evaluator requires GPU mode, lr_leaf 4/5 and BF_entry_n15=0");
+      }
       gpu_mode_ = opts.use_gpu();
       backend_verbose_ = opts.verbose();
       if (opts.use_gpu()) {
@@ -465,6 +475,9 @@ namespace strumpack {
     }
 
     template<typename scalar_t> void HODLRMatrix<scalar_t>::clear() {
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      if (gpu_front_evaluator_) gpu_front_evaluator_->finish();
+#endif
       if (stats_) HODLR_deletestats<scalar_t>(stats_);
       if (msh_) HODLR_deletemesh<scalar_t>(msh_);
       if (kerquant_) HODLR_deletekernelquant<scalar_t>(kerquant_);
@@ -473,6 +486,9 @@ namespace strumpack {
       ho_bf_ = options_ = stats_ = msh_ = kerquant_ = ptree_ = nullptr;
       // Release grids only after all matrix-specific handles are destroyed.
       process_tree_.reset();
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      gpu_front_evaluator_.reset();
+#endif
     }
 
     template<typename scalar_t> HODLRMatrix<scalar_t>&
@@ -482,6 +498,9 @@ namespace strumpack {
       gpu_mode_ = h.gpu_mode_;
       backend_verbose_ = h.backend_verbose_;
       backend_stats_ = h.backend_stats_;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      gpu_front_evaluator_ = std::move(h.gpu_front_evaluator_);
+#endif
       process_tree_ = std::move(h.process_tree_);
       ho_bf_ = h.ho_bf_;       h.ho_bf_ = nullptr;
       options_ = h.options_;   h.options_ = nullptr;
@@ -512,7 +531,11 @@ namespace strumpack {
       std::cout << "# HODLR backend=" << (gpu_mode_ ? "GPU" : "CPU")
                 << " mode=" << gpu_mode_ << " rows=" << rows_
                 << " operation=" << operation << " wall_seconds=" << seconds
-                << " construction=" << (gpu_mode_ ? "host_callbacks_plus_upload" : "host_callbacks")
+                << " construction=" << (backend_stats_.evaluator_calls ? "gpu_blocks_host_prepared_schur" :
+                                          (gpu_mode_ ? "host_callbacks_plus_upload" : "host_callbacks"))
+                << " evaluator_calls=" << backend_stats_.evaluator_calls
+                << " evaluator_upload_bytes_local=" << backend_stats_.evaluator_upload_bytes
+                << " evaluator_scratch_peak_bytes_local=" << backend_stats_.evaluator_scratch_peak_bytes
                 << " rhs_boundary_bytes_local=" << backend_stats_.rhs_boundary_bytes;
       if (gpu_mode_) {
         std::cout << " device_factor_bytes_local=" << get_stat("Mem_Factor")*1024000.;
@@ -559,6 +582,27 @@ namespace strumpack {
       compress(Amult);
     }
 
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+    template<typename scalar_t> void HODLRMatrix<scalar_t>::set_gpu_front_evaluator
+    (std::shared_ptr<GPUFrontEvaluator> state) {
+      if (!gpu_mode_ || !state || c_->size()!=1 || state->rows()!=rows_ ||
+          state->complex_values()!=std::is_same<scalar_t,std::complex<double>>::value ||
+          backend_stats_.construction_seconds || gpu_front_evaluator_)
+        throw std::invalid_argument("GPU front evaluator needs an uncompressed matching single-rank GPU matrix");
+      state->register_matrix(&ho_bf_);
+      gpu_front_evaluator_ = std::move(state);
+    }
+    template<typename scalar_t> void HODLRMatrix<scalar_t>::finish_gpu_front_evaluation() {
+      if (!gpu_front_evaluator_) return;
+      gpu_front_evaluator_->finish();
+      backend_stats_.evaluator_calls = gpu_front_evaluator_->calls();
+      backend_stats_.evaluator_upload_bytes = gpu_front_evaluator_->upload_bytes();
+      backend_stats_.evaluator_scratch_peak_bytes = gpu_front_evaluator_->scratch_peak_bytes();
+      if (!backend_stats_.evaluator_calls)
+        throw std::runtime_error("Registered GPU front evaluator was never called");
+    }
+#endif
+
     template<typename scalar_t> void
     HODLRMatrix<scalar_t>::compress(const delem_blocks_t& Aelem) {
       BLACSGrid gloc(MPIComm(MPI_COMM_SELF), 1),
@@ -569,6 +613,9 @@ namespace strumpack {
         (ho_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_element_evaluation<scalar_t>),
          &(HODLR_block_evaluation<scalar_t>), &AC);
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      finish_gpu_front_evaluation();
+#endif
       const double elapsed = MPI_Wtime()-started;
       backend_stats_.construction_seconds += elapsed;
       report_backend("construction", elapsed);
@@ -582,6 +629,9 @@ namespace strumpack {
         (ho_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_element_evaluation<scalar_t>),
          &(HODLR_block_evaluation_seq<scalar_t>), f);
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      finish_gpu_front_evaluation();
+#endif
       const double elapsed = MPI_Wtime()-started;
       backend_stats_.construction_seconds += elapsed;
       report_backend("construction", elapsed);

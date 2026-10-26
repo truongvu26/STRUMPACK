@@ -91,6 +91,7 @@ namespace strumpack {
          {"hodlr_disable_less_adapt",    no_argument, 0, 17},
          {"hodlr_BF_entry_n15",          required_argument, 0, 18},
          {"hodlr_use_gpu",               required_argument, 0, 19},
+         {"hodlr_gpu_front_max_bytes",   required_argument, 0, 20},
          {"hodlr_verbose",               no_argument, 0, 'v'},
          {"hodlr_quiet",                 no_argument, 0, 'q'},
          {"help",                        no_argument, 0, 'h'},
@@ -192,6 +193,15 @@ namespace strumpack {
               ("--hodlr_use_gpu requires an integer: 0, 1, or 2");
           set_use_gpu(mode);
         } break;
+        case 20: {
+          const std::string text(optarg);
+          if (text.empty() || text.find_first_not_of("0123456789") != std::string::npos)
+            throw std::invalid_argument("--hodlr_gpu_front_max_bytes requires a nonnegative byte count");
+          std::size_t bytes;
+          std::istringstream iss(text);
+          if (!(iss >> bytes)) throw std::invalid_argument("GPU front byte count overflows size_t");
+          set_gpu_front_max_bytes(bytes);
+        } break;
         case 'v': this->set_verbose(true); break;
         case 'q': this->set_verbose(false); break;
         case 'h': describe_options(); break;
@@ -246,6 +256,8 @@ namespace strumpack {
                 << BF_entry_n15() << ")" << std::endl
                 << "#   --hodlr_use_gpu 0|1|2 (0: CPU, 1: GPU, 2: GPU FP64 tensor cores) (default "
                 << use_gpu() << ")" << std::endl
+                << "#   --hodlr_gpu_front_max_bytes bytes (experimental single-rank assembly, 0: off) (default "
+                << gpu_front_max_bytes() << ")" << std::endl
                 << "#   --hodlr_verbose or -v (default "
                 << this->verbose() << ")" << std::endl
                 << "#   --hodlr_quiet or -q (default "

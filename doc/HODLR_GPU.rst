@@ -109,3 +109,7 @@ STRUMPACK checkout's hodlr_rhs_gpu_fix_report.txt (jobs 60043836/60043857).
 Final-code sparse validation was refreshed in jobs 60333919 and 60336439.
 Repeated performance trials, CUDA tracing and the device-evaluator design
 are documented in HODLR_GPU_PROFILE.rst and HODLR_GPU_DESIGN.rst.
+
+The opt-in bounded single-rank GPU construction prototype is documented in
+HODLR_GPU_EVALUATOR.rst. Its prepared child/Schur data and per-batch uploads
+are a correctness bridge; general distributed construction remains separate.

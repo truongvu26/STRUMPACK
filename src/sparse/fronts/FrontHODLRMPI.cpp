@@ -295,6 +295,9 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLRMPI<scalar_t,integer_t>::compress_extraction
   (const SpMat_t& A, const Opts_t& opts) {
+    if (opts.HODLR_options().gpu_front_max_bytes() && this->Comm().is_root())
+      std::cout << "# GPU front evaluator construction=host reason=distributed_front_requires_collective_preparation rows="
+                << dim_sep() << std::endl;
     F11_.set_sampling_parameter(1.2);
     auto extract_F11 =
       [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,

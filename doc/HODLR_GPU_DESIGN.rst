@@ -1,9 +1,11 @@
 GPU frontal evaluation and capability extensions
 ===============================================
 
-Status: design for the next implementation; the hybrid path remains the
-correctness reference. This document does not enable device construction or
-remove any runtime guard. The separate profiling report determines priority.
+Status: general distributed design; the hybrid path remains the correctness
+reference. A separately enabled, bounded single-rank implementation is now
+described in HODLR_GPU_EVALUATOR.rst. The distributed preparation hook and
+threading/matvec/butterfly capability extensions remain design requirements.
+The separate profiling report determines priority.
 The dependency audited here is ButterflyPACK gpu_hodlr plus 8d8b38b.
 
 The operator the evaluator must assemble

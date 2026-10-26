@@ -26,6 +26,8 @@ cmake -S . -B "$strumpack_build" \
   -DCMAKE_CXX_COMPILER=CC -DCMAKE_C_COMPILER=cc -DCMAKE_Fortran_COMPILER=ftn \
   -DSTRUMPACK_USE_MPI=ON -DSTRUMPACK_USE_OPENMP=ON \
   -DSTRUMPACK_TASK_TIMERS="${HODLR_TASK_TIMERS:-OFF}" \
+  -DSTRUMPACK_USE_HODLR_GPU_EVALUATOR="${HODLR_GPU_EVALUATOR:-OFF}" \
+  -DCMAKE_CUDA_ARCHITECTURES=80 \
   -DSTRUMPACK_USE_CUDA=OFF \
   -DSTRUMPACK_USE_HIP=OFF -DSTRUMPACK_USE_SYCL=OFF \
   -DSTRUMPACK_COUNT_FLOPS=ON \
@@ -40,3 +42,8 @@ cmake -S . -B "$strumpack_build" \
   -DTPL_SCALAPACK_LIBRARIES="$libroot/scalapack-2.2.0/build/install/lib/libscalapack.so"
 cmake --build "$strumpack_build" --target testPoisson3dMPIDist \
   test_HODLR_gpu_interface_mpi test_HODLR_process_tree_mpi -j "$build_jobs"
+
+if [[ "${HODLR_GPU_EVALUATOR:-OFF}" == ON ]]; then
+  cmake --build "$strumpack_build" --target test_HODLR_gpu_front_evaluator \
+    test_HODLR_gpu_front_integration -j "$build_jobs"
+fi
