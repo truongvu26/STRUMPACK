@@ -108,7 +108,9 @@ HODLR test compares asymmetric child-inclusive matrices to dense references
 for N/T/C products and three-RHS inverse application after moving the owner.
 
 The sparse check runs 40^3 Poisson with three RHS on one and four ranks,
-comparing the default hybrid path, eligible F11/F22 device construction and
+using the previously validated fixed two-ranks-per-GPU binding for the
+four-rank cases, and comparing the default hybrid path, eligible F11/F22
+device construction and
 a deliberately tiny cap forcing host fallback. The sparse configuration uses
 compression thresholds of 1000 and HODLR leaf size 128. It checks finite forward
 error and scaled residual, actual evaluator use and explicit distributed

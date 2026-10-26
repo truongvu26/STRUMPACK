@@ -2,6 +2,7 @@
 """Reject sparse runs without finite accuracy and actual device evaluation."""
 import json, math, re, sys
 from pathlib import Path
+from collections import Counter
 out=Path(sys.argv[1])
 def require(condition,message):
     if not condition: raise SystemExit(message)
@@ -37,6 +38,10 @@ for ranks in [1,4]:
         else:
             require(max(calls)==0,f'{name}: evaluator unexpectedly enabled')
             if variant=='capped': require('prepared_image_exceeds_byte_cap' in text,f'{name}: cap fallback missing')
+        if ranks==4:
+            bindings=re.findall(r'# shared-GPU binding .* uuid=(\S+)',text)
+            require(sorted(Counter(bindings).values())==[2,2],f'{name}: wrong GPU sharing groups')
+            require(re.search(r'up to\s+2 ranks share a GPU',text),f'{name}: backend sharing count missing')
         construction=[line for line in text.splitlines() if 'operation=construction' in line]
         def total(field):
             matches=[re.search(field+r'=(\d+)',line) for line in construction]
