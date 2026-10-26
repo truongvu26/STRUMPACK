@@ -37,9 +37,11 @@ def read_case(root, label):
     return result
 
 
-def analyze(root):
-    result = dict(status='PASS', job_id=int(root.name),
-                  source_commit=(root / 'source_commit.txt').read_text().strip(),
+def analyze(root, diagnostics=None):
+    diagnostics = diagnostics or root
+    result = dict(status='PASS', baseline_job_id=int(root.name), diagnostic_job_id=int(diagnostics.name),
+                  baseline_source_commit=(root / 'source_commit.txt').read_text().strip(),
+                  diagnostic_source_commit=(diagnostics / 'source_commit.txt').read_text().strip(),
                   baseline=[], detailed={}, notes=[
                       'Baseline trials use the uninstrumented Release binary and fresh MPI processes.',
                       'Internal timers and Nsight tracing are separate diagnostic runs; their wall times are not baseline timings.',
@@ -56,9 +58,9 @@ def analyze(root):
                 values = [trial[phase] for trial in trials]
                 group[phase] = dict(median=statistics.median(values), minimum=min(values), maximum=max(values))
             result['baseline'].append(group)
-    for mode, label in ((0, 'detailed_cpu'), (1, 'detailed_gpu')):
-        case = read_case(root, label)
-        text = (root / (label + '.rank0.log')).read_text()
+    for mode, label in ((0, 'detailed_cpu'), (1, 'detailed_gpu'), (1, 'traced_gpu')):
+        case = read_case(diagnostics, label)
+        text = (diagnostics / (label + '.rank0.log')).read_text()
         timers = {}
         for line in text.splitlines():
             if not line.startswith('|'):
@@ -78,18 +80,19 @@ def analyze(root):
         case['inclusive_internal_timers'] = timers
         if mode:
             native_count = sum(path.read_text().count('HODLR GPU factor (')
-                               for path in root.glob(label + '.rank*.log'))
+                               for path in diagnostics.glob(label + '.rank*.log'))
             if native_count != case['hodlr_fronts']:
                 raise ValueError('GPU factor coverage mismatch')
             case['native_gpu_factors'] = native_count
-            reports = sorted(root.glob('gpu.rank*.nsys-rep'))
+        if label == 'traced_gpu':
+            reports = sorted(diagnostics.glob('gpu.rank*.nsys-rep'))
             if len(reports) != 4:
                 raise ValueError('Expected four Nsight rank reports')
             case['nsight_reports'] = [path.name for path in reports]
         result['detailed'][label] = case
-    (root / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
+    (diagnostics / 'summary.json').write_text(json.dumps(result, indent=2) + '\n')
     return result
 
 
 if __name__ == '__main__':
-    print(json.dumps(analyze(Path(sys.argv[1])), indent=2))
+    print(json.dumps(analyze(Path(sys.argv[1]), Path(sys.argv[2]) if len(sys.argv) > 2 else None), indent=2))

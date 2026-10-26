@@ -38,11 +38,9 @@ run_case() {
     --sp_rel_tol 1e-10 --sp_Krylov_solver refinement --hodlr_use_gpu "$mode")
   local launcher=()
   if [[ "$traced" == 1 ]]; then
-    launcher=(nsys profile --trace=cuda,nvtx,cublas,mpi --mpi-impl=mpich
-      --sample=none --cpuctxsw=none --force-overwrite=false
-      --output="$out/gpu.rank%q{SLURM_PROCID}")
+    launcher=(bash "$PWD/test/run_hodlr_nsys_rank.sh" "$out")
   fi
-  if [[ "$name" == detailed* ]]; then args+=(--hodlr_verbose); fi
+  if [[ "$name" != baseline* ]]; then args+=(--hodlr_verbose); fi
   printf '%q ' timeout 240s srun -n 4 -c 8 --cpu-bind=cores --gpus-per-task=1 \
     --gpu-bind=single:1 "${launcher[@]}" "${args[@]}" > "$out/$name.command"
   printf '\n' >> "$out/$name.command"
@@ -61,5 +59,6 @@ for n in 40 60; do
   done
 done
 run_case detailed_cpu "$profile" 60 0 0
-run_case detailed_gpu "$profile" 60 1 1
+run_case detailed_gpu "$profile" 60 1 0
+run_case traced_gpu "$profile" 60 1 1
 python3 test/analyze_hodlr_gpu_profile.py "$out"

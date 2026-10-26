@@ -626,7 +626,8 @@ namespace strumpack {
           compress_flops_Schur(invf11_mult_flops);
         };
       HODLR::ButterflyMatrix<scalar_t> Schur(*F22_, *F22_);
-      Schur.compress(sample_Schur);
+      { TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
+        Schur.compress(sample_Schur); }
       auto extract_F22 =
         [&](VecVec_t& I, VecVec_t& J, std::vector<DenseMW_t>& B,
             HODLR::ExtractionMeta& e) {
@@ -640,7 +641,7 @@ namespace strumpack {
           element_extraction(A, I, J, B, task_depth, true);
           Schur.extract_add_elements(e, B);
         };
-      TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f22_compress);
+      TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       F22_->compress(extract_F22);
       compress_flops_F22();
     }
