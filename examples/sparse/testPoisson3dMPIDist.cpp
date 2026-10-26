@@ -128,7 +128,9 @@ int main(int argc, char* argv[]) {
                 << relerr << std::endl;
     }
   }
-  //TimerList::Finalize();
+#if defined(STRUMPACK_TASK_TIMERS)
+  TimerList::Finalize();
+#endif
   scalapack::Cblacs_exit(1);
   MPI_Finalize();
   return 0;
