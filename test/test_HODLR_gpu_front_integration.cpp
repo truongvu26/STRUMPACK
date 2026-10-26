@@ -2,6 +2,7 @@
  * reference, including move ownership and real/complex N/T/C operations. */
 #include "HODLR/HODLRMatrix.hpp"
 #include "HODLR/GPUFrontEvaluator.hpp"
+#include "HODLR/ButterflyMatrix.hpp"
 #include <cmath>
 #include <complex>
 #include <iostream>
@@ -56,6 +57,29 @@ template<typename T> void run(const MPIComm& comm) {
     }
     if (!std::isfinite(diff) || std::sqrt(diff/norm)>1.e-8)
       throw std::runtime_error("GPU-constructed HODLR multiply disagrees with child-inclusive reference");
+  }
+  // F22 preparation uses the sequential rectangular BF extraction helper.
+  // Its local output count must survive metadata initialization: resetting it
+  // to zero allocated a zero-length extraction buffer and corrupted the heap.
+  HODLR::ButterflyMatrix<T> schur(matrix,matrix);
+  typename HODLR::HODLRMatrix<T>::elem_blocks_t schur_entries =
+    [](auto& I,auto& J,auto& B,auto&) {
+      for (std::size_t b=0;b<B.size();++b)
+        for (std::size_t j=0;j<J[b].size();++j)
+          for (std::size_t i=0;i<I[b].size();++i)
+            B[b](i,j)=entry<T>(.01*(I[b][i]+1)*(J[b][j]+2),.003*(double(I[b][i])-double(J[b][j])));
+    };
+  schur.compress(schur_entries);
+  std::vector<std::vector<std::size_t>> rows{{5,0,5}},cols{{n-1,1}};
+  DenseMatrix<T> padded(6,2); padded.fill(T(-999));
+  std::vector<DenseMatrixWrapper<T>> tiles;
+  tiles.emplace_back(3,2,padded.data(),padded.ld()); tiles[0].fill(T(7));
+  schur.extract_add_elements(rows,cols,tiles);
+  for (int j=0;j<2;++j) for (int i=0;i<6;++i) {
+    const auto expected=i<3?T(7)+entry<T>(.01*(rows[0][i]+1)*(cols[0][j]+2),
+      .003*(double(rows[0][i])-double(cols[0][j]))):T(-999);
+    if (std::abs(padded(i,j)-expected)>1.e-8)
+      throw std::runtime_error("Wrong child Schur extraction or overwritten padding");
   }
   matrix.factor(); matrix.solve(rhs,solved);
   double diff=0.,norm=0.;

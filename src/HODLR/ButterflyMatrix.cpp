@@ -469,7 +469,7 @@ namespace strumpack {
       e.Npmap = 1;
       e.pmaps = pmaps;
       e.Nalldat_loc = Nalldat_loc;
-      e.Nallrows = e.Nallcols = e.Nalldat_loc = 0;
+      e.Nallrows = e.Nallcols = 0;
       for (auto Ik : I) e.Nallrows += Ik.size();
       for (auto Jk : J) e.Nallcols += Jk.size();
       e.iwork.reset(new int[e.Nallrows + e.Nallcols + 3*e.Ninter]);
