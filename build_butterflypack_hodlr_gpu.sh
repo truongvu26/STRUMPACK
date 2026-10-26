@@ -8,7 +8,7 @@ export HODLR_MAGMA_DIR="${HODLR_MAGMA_DIR:-/global/cfs/cdirs/m2957/lib/magma_v2.
 python3 - <<'PY'
 from pathlib import Path
 import os, subprocess
-source=(Path.cwd()/'../ButterflyPACK-strumpack-gpu-support').resolve()
+source=Path(os.environ.get('HODLR_BPACK_SOURCE', str(Path.cwd()/'../ButterflyPACK-strumpack-gpu-support'))).resolve()
 build=source/'build_hodlr_gpu'
 install=source/'install_hodlr_gpu'
 libroot=Path(os.environ['CFS'])/'m2957/lib/lib/PrgEnv-gnu'

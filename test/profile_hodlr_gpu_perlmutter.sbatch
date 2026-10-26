@@ -15,7 +15,7 @@ export MPICH_GPU_SUPPORT_ENABLED=0 BPACK_GPU_AWARE_MPI=0 BPACK_CHECK=''
 cd "$SLURM_SUBMIT_DIR"
 out="$PWD/profile_results/$SLURM_JOB_ID"
 mkdir -p "$out"
-baseline="${HODLR_BASELINE_EXE:-$PWD/../STRUMPACK-gpu-interface/build_gpu_hodlr/examples/sparse/testPoisson3dMPIDist}"
+baseline="${HODLR_BASELINE_EXE:-$PWD/build_gpu_hodlr/examples/sparse/testPoisson3dMPIDist}"
 profile="$PWD/build_profile_hodlr/examples/sparse/testPoisson3dMPIDist"
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
 git rev-parse HEAD > "$out/source_commit.txt"
