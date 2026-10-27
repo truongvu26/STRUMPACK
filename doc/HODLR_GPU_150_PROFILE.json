@@ -1,0 +1,43 @@
+{
+  "status": "PENDING",
+  "preflight_job": 60395917,
+  "profile_job": 60395933,
+  "branch": "perf/hodlr-gpu-150-profile",
+  "numerical_source": "24c5b4ae285a82ee49af53783a1d30445a5bde6e",
+  "instrumented_source": "6bb8aa290f8754ba6c9f89e7fe77966526eaf90f",
+  "harness_revision": "1014f7ec",
+  "dependency_source": "ae6e81a5d735c0679aae5675869bc5c9ccc53724",
+  "baseline_sha256": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237",
+  "diagnostic_sha256": "e78f8aa32f84c5693c39f9848fca2d35c185fdf55d708294544e71b01d48e434",
+  "dependency_sha256": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+  "layout": {
+    "grid": 150,
+    "unknowns": 3375000,
+    "nodes": 4,
+    "mpi_ranks": 32,
+    "gpus": 16,
+    "ranks_per_gpu": 2,
+    "rhs": 3,
+    "omp_threads": 1
+  },
+  "settings": {
+    "relative_compression_tolerance": 1e-05,
+    "relative_solver_tolerance": 1e-10,
+    "leaf_size": 128,
+    "butterfly_levels": 0,
+    "evaluator_cap_bytes": 268435456
+  },
+  "cases": [
+    "quiet GPU current interface",
+    "quiet CPU current interface",
+    "GPU diagnostic CSV and task timers",
+    "GPU diagnostic plus CUDA/NVTX trace on ranks 0 and 31"
+  ],
+  "results_path": "profile_results/60395933/stage_summary.json",
+  "notes": [
+    "No numerical or performance result is claimed until the jobs finish.",
+    "The 150-cubed job depends on a successful 40-cubed instrumentation preflight.",
+    "Executables and ButterflyPACK shared library are immutable snapshots; LD_PRELOAD overrides executable DT_RPATH.",
+    "Raw logs, job folders, traces and build directories remain locally ignored."
+  ]
+}
