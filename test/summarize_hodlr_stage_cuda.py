@@ -5,7 +5,7 @@ from pathlib import Path
 from summarize_hodlr_nsys import summarize
 p=Path(sys.argv[1]); result=summarize(p,1.)
 result.pop('gpu_active_union_over_solver_wall')
-c=sqlite3.connect(p); c.row_factory=sqlite3.Row
+c=sqlite3.connect(str(p)); c.row_factory=sqlite3.Row
 tables={r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 if 'NVTX_EVENTS' in tables:
     result['nvtx_events']=c.execute('SELECT COUNT(*) FROM NVTX_EVENTS').fetchone()[0]
