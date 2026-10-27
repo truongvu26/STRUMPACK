@@ -35,7 +35,7 @@ for variant in expected:
         if sum(bindings.values())!=ranks or len(bindings)!=ranks//2 or set(bindings.values())!={2}: raise ValueError('Two ranks per GPU binding failed')
         case['gpu_uuid_rank_counts']=dict(bindings)
         if variant in ('diagnostic','traced'):
-            by_phase=defaultdict(lambda:defaultdict(list)); fronts=[]; peaks=[]
+            by_phase=defaultdict(lambda:defaultdict(list)); fronts=[]; peaks=[]; accounting=[]
             for rank in range(ranks):
                 path=root/f'{variant}.stages.rank{rank}.csv'
                 with path.open() as f: rows=list(csv.DictReader(f))
@@ -44,6 +44,11 @@ for variant in expected:
                 labels=Counter(row['phase'] for row in rows)
                 if any(labels[k]!=1 for k in ('solver.reorder','solver.factor','solver.solve')): raise ValueError('Missing or duplicate solver scope')
                 if not labels['prepare.upload_resident_image']: raise ValueError('Missing CUDA translation-unit measurement')
+                factor_rows=[row for row in rows if row['section']=='solver.factor']
+                factor_wall=next(float(row['inclusive']) for row in factor_rows if row['phase']=='solver.factor')
+                partition=sum(float(row['exclusive']) for row in factor_rows)
+                if abs(partition-factor_wall)>max(.001,1e-8*factor_wall): raise ValueError('Exclusive scopes do not partition factor envelope')
+                accounting.append(dict(rank=rank,factor_envelope_seconds=factor_wall,exclusive_partition_seconds=partition))
                 for row in rows:
                     inc=float(row['inclusive']); exc=float(row['exclusive'])
                     if not (math.isfinite(inc) and 0<=exc<=inc+1e-6): raise ValueError('Invalid phase duration')
@@ -61,6 +66,10 @@ for variant in expected:
             case['phases']=sorted(phases,key=lambda r:r['exclusive_rank_seconds']['sum'],reverse=True)
             case['slowest_constructions']=sorted(fronts,key=lambda x:x['seconds'],reverse=True)[:60]
             case['peak_resident_image_bytes_by_rank']=peaks
+            case['rank_accounting']=accounting
+        if variant=='traced':
+            case['cuda']=[json.loads((root/f'rank{rank}.cuda.json').read_text()) for rank in sorted({0,ranks-1})]
+            if not all(x['kernel_count']>0 and x.get('nvtx_events',0)>0 for x in case['cuda']): raise ValueError('Missing CUDA/NVTX evidence')
         case['status']='PASS'
     except (ValueError,OSError,KeyError) as e:
         case['error']=str(e); failures.append(variant+': '+str(e))
