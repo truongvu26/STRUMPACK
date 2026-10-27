@@ -65,6 +65,20 @@ for variant in expected:
                 phases.append(rec)
             case['phases']=sorted(phases,key=lambda r:r['exclusive_rank_seconds']['sum'],reverse=True)
             case['slowest_constructions']=sorted(fronts,key=lambda x:x['seconds'],reverse=True)[:60]
+            grouped=defaultdict(list)
+            for row in fronts:
+                key=tuple(row[k] for k in ('phase','front','rows','cols','procs'))
+                grouped[key].append(row)
+            unique=[]
+            for key,rows in grouped.items():
+                rec=dict(zip(('phase','front','rows','cols','procs'),key))
+                slowest=max(rows,key=lambda row:row['seconds'])
+                rec.update(calls=len(rows),participating_ranks=len({row['rank'] for row in rows}),
+                           max_rank=slowest['rank'],max_seconds=slowest['seconds'],
+                           mean_seconds=statistics.mean(row['seconds'] for row in rows),
+                           rank_seconds=sum(row['seconds'] for row in rows))
+                unique.append(rec)
+            case['construction_fronts']=sorted(unique,key=lambda row:row['max_seconds'],reverse=True)
             case['peak_resident_image_bytes_by_rank']=peaks
             case['rank_accounting']=accounting
         if variant=='traced':

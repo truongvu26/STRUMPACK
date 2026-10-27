@@ -31,8 +31,12 @@ if 'diagnostic' in quiet:
       'Mean rank wall seconds, using exclusive nested scopes. This partitions local factor envelopes; it is not a global critical path or pure CPU/GPU execution time.', '',
       '| Component | Mean rank seconds | Fraction |', '|---|---:|---:|']
     for k,v in sorted(budget.items(),key=lambda kv:kv[1],reverse=True): lines.append(f'| {k} | {v:.3f} | {100*v/total:.1f}% |')
-    lines += ['', '## Slowest individual construction calls', '', '| Phase | Rank | Front | Shape | Front ranks | Wall seconds |','|---|---:|---:|---|---:|---:|']
-    for p in c['slowest_constructions'][:15]: lines.append(f"| {p['phase']} | {p['rank']} | {p['front']} | {p['rows']}×{p['cols']} | {p['procs']} | {p['seconds']:.3f} |")
+    lines += ['', '## Slowest construction fronts', '',
+      'Each front appears once per block/backend; maximum and mean are over participating ranks. Different fronts may execute concurrently.', '',
+      '| Phase | Front | Shape | Front ranks | Slowest rank | Maximum (s) | Mean (s) |',
+      '|---|---:|---|---:|---:|---:|---:|']
+    for p in c.get('construction_fronts',[])[:15]:
+        lines.append(f"| {p['phase']} | {p['front']} | {p['rows']}×{p['cols']} | {p['procs']} | {p['max_rank']} | {p['max_seconds']:.3f} | {p['mean_seconds']:.3f} |")
     lines += ['',f"Maximum logical resident entry-image payload: {max(c['peak_resident_image_bytes_by_rank'])/2**30:.3f} GiB per rank. This excludes native factors and pool reservations.", '',
       '## Selecting the next change', '',
       'Use the largest measured component together with the slowest front calls and CUDA traces:', '',
