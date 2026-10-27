@@ -60,7 +60,9 @@ for n,repeats in expected.items():
         if len(passing)!=repeats or {case['repeat'] for case in passing}!=set(range(1,repeats+1)):
             complete=False
         group=dict(grid=n,unknowns=n**3,variant=variant,expected_repetitions=repeats,
-                   completed_repetitions=len(passing),status='PASS' if len(passing)==repeats else 'RUNNING',
+                   completed_repetitions=len(passing),status=('FAIL' if any(case['status']!='PASS' for case in trials) else
+                           ('PASS' if len(passing)==repeats else
+                            ('NOT_RUN' if not trials and all(allocation['scheduler_state'].split()[0] not in ['RUNNING','PENDING','COMPLETING','CONFIGURING'] for allocation in allocations) else 'RUNNING'))),
                    timing_evidence='three repetitions' if repeats==3 else 'single-trial preliminary')
         if passing:
             for phase in ['factor_seconds','solve_seconds','factor_plus_solve_seconds']:

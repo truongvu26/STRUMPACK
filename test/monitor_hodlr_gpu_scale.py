@@ -31,7 +31,7 @@ def report(result):
             group=groups[variant]
             if group['completed_repetitions']:
                 value='{:.3f} / {:.3f}'.format(group['factor_seconds']['median'],group['solve_seconds']['median'])
-            else: value='pending'
+            else: value={'FAIL':'failed','NOT_RUN':'not run'}.get(group['status'],'pending')
             lines.append('     - '+value)
         counts='/'.join(str(groups[v]['completed_repetitions']) for v in ['cpu','hybrid','evaluator'])
         lines.append('     - '+counts+' (CPU/hybrid/evaluator)')

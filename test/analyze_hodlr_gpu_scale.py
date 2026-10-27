@@ -39,7 +39,15 @@ for status_path in sorted(root.glob('n*_r*.exit_code')):
     case=dict(label=label,grid=n,unknowns=n**3,variant=variant,repeat=repeat,
               exit_code=int(status_path.read_text()),status='FAIL')
     try:
-        if case['exit_code']: raise ValueError('Solver step exit '+str(case['exit_code']))
+        if case['exit_code']:
+            evidence=[]
+            for path in sorted(root.glob(label+'.rank*.log')):
+                if 'Too many communicators' in path.read_text(): evidence.append(path.name)
+            if evidence:
+                case['failure_kind']='mpi_communicator_exhaustion'
+                case['failure_evidence']=evidence
+                raise ValueError('MPICH communicator contexts exhausted (0/4096 free); see '+', '.join(evidence))
+            raise ValueError('Solver step exit '+str(case['exit_code']))
         logs=[root/(label+'.rank%d.log'%rank) for rank in range(args.ranks)]
         if not all(path.exists() for path in logs): raise ValueError('Missing rank logs')
         text=logs[0].read_text()

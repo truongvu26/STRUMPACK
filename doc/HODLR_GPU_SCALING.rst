@@ -106,7 +106,7 @@ checksum and rank-wrapper copy document the actual launch selection.
 Measured results
 -----------------
 
-Numerical status: RUNNING. The JSON record contains individual
+Numerical status: FAIL. The JSON record contains individual
 trial accuracy, device-construction coverage and allocation accounting.
 
 .. list-table:: Sparse factor / solve times in seconds
@@ -124,13 +124,13 @@ trial accuracy, device-construction coverage and allocation accounting.
      - 3/3/3 (CPU/hybrid/evaluator)
    * - 150^3
      - 845.854 / 3.730
-     - pending
-     - pending
-     - 1/0/0 (CPU/hybrid/evaluator)
+     - 843.150 / 6.951
+     - 851.115 / 4.185
+     - 1/1/1 (CPU/hybrid/evaluator)
    * - 200^3
-     - pending
-     - pending
-     - pending
+     - failed
+     - not run
+     - not run
      - 0/0/0 (CPU/hybrid/evaluator)
 
 100^3 rows use medians when repetitions have completed; 150^3 and 200^3
@@ -140,4 +140,8 @@ Allocation states:
 
 * Job 60351838: scheduler CANCELLED by 115486, numerical plan PASS.
 
-* Job 60353138: scheduler RUNNING, numerical plan RUNNING.
+* Job 60353138: scheduler TIMEOUT, numerical plan FAIL.
+
+Failures:
+
+* n200_cpu_r1: MPICH communicator contexts exhausted (0/4096 free); see n200_cpu_r1.rank31.log

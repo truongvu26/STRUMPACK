@@ -17,7 +17,8 @@ export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MPICH_GPU_SUPPORT_ENABLED=0 BPAC
 cd "$SLURM_SUBMIT_DIR"
 out="$PWD/profile_results/$SLURM_JOB_ID"; mkdir -p "$out"
 build="${HODLR_EVALUATOR_BUILD:-$PWD/build_optimized_hodlr}"
-exe="$build/examples/sparse/testPoisson3dMPIDist"
+exe="${HODLR_EVALUATOR_EXE:-$build/examples/sparse/testPoisson3dMPIDist}"
+metadata="${HODLR_EVALUATOR_METADATA:-$build}"
 ranks=$((SLURM_JOB_NUM_NODES * 8))
 read -r -a grids <<< "${HODLR_SCALE_GRIDS:-100 150 200}"
 repeats="${HODLR_SCALE_REPEATS:-3}"
@@ -37,7 +38,7 @@ sha256sum "$exe" > "$out/executable.sha256"
 cp "$exe" "$out/solver_snapshot"
 chmod a-w "$out/solver_snapshot"
 sha256sum "$out/solver_snapshot" > "$out/solver_snapshot.sha256"
-cp "$build/CMakeCache.txt" "$build/StrumpackConfig.h" "$out/"
+cp "$metadata/CMakeCache.txt" "$metadata/StrumpackConfig.h" "$out/"
 scontrol show job "$SLURM_JOB_ID" > "$out/slurm_job.txt"
 ldd "$exe" > "$out/libraries.txt"
 srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c 1 --gpu-bind=none \
@@ -62,12 +63,12 @@ for n in "${grids[@]}"; do
         python3 test/analyze_hodlr_gpu_scale.py "$out" --ranks "$ranks"
         continue
       fi
-      printf '%q ' srun -n "$ranks" --ntasks-per-node=8 -c 8 --cpu-bind=cores --gpu-bind=none \
+      printf '%q ' srun --kill-on-bad-exit=1 --wait=60 -n "$ranks" --ntasks-per-node=8 -c 8 --cpu-bind=cores --gpu-bind=none \
         bash test/run_hodlr_scale_rank.sh "${args[@]}" > "$out/$name.command"
       printf '\n' >> "$out/$name.command"
       status=0
       /usr/bin/time -v -o "$out/$name.time" \
-        srun -n "$ranks" --ntasks-per-node=8 -c 8 --cpu-bind=cores --gpu-bind=none \
+        timeout --kill-after=60s "${HODLR_SCALE_CASE_TIMEOUT:-7200}s" srun --kill-on-bad-exit=1 --wait=60 -n "$ranks" --ntasks-per-node=8 -c 8 --cpu-bind=cores --gpu-bind=none \
         --output="$out/$name.rank%t.log" --error="$out/$name.rank%t.log" \
         bash test/run_hodlr_scale_rank.sh "${args[@]}" || status=$?
       printf '%s\n' "$status" > "$out/$name.exit_code"

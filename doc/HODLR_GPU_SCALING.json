@@ -1,5 +1,5 @@
 {
-  "status": "RUNNING",
+  "status": "FAIL",
   "expected_repetitions": {
     "100": 3,
     "150": 1,
@@ -57,12 +57,13 @@
       "source_commit": "b086c0059477c2e4e1fe72bc9bca7587c3ef9c82",
       "executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
       "source_patch_bytes": 7903,
-      "scheduler_state": "RUNNING",
-      "scheduler_elapsed": "00:05:35",
+      "scheduler_state": "TIMEOUT",
+      "scheduler_elapsed": "04:00:12",
       "scheduler_exit_code": "0:0",
-      "numerical_status": "RUNNING",
+      "numerical_status": "FAIL",
       "artifacts": "profile_results/60353138",
       "excluded_unplanned_cases": [],
+      "frozen_executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
       "gpu_inventory": {
         "NVIDIA A100-SXM4-80GB / 81920 MiB": 8,
         "NVIDIA A100-SXM4-40GB / 40960 MiB": 8
@@ -215,18 +216,66 @@
       "unknowns": 3375000,
       "variant": "hybrid",
       "expected_repetitions": 1,
-      "completed_repetitions": 0,
-      "status": "RUNNING",
-      "timing_evidence": "single-trial preliminary"
+      "completed_repetitions": 1,
+      "status": "PASS",
+      "timing_evidence": "single-trial preliminary",
+      "factor_seconds": {
+        "median": 843.15,
+        "minimum": 843.15,
+        "maximum": 843.15
+      },
+      "solve_seconds": {
+        "median": 6.95118,
+        "minimum": 6.95118,
+        "maximum": 6.95118
+      },
+      "factor_plus_solve_seconds": {
+        "median": 850.10118,
+        "minimum": 850.10118,
+        "maximum": 850.10118
+      },
+      "maximum_relative_error": 6.66587e-10,
+      "maximum_scaled_residual": 4.63556e-08,
+      "hodlr_fronts": [
+        1980
+      ],
+      "prepared_device_blocks": {
+        "F11": 0,
+        "F22": 0
+      }
     },
     {
       "grid": 150,
       "unknowns": 3375000,
       "variant": "evaluator",
       "expected_repetitions": 1,
-      "completed_repetitions": 0,
-      "status": "RUNNING",
-      "timing_evidence": "single-trial preliminary"
+      "completed_repetitions": 1,
+      "status": "PASS",
+      "timing_evidence": "single-trial preliminary",
+      "factor_seconds": {
+        "median": 851.115,
+        "minimum": 851.115,
+        "maximum": 851.115
+      },
+      "solve_seconds": {
+        "median": 4.1853,
+        "minimum": 4.1853,
+        "maximum": 4.1853
+      },
+      "factor_plus_solve_seconds": {
+        "median": 855.3003,
+        "minimum": 855.3003,
+        "maximum": 855.3003
+      },
+      "maximum_relative_error": 5.2689e-10,
+      "maximum_scaled_residual": 3.84744e-08,
+      "hodlr_fronts": [
+        1980
+      ],
+      "prepared_device_blocks": {
+        "F11": 1853,
+        "F22": 117
+      }
     },
     {
       "grid": 200,
@@ -234,7 +283,7 @@
       "variant": "cpu",
       "expected_repetitions": 1,
       "completed_repetitions": 0,
-      "status": "RUNNING",
+      "status": "FAIL",
       "timing_evidence": "single-trial preliminary"
     },
     {
@@ -243,7 +292,7 @@
       "variant": "hybrid",
       "expected_repetitions": 1,
       "completed_repetitions": 0,
-      "status": "RUNNING",
+      "status": "NOT_RUN",
       "timing_evidence": "single-trial preliminary"
     },
     {
@@ -252,7 +301,7 @@
       "variant": "evaluator",
       "expected_repetitions": 1,
       "completed_repetitions": 0,
-      "status": "RUNNING",
+      "status": "NOT_RUN",
       "timing_evidence": "single-trial preliminary"
     }
   ],
@@ -686,9 +735,112 @@
         "GPU-37d7c53c-0b2f-bb97-147e-aef509ceda0c": 2
       },
       "job": "60353138"
+    },
+    {
+      "label": "n150_evaluator_r1",
+      "grid": 150,
+      "unknowns": 3375000,
+      "variant": "evaluator",
+      "repeat": 1,
+      "exit_code": 0,
+      "status": "PASS",
+      "relative_error": 5.2689e-10,
+      "scaled_residual": 3.84744e-08,
+      "hodlr_fronts": 1980,
+      "refinement_iterations": 9,
+      "factor_seconds": 851.115,
+      "solve_seconds": 4.1853,
+      "factor_plus_solve_seconds": 855.3003,
+      "prepared_device_blocks": {
+        "F11": 1853,
+        "F22": 117
+      },
+      "host_fallback_counts": {
+        "prepared_image_exceeds_byte_cap": 1928,
+        "distributed_front_requires_collective_preparation": 31
+      },
+      "gpu_uuid_rank_counts": {
+        "GPU-30c45157-3a11-a5ce-97e3-a7163c6921ba": 2,
+        "GPU-00125c53-6268-b36f-4609-af2cb7db0e3f": 2,
+        "GPU-a0828915-30cf-50d4-6e60-9b5f9e68007d": 2,
+        "GPU-1d8a85af-45e3-bbba-e51b-88f89d630c22": 2,
+        "GPU-fc8a3144-6143-2d3b-6541-7d8572218506": 2,
+        "GPU-f66c4091-4667-04e8-4ded-09b715ebd8f7": 2,
+        "GPU-399c14d3-f114-b196-864c-c204a7cedfc0": 2,
+        "GPU-d8e77147-086d-2c09-e969-b660fb04ffe3": 2,
+        "GPU-5057a4ff-b44a-a096-424a-5bb6b18ab37a": 2,
+        "GPU-8d04720f-664b-c883-becc-109d05d440eb": 2,
+        "GPU-904f787b-999e-fb63-121f-358fc5920f69": 2,
+        "GPU-b6d4b4cc-1b73-e585-9e98-03915fed9cc6": 2,
+        "GPU-37e5b1b6-09f9-079a-4377-53d8152f7bb8": 2,
+        "GPU-d822a389-2ee0-ee78-7b1a-9c2d9d16f980": 2,
+        "GPU-161c8cb1-b4d8-ee29-a380-b6abded81e66": 2,
+        "GPU-ea7ebeb3-9c7e-f6a0-90a3-e72e3078198f": 2
+      },
+      "job": "60353138"
+    },
+    {
+      "label": "n150_hybrid_r1",
+      "grid": 150,
+      "unknowns": 3375000,
+      "variant": "hybrid",
+      "repeat": 1,
+      "exit_code": 0,
+      "status": "PASS",
+      "relative_error": 6.66587e-10,
+      "scaled_residual": 4.63556e-08,
+      "hodlr_fronts": 1980,
+      "refinement_iterations": 15,
+      "factor_seconds": 843.15,
+      "solve_seconds": 6.95118,
+      "factor_plus_solve_seconds": 850.10118,
+      "prepared_device_blocks": {
+        "F11": 0,
+        "F22": 0
+      },
+      "host_fallback_counts": {
+        "prepared_image_exceeds_byte_cap": 0,
+        "distributed_front_requires_collective_preparation": 0
+      },
+      "gpu_uuid_rank_counts": {
+        "GPU-30c45157-3a11-a5ce-97e3-a7163c6921ba": 2,
+        "GPU-00125c53-6268-b36f-4609-af2cb7db0e3f": 2,
+        "GPU-a0828915-30cf-50d4-6e60-9b5f9e68007d": 2,
+        "GPU-1d8a85af-45e3-bbba-e51b-88f89d630c22": 2,
+        "GPU-fc8a3144-6143-2d3b-6541-7d8572218506": 2,
+        "GPU-f66c4091-4667-04e8-4ded-09b715ebd8f7": 2,
+        "GPU-399c14d3-f114-b196-864c-c204a7cedfc0": 2,
+        "GPU-d8e77147-086d-2c09-e969-b660fb04ffe3": 2,
+        "GPU-5057a4ff-b44a-a096-424a-5bb6b18ab37a": 2,
+        "GPU-8d04720f-664b-c883-becc-109d05d440eb": 2,
+        "GPU-904f787b-999e-fb63-121f-358fc5920f69": 2,
+        "GPU-b6d4b4cc-1b73-e585-9e98-03915fed9cc6": 2,
+        "GPU-37e5b1b6-09f9-079a-4377-53d8152f7bb8": 2,
+        "GPU-d822a389-2ee0-ee78-7b1a-9c2d9d16f980": 2,
+        "GPU-161c8cb1-b4d8-ee29-a380-b6abded81e66": 2,
+        "GPU-ea7ebeb3-9c7e-f6a0-90a3-e72e3078198f": 2
+      },
+      "job": "60353138"
+    },
+    {
+      "label": "n200_cpu_r1",
+      "grid": 200,
+      "unknowns": 8000000,
+      "variant": "cpu",
+      "repeat": 1,
+      "exit_code": 143,
+      "status": "FAIL",
+      "failure_kind": "mpi_communicator_exhaustion",
+      "failure_evidence": [
+        "n200_cpu_r1.rank31.log"
+      ],
+      "error": "MPICH communicator contexts exhausted (0/4096 free); see n200_cpu_r1.rank31.log",
+      "job": "60353138"
     }
   ],
-  "failures": [],
+  "failures": [
+    "n200_cpu_r1: MPICH communicator contexts exhausted (0/4096 free); see n200_cpu_r1.rank31.log"
+  ],
   "notes": [
     "Allocation status is distinct from completed numerical-case status.",
     "100^3 allocation is intentionally released after its nine cases; larger sizes use a separate longer allocation.",
