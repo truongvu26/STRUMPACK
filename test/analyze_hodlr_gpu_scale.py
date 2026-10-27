@@ -27,11 +27,15 @@ expected={(n,variant,repeat) for n in plan['grids'] for variant in ['cpu','hybri
           for repeat in range(1,plan['repetitions']+1)}
 cases=[]
 failures=[]
+excluded=[]
 for status_path in sorted(root.glob('n*_r*.exit_code')):
     label=status_path.name[:-len('.exit_code')]
     match=re.fullmatch(r'n(\d+)_(cpu|hybrid|evaluator)_r([123])',label)
     if not match: continue
     n,variant,repeat=int(match[1]),match[2],int(match[3])
+    if (n,variant,repeat) not in expected:
+        excluded.append(dict(label=label,exit_code=int(status_path.read_text()),reason='Outside retained per-allocation plan'))
+        continue
     case=dict(label=label,grid=n,unknowns=n**3,variant=variant,repeat=repeat,
               exit_code=int(status_path.read_text()),status='FAIL')
     try:
@@ -85,7 +89,7 @@ complete={(case['grid'],case['variant'],case['repeat']) for case in cases}==expe
 result=dict(status='FAIL' if failures else ('PASS' if complete else 'RUNNING'),job=root.name,
             ranks=args.ranks,nodes=args.ranks//8,gpus=args.ranks//2,ranks_per_gpu=2,
             rhs=3,plan=plan,source_commit=(root/'source_commit.txt').read_text().strip(),
-            cases=cases,summaries=summaries,failures=failures,
+            cases=cases,summaries=summaries,failures=failures,excluded_unplanned_cases=excluded,
             notes=['Uninstrumented Release runs; native verbose checks disabled.',
                    'Fresh-process repetitions per the recorded plan, alternating variant order; one repetition gives preliminary timings.',
                    'Device evaluator uses an 8 MiB per-block cap and explicit host fallback.',
