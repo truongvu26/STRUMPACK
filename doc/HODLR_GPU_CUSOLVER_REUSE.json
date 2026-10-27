@@ -1,5 +1,5 @@
 {
-  "status": "PENDING_FULL_SOLVER",
+  "status": "PENDING_QUIET_RUN",
   "butterflypack_branch": "fix/gpu-cusolver-resource-reuse",
   "implementation_revision": "a22b149",
   "regression_revision": "313b393",
@@ -91,5 +91,34 @@
     "job": 60403957,
     "status": "CANCELLED_EARLY_HARDWARE_MISMATCH",
     "reason": "Allocated A100 80 GB GPUs; replaced with explicit gpu&hbm40g constraint to reproduce the original 40 GB conditions"
+  },
+  "diagnostic_recovery": {
+    "status": "PASS_AFTER_REPORT_PARSER_FIX",
+    "job": 60403959,
+    "original_batch_status": "FAILED",
+    "solver_exit_code": 0,
+    "reason": "Hardware inventory parser did not strip MiB units; corrected offline without rerunning the solver",
+    "resource_audit": {
+      "ranks": 32,
+      "handles_per_process": 1,
+      "params_per_process": 1,
+      "creation_failures": 0
+    }
+  },
+  "diagnostic_result": {
+    "status": "PASS",
+    "relative_error": 3.72815e-10,
+    "scaled_residual": 2.673e-08,
+    "factor_seconds": 717.034,
+    "solve_seconds": 7.93349,
+    "factor_plus_solve_seconds": 724.96749,
+    "hodlr_fronts": 1980.0,
+    "refinement_iterations": 9.0,
+    "cusolver_resource_audit": {
+      "ranks": 32,
+      "handles_per_process": 1,
+      "params_per_process": 1,
+      "creation_failures": 0
+    }
   }
 }

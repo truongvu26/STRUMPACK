@@ -19,7 +19,7 @@ if inventory.exists():
     devices=[]
     for row in csv.reader(inventory.read_text().splitlines()):
         if len(row)==4 and row[0].strip().startswith('NVIDIA'):
-            devices.append(dict(name=row[0].strip(),uuid=row[1].strip(),memory_mib=int(row[2]),driver=row[3].strip()))
+            devices.append(dict(name=row[0].strip(),uuid=row[1].strip(),memory_mib=int(row[2].split()[0]),driver=row[3].strip()))
     result['gpu_devices']=devices
 def number(text,pattern):
     matches=re.findall(pattern,text)
