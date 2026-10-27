@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -A m4872_g
-#SBATCH -C gpu
+#SBATCH -C gpu&hbm40g
 #SBATCH -q regular
 #SBATCH -N 4
 #SBATCH --gpus-per-node=4

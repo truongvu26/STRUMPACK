@@ -14,6 +14,13 @@ result=dict(status='RUNNING',job=root.name,grid=n,unknowns=n**3,ranks=ranks,rhs=
 failures=[]
 heap_file=root/'heap_fraction.txt'
 result['bpack_gpu_heap_fraction']=float(heap_file.read_text()) if heap_file.exists() else .85
+inventory=root/'devices.txt'
+if inventory.exists():
+    devices=[]
+    for row in csv.reader(inventory.read_text().splitlines()):
+        if len(row)==4 and row[0].strip().startswith('NVIDIA'):
+            devices.append(dict(name=row[0].strip(),uuid=row[1].strip(),memory_mib=int(row[2]),driver=row[3].strip()))
+    result['gpu_devices']=devices
 def number(text,pattern):
     matches=re.findall(pattern,text)
     if len(matches)!=1: raise ValueError('Expected one '+pattern)

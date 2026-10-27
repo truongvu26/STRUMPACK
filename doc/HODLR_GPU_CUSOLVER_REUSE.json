@@ -59,7 +59,7 @@
     0
   ],
   "pending_jobs": {
-    "quiet_gpu": 60403957,
+    "quiet_gpu": 60405138,
     "diagnostic_gpu": 60403959
   },
   "layout": {
@@ -70,7 +70,8 @@
     "mpi_ranks": 32,
     "gpus": 16,
     "ranks_per_gpu": 2,
-    "omp_threads": 1
+    "omp_threads": 1,
+    "gpu_memory_gb": 40
   },
   "settings": {
     "bpack_gpu_heap_fraction": 0.85,
@@ -83,6 +84,12 @@
     "The resource audit interposes actual cuSOLVER handle and parameter creation calls.",
     "The original library reproduced cusolverDnCreate status 7 under the same many-live-states stress.",
     "Raw logs, traces, executables and build folders remain locally ignored.",
-    "The tiled distributed frontal evaluator is a separate design; it is not enabled by this resource fix."
-  ]
+    "The tiled distributed frontal evaluator is a separate design; it is not enabled by this resource fix.",
+    "Full-size reruns are pinned to gpu&hbm40g; the queued diagnostic constraint was updated before allocation."
+  ],
+  "cancelled_attempt": {
+    "job": 60403957,
+    "status": "CANCELLED_EARLY_HARDWARE_MISMATCH",
+    "reason": "Allocated A100 80 GB GPUs; replaced with explicit gpu&hbm40g constraint to reproduce the original 40 GB conditions"
+  }
 }
