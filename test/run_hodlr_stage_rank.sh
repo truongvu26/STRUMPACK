@@ -21,11 +21,10 @@ trap 'rm -rf "$local_dir"' EXIT
 status=0
 nsys profile --trace=cuda,nvtx,cublas --sample=none --cpuctxsw=none \
   --force-overwrite=false --output="$local_dir/rank${SLURM_PROCID}" "$@" || status=$?
+printf '%s\n' "$status" > "$out/rank${SLURM_PROCID}.target_exit_code"
 shopt -s nullglob
 reports=("$local_dir"/*.nsys-rep)
 if (( ${#reports[@]} )); then
   cp "${reports[@]}" "$out/"
-  nsys export --type=sqlite --output="$local_dir/rank${SLURM_PROCID}.sqlite" "${reports[0]}"
-  python3 "$SLURM_SUBMIT_DIR/test/summarize_hodlr_stage_cuda.py" "$local_dir/rank${SLURM_PROCID}.sqlite" "$out/rank${SLURM_PROCID}.cuda.json"
 fi
 exit "$status"

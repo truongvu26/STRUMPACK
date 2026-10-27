@@ -64,6 +64,11 @@ PYCODE
     --cpu-bind=cores --gpu-bind=none --output="$out/$variant.rank%t.log" --error="$out/$variant.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" "$variant" "$trace" "${args[@]}" || status=$?
   printf '%s\n' "$status" > "$out/$variant.exit_code"
+  if [[ "$trace" == 1 && "$status" == 0 ]]; then
+    report_status=0
+    bash test/process_hodlr_stage_traces.sh "$out" "$HODLR_PROFILE_RANKS" || report_status=$?
+    printf '%s\n' "$report_status" > "$out/$variant.report_exit_code"
+  fi
   python3 test/analyze_hodlr_stages.py "$out"
   (( status == 0 )) || exit "$status"
   echo "$variant completed"

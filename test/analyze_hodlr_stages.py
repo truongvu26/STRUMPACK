@@ -84,6 +84,8 @@ for variant in expected:
             case['peak_resident_image_bytes_by_rank']=peaks
             case['rank_accounting']=accounting
         if variant=='traced':
+            report_status=root/'traced.report_exit_code'
+            if report_status.exists() and int(report_status.read_text()): raise ValueError('CUDA report conversion failed')
             case['cuda']=[json.loads((root/f'rank{rank}.cuda.json').read_text()) for rank in sorted({0,ranks-1})]
             if not all(x['kernel_count']>0 and x.get('nvtx_events',0)>0 for x in case['cuda']): raise ValueError('Missing CUDA/NVTX evidence')
         case['status']='PASS'
