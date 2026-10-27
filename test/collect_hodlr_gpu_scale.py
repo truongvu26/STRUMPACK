@@ -29,6 +29,8 @@ for root in args.directories:
                     scheduler_exit_code=main[4] if main else None,
                     numerical_status=summary.get('status','RUNNING'),artifacts=str(root),
                     excluded_unplanned_cases=summary.get('excluded_unplanned_cases',[]))
+    if (root/'reused_cases.json').exists():
+        allocation['reused_cases']=json.loads((root/'reused_cases.json').read_text())
     if (root/'scope_change.json').exists():
         allocation['scope_change']=json.loads((root/'scope_change.json').read_text())
     allocations.append(allocation)

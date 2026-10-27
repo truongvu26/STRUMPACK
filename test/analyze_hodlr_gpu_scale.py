@@ -18,7 +18,7 @@ root=args.directory
 def scalar(text,pattern,kind=float):
     matches=re.findall(pattern,text)
     if len(matches)!=1: raise ValueError('Expected one '+pattern)
-    value=kind(matches[0])
+    value=kind(matches[0].replace(',',''))
     if not math.isfinite(value): raise ValueError('Nonfinite '+pattern)
     return value
 
@@ -45,7 +45,7 @@ for status_path in sorted(root.glob('n*_r*.exit_code')):
         text=logs[0].read_text()
         case['relative_error']=scalar(text,r'# relative error = .* = (\S+)')
         case['scaled_residual']=scalar(text,r'# COMPONENTWISE SCALED RESIDUAL = (\S+)')
-        case['hodlr_fronts']=scalar(text,r'nr of HODLR Frontal matrices = (\d+)',int)
+        case['hodlr_fronts']=scalar(text,r'nr of HODLR Frontal matrices = ([\d,]+)',int)
         case['refinement_iterations']=scalar(text,r'number of Krylov iterations = (\d+)',int)
         for phase in ['factor','solve']:
             case[phase+'_seconds']=scalar(text,r'#\s+- '+phase+r' time = (\S+)')

@@ -54,6 +54,11 @@ for n in "${grids[@]}"; do
         --hodlr_leaf_size 128 --hodlr_rel_tol 1e-5 --hodlr_butterfly_levels 0
         --sp_Krylov_solver refinement --sp_rel_tol 1e-10 --hodlr_use_gpu "$mode"
         --hodlr_gpu_front_max_bytes "$cap")
+      if [[ -n "${HODLR_SCALE_RESUME_FROM:-}" && -f "$HODLR_SCALE_RESUME_FROM/$name.exit_code" ]]; then
+        python3 test/reuse_hodlr_gpu_scale_case.py "$HODLR_SCALE_RESUME_FROM" "$out" "$name" "${args[@]}"
+        python3 test/analyze_hodlr_gpu_scale.py "$out" --ranks "$ranks"
+        continue
+      fi
       printf '%q ' srun -n "$ranks" --ntasks-per-node=8 -c 8 --cpu-bind=cores --gpu-bind=none \
         bash test/run_hodlr_scale_rank.sh "${args[@]}" > "$out/$name.command"
       printf '\n' >> "$out/$name.command"
