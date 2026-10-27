@@ -31,6 +31,22 @@ if 'diagnostic' in quiet:
       'Mean rank wall seconds, using exclusive nested scopes. This partitions local factor envelopes; it is not a global critical path or pure CPU/GPU execution time.', '',
       '| Component | Mean rank seconds | Fraction |', '|---|---:|---:|']
     for k,v in sorted(budget.items(),key=lambda kv:kv[1],reverse=True): lines.append(f'| {k} | {v:.3f} | {100*v/total:.1f}% |')
+    lines += ['', '## Construction backend coverage', '',
+      '| Block and backend | Unique fronts | Rank calls | Mean rank wall (s) | Factor envelope fraction |',
+      '|---|---:|---:|---:|---:|']
+    for p in sorted((p for p in phases if '.construct.' in p['phase']),
+                    key=lambda p:p['exclusive_rank_seconds']['mean'],reverse=True):
+        count=sum(q['phase']==p['phase'] for q in c.get('construction_fronts',[]))
+        seconds=p['exclusive_rank_seconds']['mean']
+        lines.append(f"| {p['phase']} | {count} | {p['calls']} | {seconds:.3f} | {100*seconds/total:.1f}% |")
+    lines += ['', '## Entry-image preparation detail', '',
+      'Exclusive wall time separates nested child extraction, packing, replication and upload scopes.', '',
+      '| Phase | Calls | Mean rank wall (s) | Maximum rank wall (s) |',
+      '|---|---:|---:|---:|']
+    for p in sorted((p for p in phases if p['phase'].startswith('prepare.') or p['phase'].endswith('.prepare')),
+                    key=lambda p:p['exclusive_rank_seconds']['mean'],reverse=True):
+        q=p['exclusive_rank_seconds']
+        lines.append(f"| {p['phase']} | {p['calls']} | {q['mean']:.3f} | {q['max']:.3f} |")
     lines += ['', '## Slowest construction fronts', '',
       'Each front appears once per block/backend; maximum and mean are over participating ranks. Different fronts may execute concurrently.', '',
       '| Phase | Front | Shape | Front ranks | Slowest rank | Maximum (s) | Mean (s) |',
@@ -46,6 +62,14 @@ if 'diagnostic' in quiet:
       '- Device construction or factorization: inspect kernel sizes, synchronization and allocation costs in the CUDA summaries before changing numerical algorithms.',
       '- Solve overhead: inspect small-RHS transfers, repeated calls during refinement and two-rank GPU contention. Factorization and solve need separate decisions.', '',
       'Rank work can include MPI waits and GPU contention. A large local phase alone does not establish global speedup potential.']
+    solve=[p for p in c['phases'] if p['section']=='solver.solve']
+    solve_total=sum(p['exclusive_rank_seconds']['mean'] for p in solve)
+    lines += ['', '## Solve phase distribution', '',
+      'Exclusive rank wall times include all refinement iterations; outer forward/backward scopes retain uninstrumented work and communication.', '',
+      '| Phase | Calls | Mean rank wall (s) | Fraction |', '|---|---:|---:|---:|']
+    for p in sorted(solve,key=lambda p:p['exclusive_rank_seconds']['mean'],reverse=True):
+        seconds=p['exclusive_rank_seconds']['mean']
+        lines.append(f"| {p['phase']} | {p['calls']} | {seconds:.3f} | {100*seconds/solve_total:.1f}% |")
 for c in data['cases']:
     if 'cuda' not in c: continue
     lines += ['', '## Selected-rank CUDA activity', '', 'Only ranks zero and the last rank are traced; each shares a GPU with an untraced peer.', '',
