@@ -16,6 +16,8 @@ for c in data['cases']:
 quiet={c['variant']:c for c in data['cases'] if c['status']=='PASS'}
 if 'gpu' in quiet and 'cpu' in quiet:
     lines += ['',f"Quiet CPU/GPU factor-plus-solve ratio: {quiet['cpu']['factor_plus_solve_seconds']/quiet['gpu']['factor_plus_solve_seconds']:.3f}. One trial per backend; this is preliminary."]
+if 'baseline' in quiet and 'panels' in quiet:
+    lines += ['',f"Current GPU/panel GPU factor-plus-solve ratio: {quiet['baseline']['factor_plus_solve_seconds']/quiet['panels']['factor_plus_solve_seconds']:.3f}. One paired trial, not a repeated benchmark."]
 if 'diagnostic' in quiet:
     c=quiet['diagnostic']; phases=[p for p in c['phases'] if p['section']=='solver.factor']; budget=defaultdict(float)
     def group(phase):
