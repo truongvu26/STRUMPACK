@@ -249,11 +249,7 @@
       "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
       "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
       "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
-    ],
-    "scheduler_state": "COMPLETED",
-    "elapsed": "00:01:51",
-    "source_commit": "3525937944ca2d740acbcf8ed25c05b7055895ee",
-    "butterflypack_commit": "8285e65abc278ddca6f55fb92203295ad79e9535"
+    ]
   },
   "direct_checks": {
     "status": "PASS",
@@ -279,11 +275,11 @@
     "test_HODLR_gpu_rectangular": "353015bdac8db43414f143a8f6818835fc102cc7cea26152062148749010bb84",
     "testPoisson3dMPIDist": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237"
   },
-  "butterflypack_library_sha256": {
-    "libbutterflypack.so": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
-    "libbutterflypack.so.5": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
-    "libbutterflypack.so.5.0.0": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f"
-  },
+  "butterflypack_library_sha256": [
+    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so",
+    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so.5",
+    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so.5.0.0"
+  ],
   "profile": {
     "status": "PASS",
     "job": "60390292",
@@ -656,19 +652,7 @@
     },
     "source_note": "Predates registration shape/type validators only; same numerical implementation. Final guard build is validated end to end in job 60392134."
   },
-  "registration_guard_checks": {
-    "status": "PASS",
-    "job": 60392134,
-    "checks": [
-      "rectangular column-count mismatch rejection",
-      "real/complex evaluator mismatch rejection"
-    ],
-    "ranks": [
-      1,
-      3,
-      4
-    ]
-  },
+  "registration_guard_checks": "PASS: wrong evaluator shape and scalar type rejected before native registration",
   "previous_validations": {
     "60390291": {
       "status": "PASS",
@@ -776,5 +760,114 @@
       ],
       "strumpack_commit": "a450b185715252b8aa49535ecaa8289499923229"
     }
+  },
+  "validation_60390291": {
+    "status": "PASS",
+    "job": "60392134",
+    "grid": 40,
+    "rhs": 3,
+    "cases": [
+      {
+        "label": "hybrid_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 4.17258e-15,
+        "scaled_residual": 5.59977e-13,
+        "hodlr_fronts": 24,
+        "factor_seconds": 17.9344,
+        "solve_seconds": 0.209664,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 1.80023e-15,
+        "scaled_residual": 1.53157e-13,
+        "hodlr_fronts": 24,
+        "factor_seconds": 18.0235,
+        "solve_seconds": 0.194064,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 7.43819e-11,
+        "scaled_residual": 3.01471e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 12.5228,
+        "solve_seconds": 0.316486,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 159394560
+      },
+      {
+        "label": "hybrid_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 3.91463e-14,
+        "scaled_residual": 3.20159e-12,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.44017,
+        "solve_seconds": 0.114988,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 1.61735e-11,
+        "scaled_residual": 1.22207e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.37667,
+        "solve_seconds": 0.232886,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 2.07523e-10,
+        "scaled_residual": 3.29228e-08,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.5887,
+        "solve_seconds": 0.20839,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 9,
+        "resident_entry_bytes_reports": 159394560
+      }
+    ],
+    "failures": [],
+    "notes": [
+      "One trial per variant/layout; preliminary timings, no speedup claim.",
+      "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
+      "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
+      "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
+    ],
+    "scheduler_state": "COMPLETED",
+    "elapsed": "00:01:51",
+    "source_commit": "3525937944ca2d740acbcf8ed25c05b7055895ee",
+    "butterflypack_commit": "8285e65abc278ddca6f55fb92203295ad79e9535"
   }
 }

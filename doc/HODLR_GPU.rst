@@ -113,3 +113,7 @@ are documented in HODLR_GPU_PROFILE.rst and HODLR_GPU_DESIGN.rst.
 The opt-in bounded single-rank GPU construction prototype is documented in
 HODLR_GPU_EVALUATOR.rst. Its prepared child/Schur data and per-batch uploads
 are a correctness bridge; general distributed construction remains separate.
+
+The further opt-in level-zero rectangular GPU, device Schur and bounded
+distributed-construction extension is documented in HODLR_GPU_RECTANGULAR.rst,
+including its remaining host preparation and controlled timing evidence.

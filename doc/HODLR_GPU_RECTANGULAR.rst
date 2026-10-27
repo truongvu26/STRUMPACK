@@ -110,17 +110,18 @@ factor-row routing, leases with eviction and per-GPU memory accounting.
 Validation record
 -------------------
 
-Job 60390291 PASSED on the final numerical source (STRUMPACK a450b185,
+Job 60392134 PASSED on the final implementation (STRUMPACK 35259379,
 ButterflyPACK 8285e65): device contract tests, zero Compute Sanitizer memory
 errors, square-evaluator regression, real/complex direct checks at one,
 three and four ranks, scoped MPI_SELF work while other ranks wait, and all
 six 40^3 sparse variants with three RHS and 24 HODLR fronts. The four-rank
 constructed case reports 46 rectangular GPU constructions, nine collective
 prepared images and 69 device Schur calls across front roots. Its relative
-error is 2.64e-11 and scaled residual 3.42e-9. Raw logs remain under the
-ignored profile_results/60390291 folder. Exact executable and library hashes
+error is 2.075e-10 and scaled residual 3.292e-08. Raw logs remain under the
+ignored profile_results/60392134 folder. Exact executable and library hashes
 are retained in HODLR_GPU_RECTANGULAR.json.
 
+The preceding job 60390291 passed before registration shape/type checks.
 The initial job 60387091 also passed before device-factor reuse and the
 conjugate-transpose extension. Failed integration attempts 60386850 and
 60386973 remain in the JSON with their causes and corrections; neither
