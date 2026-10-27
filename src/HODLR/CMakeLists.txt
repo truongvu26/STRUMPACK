@@ -30,6 +30,8 @@ if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
   set_target_properties(strumpack_hodlr_gpu_evaluator PROPERTIES
     POSITION_INDEPENDENT_CODE ON CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
   target_link_libraries(strumpack_hodlr_gpu_evaluator PRIVATE CUDA::cudart)
+  target_compile_definitions(strumpack_hodlr_gpu_evaluator PRIVATE
+    $<$<BOOL:${STRUMPACK_USE_HODLR_GPU_RECTANGULAR}>:STRUMPACK_USE_HODLR_GPU_RECTANGULAR>)
   if(TARGET ButterflyPACK::butterflypack)
     target_link_libraries(strumpack_hodlr_gpu_evaluator PRIVATE ButterflyPACK::butterflypack)
   else()

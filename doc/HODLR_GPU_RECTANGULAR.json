@@ -1,0 +1,25 @@
+{
+  "status": "VALIDATION_PENDING",
+  "butterflypack_branch": "feature/gpu-rectangular-schur",
+  "butterflypack_commit": "275ca32",
+  "strumpack_branch": "feature/hodlr-gpu-rectangular-schur",
+  "attempts": [
+    {
+      "job": 60386850,
+      "status": "FAIL",
+      "stage": "first direct GPU test",
+      "reason": "CUDA evaluator object lacked STRUMPACK_USE_HODLR_GPU_RECTANGULAR definition; runtime registration rejected before rectangular numerical work",
+      "fix": "Propagate capability definition to CUDA object target"
+    }
+  ],
+  "configure_checks": {
+    "new_dependency": "PASS",
+    "old_dependency_rejected": "PASS"
+  },
+  "limits": [
+    "Butterfly levels zero; OMP_NUM_THREADS=1",
+    "Distributed entry images are host-prepared, replicated and bounded per block",
+    "Large images retain host compression; no unbounded tile service",
+    "CPU randomized temporary Schur compression remains; its N/T operator applications use device intermediates"
+  ]
+}
