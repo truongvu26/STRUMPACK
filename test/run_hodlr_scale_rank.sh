@@ -11,4 +11,10 @@ export CUDA_VISIBLE_DEVICES="${visible[$index]}"
 uuid=$(nvidia-smi -i "$CUDA_VISIBLE_DEVICES" --query-gpu=uuid --format=csv,noheader)
 printf '# scale binding rank=%s local_rank=%s node=%s uuid=%s\n' \
   "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
+# A study owns an immutable copy so unrelated builds cannot change later trials.
+snapshot="${SLURM_SUBMIT_DIR}/profile_results/${SLURM_JOB_ID}/solver_snapshot"
+if [[ -x "$snapshot" ]]; then
+  shift
+  exec "$snapshot" "$@"
+fi
 exec "$@"
