@@ -1,7 +1,7 @@
 {
   "status": "VALIDATION_PENDING",
   "butterflypack_branch": "feature/gpu-rectangular-schur",
-  "butterflypack_commit": "275ca32",
+  "butterflypack_commit": "see runtime butterflypack_commit.txt",
   "strumpack_branch": "feature/hodlr-gpu-rectangular-schur",
   "attempts": [
     {
@@ -10,6 +10,13 @@
       "stage": "first direct GPU test",
       "reason": "CUDA evaluator object lacked STRUMPACK_USE_HODLR_GPU_RECTANGULAR definition; runtime registration rejected before rectangular numerical work",
       "fix": "Propagate capability definition to CUDA object target"
+    },
+    {
+      "job": 60386973,
+      "status": "FAIL",
+      "stage": "first direct GPU test",
+      "reason": "Readiness query required point slots before BF GPU construction; registration succeeded but native BF fell back to CPU and the no-silent-fallback assertion caught it",
+      "fix": "Initialize rectangular merged-tree point slots at explicit GPU activation"
     }
   ],
   "configure_checks": {
