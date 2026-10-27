@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collect cases across allocations, keeping scheduler and numerical status separate."""
 import argparse
+from collections import Counter
 import json
 from pathlib import Path
 import statistics
@@ -29,6 +30,13 @@ for root in args.directories:
                     scheduler_exit_code=main[4] if main else None,
                     numerical_status=summary.get('status','RUNNING'),artifacts=str(root),
                     excluded_unplanned_cases=summary.get('excluded_unplanned_cases',[]))
+    if (root/'devices.txt').exists():
+        inventory=Counter()
+        for line in (root/'devices.txt').read_text().splitlines():
+            if line.startswith('NVIDIA '):
+                columns=[column.strip() for column in line.split(',')]
+                if len(columns)>=3: inventory[columns[0]+' / '+columns[2]]+=1
+        allocation['gpu_inventory']=dict(inventory)
     if (root/'reused_cases.json').exists():
         allocation['reused_cases']=json.loads((root/'reused_cases.json').read_text())
     if (root/'scope_change.json').exists():
@@ -67,7 +75,8 @@ result=dict(status='FAIL' if failures else ('PASS' if complete else 'RUNNING'),
                    '100^3 allocation is intentionally released after its nine cases; larger sizes use a separate longer allocation.',
                    '150^3 and 200^3 are initial single-trial comparisons, not established speed estimates.',
                    'Native ButterflyPACK verbose checks are disabled for these timings.',
-                   'All cases use the identical Release executable, host-staged MPI and zero butterfly levels.'])
+                   'All cases use the identical Release executable, host-staged MPI and zero butterfly levels.',
+                   'The resumed 150^3 CPU baseline originated on all-40-GB nodes; its GPU cases use a mixed 40/80-GB allocation. Treat their timings as preliminary, not a controlled speed comparison.'])
 args.output.write_text(json.dumps(result,indent=2)+'\n')
 print('{}: {}/15 numerical cases PASS'.format(result['status'],sum(case['status']=='PASS' for case in cases)))
 if failures or (args.require_complete and not complete): raise SystemExit(1)

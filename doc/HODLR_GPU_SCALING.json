@@ -20,12 +20,21 @@
       "source_commit": "daaa07fde461ab97a8cdcd6c333320ea0067b3fb",
       "executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
       "source_patch_bytes": 0,
-      "scheduler_state": "RUNNING",
-      "scheduler_elapsed": "00:21:04",
+      "scheduler_state": "CANCELLED by 115486",
+      "scheduler_elapsed": "00:22:50",
       "scheduler_exit_code": "0:0",
-      "numerical_status": "RUNNING",
+      "numerical_status": "PASS",
       "artifacts": "profile_results/60351838",
-      "excluded_unplanned_cases": [],
+      "excluded_unplanned_cases": [
+        {
+          "label": "n150_cpu_r1",
+          "exit_code": 143,
+          "reason": "Outside retained per-allocation plan"
+        }
+      ],
+      "gpu_inventory": {
+        "NVIDIA A100-SXM4-40GB / 40960 MiB": 16
+      },
       "scope_change": {
         "reason": "Measured 100^3 cost required a separate longer allocation for 150^3 and 200^3.",
         "original_driver_grids": [
@@ -37,21 +46,35 @@
           100
         ],
         "retained_repetitions": 3,
-        "replacement_job": "60352297",
-        "allocation_completion": "Controller cancels allocation after all nine retained cases pass; cancellation is not a numerical test failure."
+        "replacement_job": "60353138",
+        "allocation_completion": "Controller cancels allocation after all nine retained cases pass; cancellation is not a numerical test failure.",
+        "initial_replacement_job": "60352297",
+        "continuation_note": "Original 150^3 CPU solve passed; its analysis-only grouped-number error was corrected and its result is reused by the continuation."
       }
     },
     {
-      "job": "60352297",
-      "source_commit": "cd174585d859a8fc5e8d84c6dbed9339a6392f11",
+      "job": "60353138",
+      "source_commit": "b086c0059477c2e4e1fe72bc9bca7587c3ef9c82",
       "executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
-      "source_patch_bytes": 0,
+      "source_patch_bytes": 7903,
       "scheduler_state": "RUNNING",
-      "scheduler_elapsed": "00:13:44",
+      "scheduler_elapsed": "00:02:34",
       "scheduler_exit_code": "0:0",
       "numerical_status": "RUNNING",
-      "artifacts": "profile_results/60352297",
-      "excluded_unplanned_cases": []
+      "artifacts": "profile_results/60353138",
+      "excluded_unplanned_cases": [],
+      "gpu_inventory": {
+        "NVIDIA A100-SXM4-80GB / 81920 MiB": 8,
+        "NVIDIA A100-SXM4-40GB / 40960 MiB": 8
+      },
+      "reused_cases": {
+        "n150_cpu_r1": {
+          "origin_job": "60352297",
+          "origin_artifacts": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-profile-design/profile_results/60352297",
+          "source_commit": "cd174585d859a8fc5e8d84c6dbed9339a6392f11",
+          "reason": "Resume after analysis-only failure; solver step completed with exit zero"
+        }
+      }
     }
   ],
   "groups": [
@@ -126,22 +149,22 @@
       "unknowns": 1000000,
       "variant": "evaluator",
       "expected_repetitions": 3,
-      "completed_repetitions": 2,
-      "status": "RUNNING",
+      "completed_repetitions": 3,
+      "status": "PASS",
       "timing_evidence": "three repetitions",
       "factor_seconds": {
-        "median": 145.1255,
-        "minimum": 144.706,
+        "median": 144.706,
+        "minimum": 144.247,
         "maximum": 145.545
       },
       "solve_seconds": {
-        "median": 1.2377,
+        "median": 1.22955,
         "minimum": 1.22879,
         "maximum": 1.24661
       },
       "factor_plus_solve_seconds": {
-        "median": 146.3632,
-        "minimum": 145.95261,
+        "median": 145.95261,
+        "minimum": 145.47655,
         "maximum": 146.77379
       },
       "maximum_relative_error": 7.71725e-11,
@@ -159,9 +182,33 @@
       "unknowns": 3375000,
       "variant": "cpu",
       "expected_repetitions": 1,
-      "completed_repetitions": 0,
-      "status": "RUNNING",
-      "timing_evidence": "single-trial preliminary"
+      "completed_repetitions": 1,
+      "status": "PASS",
+      "timing_evidence": "single-trial preliminary",
+      "factor_seconds": {
+        "median": 845.854,
+        "minimum": 845.854,
+        "maximum": 845.854
+      },
+      "solve_seconds": {
+        "median": 3.72974,
+        "minimum": 3.72974,
+        "maximum": 3.72974
+      },
+      "factor_plus_solve_seconds": {
+        "median": 849.58374,
+        "minimum": 849.58374,
+        "maximum": 849.58374
+      },
+      "maximum_relative_error": 2.68729e-10,
+      "maximum_scaled_residual": 2.00859e-08,
+      "hodlr_fronts": [
+        1980
+      ],
+      "prepared_device_blocks": {
+        "F11": 0,
+        "F22": 0
+      }
     },
     {
       "grid": 150,
@@ -426,6 +473,49 @@
       "job": "60351838"
     },
     {
+      "label": "n100_evaluator_r3",
+      "grid": 100,
+      "unknowns": 1000000,
+      "variant": "evaluator",
+      "repeat": 3,
+      "exit_code": 0,
+      "status": "PASS",
+      "relative_error": 2.70304e-11,
+      "scaled_residual": 1.00616e-08,
+      "hodlr_fronts": 528,
+      "refinement_iterations": 7,
+      "factor_seconds": 144.247,
+      "solve_seconds": 1.22955,
+      "factor_plus_solve_seconds": 145.47655,
+      "prepared_device_blocks": {
+        "F11": 496,
+        "F22": 52
+      },
+      "host_fallback_counts": {
+        "prepared_image_exceeds_byte_cap": 446,
+        "distributed_front_requires_collective_preparation": 31
+      },
+      "gpu_uuid_rank_counts": {
+        "GPU-571dd5c7-0c14-3a3b-b911-226bef564c9e": 2,
+        "GPU-25d53f67-71be-56d2-5bab-5f002254dfea": 2,
+        "GPU-4f2fb35b-5fd2-e016-83f4-e174df887c97": 2,
+        "GPU-23213941-17ce-99d9-dc6a-3e8d9a0f093c": 2,
+        "GPU-35ffa7ec-65f9-84ee-65bf-9987745f25b7": 2,
+        "GPU-012ec22f-1254-5f52-0fb4-faea96a0b1d6": 2,
+        "GPU-6482eca6-8972-2512-3bd9-b8af217d990b": 2,
+        "GPU-242486b5-bab9-06c2-4152-4ddf82c96bac": 2,
+        "GPU-89de3c39-e482-7499-a9b1-9fd282a2a623": 2,
+        "GPU-010617c2-fb8c-9535-c91b-1a661b637b98": 2,
+        "GPU-2d2c9315-68ec-04c6-b007-1745aa451dfa": 2,
+        "GPU-6f554e17-ccb8-a45f-66b4-08f6a822c41d": 2,
+        "GPU-3c3b5dd0-f2fd-c866-e13a-8a3b41fb4444": 2,
+        "GPU-f5841217-5e15-c26d-77b3-e56df48b75f3": 2,
+        "GPU-ae7f4a7e-615c-48f4-8dc4-e64c785b629d": 2,
+        "GPU-91efd757-9531-86e3-2bb0-e6b5eecdcfe0": 2
+      },
+      "job": "60351838"
+    },
+    {
       "label": "n100_hybrid_r1",
       "grid": 100,
       "unknowns": 1000000,
@@ -553,6 +643,49 @@
         "GPU-91efd757-9531-86e3-2bb0-e6b5eecdcfe0": 2
       },
       "job": "60351838"
+    },
+    {
+      "label": "n150_cpu_r1",
+      "grid": 150,
+      "unknowns": 3375000,
+      "variant": "cpu",
+      "repeat": 1,
+      "exit_code": 0,
+      "status": "PASS",
+      "relative_error": 2.68729e-10,
+      "scaled_residual": 2.00859e-08,
+      "hodlr_fronts": 1980,
+      "refinement_iterations": 10,
+      "factor_seconds": 845.854,
+      "solve_seconds": 3.72974,
+      "factor_plus_solve_seconds": 849.58374,
+      "prepared_device_blocks": {
+        "F11": 0,
+        "F22": 0
+      },
+      "host_fallback_counts": {
+        "prepared_image_exceeds_byte_cap": 0,
+        "distributed_front_requires_collective_preparation": 0
+      },
+      "gpu_uuid_rank_counts": {
+        "GPU-ee5f1c09-2a94-06ce-a562-05462e463d1d": 2,
+        "GPU-3e248a82-70a5-ff45-ade8-02da48f0ef40": 2,
+        "GPU-f4c4c873-d5c3-6cd6-4a5b-0342f136bff2": 2,
+        "GPU-bb8d1fc0-f124-f8ec-bc35-b27bb2f214b0": 2,
+        "GPU-850d11c2-3227-7f67-c2e1-d5e19a0a8031": 2,
+        "GPU-1e0c0694-3ee8-f03b-2040-6ce85c4ba81b": 2,
+        "GPU-275e1b80-6857-067f-2d67-f44a99469248": 2,
+        "GPU-d0204d91-d257-8689-0aed-26caaac29c0d": 2,
+        "GPU-fe316388-3b29-492c-0f63-d7f5aab6d7d4": 2,
+        "GPU-5924c583-3d0f-7a72-0a1d-7d8deca49010": 2,
+        "GPU-4d467852-d80a-a4fd-bf51-3c31125b4dc0": 2,
+        "GPU-0914f9e0-829d-e589-cba4-5adf52fb9e3c": 2,
+        "GPU-888c702f-cee1-a464-5764-147ed739e5f5": 2,
+        "GPU-755add8a-0c39-0600-e923-572680fc5713": 2,
+        "GPU-f4019667-27b2-fb15-d009-4528e0c3e5b6": 2,
+        "GPU-37d7c53c-0b2f-bb97-147e-aef509ceda0c": 2
+      },
+      "job": "60353138"
     }
   ],
   "failures": [],
@@ -561,6 +694,7 @@
     "100^3 allocation is intentionally released after its nine cases; larger sizes use a separate longer allocation.",
     "150^3 and 200^3 are initial single-trial comparisons, not established speed estimates.",
     "Native ButterflyPACK verbose checks are disabled for these timings.",
-    "All cases use the identical Release executable, host-staged MPI and zero butterfly levels."
+    "All cases use the identical Release executable, host-staged MPI and zero butterfly levels.",
+    "The resumed 150^3 CPU baseline originated on all-40-GB nodes; its GPU cases use a mixed 40/80-GB allocation. Treat their timings as preliminary, not a controlled speed comparison."
   ]
 }
