@@ -10,6 +10,10 @@ export CUDA_VISIBLE_DEVICES="${visible[$index]}"
 export LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0${LD_PRELOAD:+:$LD_PRELOAD}"
 uuid=$(nvidia-smi -i "$CUDA_VISIBLE_DEVICES" --query-gpu=uuid --format=csv,noheader)
 printf '# stage binding rank=%s local_rank=%s node=%s uuid=%s\n' "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
+if [[ -n "${HODLR_CUSOLVER_AUDIT_LIBRARY:-}" ]]; then
+  export HODLR_CUSOLVER_AUDIT="$out/$variant.cusolver"
+  export LD_PRELOAD="$LD_PRELOAD:$HODLR_CUSOLVER_AUDIT_LIBRARY"
+fi
 if [[ "$variant" == diagnostic || "$variant" == traced ]]; then
   export STRUMPACK_HODLR_STAGE_FILE="$out/$variant.stages"
 fi

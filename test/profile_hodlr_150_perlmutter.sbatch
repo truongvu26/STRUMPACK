@@ -30,6 +30,9 @@ read -r -a cases <<< "${HODLR_PROFILE_CASES:-gpu cpu diagnostic traced}"
 printf '%s\n' "${cases[@]}" > "$out/cases.txt"
 printf '%s\n' "$n" "$HODLR_PROFILE_RANKS" > "$out/layout.txt"
 printf '%s\n' "${BPACK_GPU_HEAP_FRACTION:-0.85}" > "$out/heap_fraction.txt"
+if [[ -n "${HODLR_CUSOLVER_AUDIT_LIBRARY:-}" ]]; then
+  sha256sum "$HODLR_CUSOLVER_AUDIT_LIBRARY" > "$out/cusolver_audit_enabled"
+fi
 for variant in "${cases[@]}"; do
   # Short backfill allocations prioritize the requested GPU run. A CPU control
   # is optional and must not start without its measured 150-cubed time budget.

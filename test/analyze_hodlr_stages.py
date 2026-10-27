@@ -36,6 +36,11 @@ for variant in expected:
         bindings=Counter(x for log in logs for x in re.findall(r'# stage binding .* uuid=(\S+)',log.read_text()))
         if sum(bindings.values())!=ranks or len(bindings)!=ranks//2 or set(bindings.values())!={2}: raise ValueError('Two ranks per GPU binding failed')
         case['gpu_uuid_rank_counts']=dict(bindings)
+        if variant!='cpu' and (root/'cusolver_audit_enabled').exists():
+            audit=[json.loads((root/f'{variant}.cusolver.rank{rank}.json').read_text()) for rank in range(ranks)]
+            if not all(x['handles_created']==1 and x['params_created']==1 and x['creation_failures']==0 for x in audit):
+                raise ValueError('cuSOLVER resources are not bounded to one handle and parameter object per process')
+            case['cusolver_resource_audit']=dict(ranks=ranks,handles_per_process=1,params_per_process=1,creation_failures=0)
         if variant in ('diagnostic','traced'):
             by_phase=defaultdict(lambda:defaultdict(list)); fronts=[]; peaks=[]; accounting=[]
             for rank in range(ranks):
