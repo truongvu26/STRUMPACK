@@ -18,9 +18,10 @@ template<typename T> T entry(int i,int j,bool reverse) {
     value<T>(.1*(1+i%3),.02*(i%2))*value<T>(.03*(1+j%5),-.01*(j%3));
 }
 template<typename T> T vector_value(int i,int j) { return value<T>(.01*(i+1)*(j+1),.02*(i-j)); }
-template<typename T> void check(const MPIComm& comm) {
+template<typename T> void check(const MPIComm& comm,bool panels=false,std::size_t budget=1024) {
   constexpr int n=48,u=64;
   HODLR::HODLROptions<T> opts; opts.set_use_gpu(1); opts.set_gpu_rectangular(true);
+  opts.set_gpu_host_panels(panels); opts.set_gpu_panel_max_bytes(budget);
   opts.set_leaf_size(8); opts.set_rel_tol(1.e-10); opts.set_knn_hodlrbf(0); opts.set_knn_lrbf(0);
   structured::ClusterTree tree(n),update_tree(u); tree.refine(8); update_tree.refine(8);
   HODLR::HODLRMatrix<T> diagonal(comm,tree,opts),update(comm,update_tree,opts,&diagonal);
@@ -55,13 +56,17 @@ template<typename T> void check(const MPIComm& comm) {
     data.rows=matrix.rows(); data.cols=matrix.cols(); data.ptr.resize(data.rows+1,0);
     for (int j=0;j<data.cols;++j) for (int i=0;i<data.rows;++i)
       data.contribution.push_back(entry<T>(i,j,reverse));
-    matrix.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
+    if (!panels) matrix.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
     typename HODLR::ButterflyMatrix<T>::delem_blocks_t host=[&](auto& I,auto& J,auto& B,auto&) {
       for (std::size_t b=0;b<B.size();++b) for (std::size_t j=0;j<B[b].lcols();++j)
         for (std::size_t i=0;i<B[b].lrows();++i)
           B[b](i,j)=entry<T>(I[b][B[b].rowl2g(i)],J[b][B[b].coll2g(j)],reverse);
     };
     matrix.compress(host);
+    if (panels && (!matrix.backend_statistics().host_panel_calls ||
+                   matrix.backend_statistics().host_panel_peak_bytes>budget))
+      throw std::runtime_error("Rectangular host panels missing or staging budget exceeded");
+
     for (auto op:{Trans::N,Trans::T,Trans::C}) for (int nrhs:{1,3}) {
       const bool normal=op==Trans::N;
       const int ni=normal?matrix.lcols():matrix.lrows(),no=normal?matrix.lrows():matrix.lcols();
@@ -126,13 +131,16 @@ int main(int argc,char** argv) {
   try {
     MPIComm comm(MPI_COMM_WORLD);
     HODLR::HODLRMatrix<double>::initialize_gpu(comm);
-    check<double>(comm); check<std::complex<double>>(comm);
+    HODLR::HODLROptions<double> options; options.set_from_command_line(argc,argv);
+    check<double>(comm,options.gpu_host_panels(),options.gpu_panel_max_bytes());
+    check<std::complex<double>>(comm,options.gpu_host_panels(),options.gpu_panel_max_bytes());
     // A front may use a strict subset of the solver ranks. Other ranks stay
     // outside its collectives, exercising the original integration boundary.
     if (comm.size()>1) {
       if (comm.is_root()) {
         MPIComm self(MPI_COMM_SELF);
-        check<double>(self); check<std::complex<double>>(self);
+        check<double>(self,options.gpu_host_panels(),options.gpu_panel_max_bytes());
+        check<std::complex<double>>(self,options.gpu_host_panels(),options.gpu_panel_max_bytes());
       }
       MPI_Barrier(comm.comm());
     }

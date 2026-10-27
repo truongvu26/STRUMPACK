@@ -50,3 +50,7 @@ if [[ "${HODLR_GPU_EVALUATOR:-OFF}" == ON ]]; then
   cmake --build "$strumpack_build" --target test_HODLR_gpu_front_evaluator \
     test_HODLR_gpu_front_integration -j "$build_jobs"
 fi
+
+if [[ "${HODLR_GPU_RECTANGULAR:-OFF}" == ON ]]; then
+  cmake --build "$strumpack_build" --target test_HODLR_gpu_rectangular -j "$build_jobs"
+fi
