@@ -186,6 +186,8 @@ namespace strumpack {
 
     template<typename scalar_t> HODLRMatrix<scalar_t>::HODLRMatrix
     (const MPIComm& c, kernel::Kernel<real_t>& K, const opts_t& opts) {
+      if (opts.gpu_host_panels())
+        throw std::invalid_argument("GPU host panels require batched element callbacks, not the kernel constructor");
       rows_ = cols_ = K.n();
       structured::ClusterTree tree(rows_);
       if (opts.geo() == 1)

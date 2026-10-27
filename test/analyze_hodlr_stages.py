@@ -57,7 +57,7 @@ for variant in expected:
                 peaks.append(max(int(row['peak_image_bytes']) for row in rows))
                 labels=Counter(row['phase'] for row in rows)
                 if any(labels[k]!=1 for k in ('solver.reorder','solver.factor','solver.solve')): raise ValueError('Missing or duplicate solver scope')
-                if not labels['prepare.upload_resident_image']: raise ValueError('Missing CUDA translation-unit measurement')
+                if not (labels['prepare.upload_resident_image'] or labels['prepare.host_panels']): raise ValueError('Missing GPU image or host-panel preparation measurement')
                 factor_rows=[row for row in rows if row['section']=='solver.factor']
                 factor_wall=next(float(row['inclusive']) for row in factor_rows if row['phase']=='solver.factor')
                 partition=sum(float(row['exclusive']) for row in factor_rows)
