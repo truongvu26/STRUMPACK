@@ -19,6 +19,17 @@ out="$PWD/profile_results/$SLURM_JOB_ID"; mkdir -p "$out"
 build="${HODLR_EVALUATOR_BUILD:-$PWD/build_optimized_hodlr}"
 exe="$build/examples/sparse/testPoisson3dMPIDist"
 ranks=$((SLURM_JOB_NUM_NODES * 8))
+read -r -a grids <<< "${HODLR_SCALE_GRIDS:-100 150 200}"
+repeats="${HODLR_SCALE_REPEATS:-3}"
+[[ "$repeats" =~ ^[1-3]$ ]] || { echo 'Repetitions must be 1, 2 or 3.' >&2; exit 1; }
+for n in "${grids[@]}"; do
+  case "$n" in 100|150|200) ;; *) echo "Unsupported grid $n" >&2; exit 1;; esac
+done
+python3 - "$out/plan.json" "$repeats" "${grids[@]}" <<'PYCODE'
+import json,sys
+from pathlib import Path
+Path(sys.argv[1]).write_text(json.dumps(dict(repetitions=int(sys.argv[2]),grids=list(map(int,sys.argv[3:]))),indent=2)+'\n')
+PYCODE
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
 git rev-parse HEAD > "$out/source_commit.txt"
 git diff --binary HEAD > "$out/source.patch"
@@ -30,8 +41,8 @@ srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c 1 --gpu-bind=none \
   bash -c 'hostname; nvidia-smi --query-gpu=name,uuid,memory.total,driver_version --format=csv' > "$out/devices.txt"
 # Each case is a fresh MPI job step. Capture status and elapsed/RSS externally
 # without enabling ButterflyPACK's costly native entry/product error checks.
-for n in ${HODLR_SCALE_GRIDS:-100 150 200}; do
-  for repeat in 1 2 3; do
+for n in "${grids[@]}"; do
+  for (( repeat=1; repeat<=repeats; repeat++ )); do
     if (( repeat % 2 )); then variants=(cpu hybrid evaluator); else variants=(evaluator hybrid cpu); fi
     for variant in "${variants[@]}"; do
       mode=1; cap=0

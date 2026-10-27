@@ -22,6 +22,9 @@ def scalar(text,pattern,kind=float):
     if not math.isfinite(value): raise ValueError('Nonfinite '+pattern)
     return value
 
+plan=json.loads((root/'plan.json').read_text()) if (root/'plan.json').exists() else dict(grids=[100,150,200],repetitions=3)
+expected={(n,variant,repeat) for n in plan['grids'] for variant in ['cpu','hybrid','evaluator']
+          for repeat in range(1,plan['repetitions']+1)}
 cases=[]
 failures=[]
 for status_path in sorted(root.glob('n*_r*.exit_code')):
@@ -69,7 +72,7 @@ for status_path in sorted(root.glob('n*_r*.exit_code')):
     cases.append(case)
 
 summaries=[]
-for n in [100,150,200]:
+for n in plan['grids']:
     for variant in ['cpu','hybrid','evaluator']:
         trials=[case for case in cases if case['grid']==n and case['variant']==variant and case['status']=='PASS']
         if not trials: continue
@@ -78,13 +81,13 @@ for n in [100,150,200]:
             values=[case[phase] for case in trials]
             group[phase]=dict(median=statistics.median(values),minimum=min(values),maximum=max(values))
         summaries.append(group)
-complete=len(cases)==27 and not failures
+complete={(case['grid'],case['variant'],case['repeat']) for case in cases}==expected and not failures
 result=dict(status='FAIL' if failures else ('PASS' if complete else 'RUNNING'),job=root.name,
             ranks=args.ranks,nodes=args.ranks//8,gpus=args.ranks//2,ranks_per_gpu=2,
-            rhs=3,source_commit=(root/'source_commit.txt').read_text().strip(),
+            rhs=3,plan=plan,source_commit=(root/'source_commit.txt').read_text().strip(),
             cases=cases,summaries=summaries,failures=failures,
             notes=['Uninstrumented Release runs; native verbose checks disabled.',
-                   'Three fresh-process repetitions per size/variant, alternating variant order.',
+                   'Fresh-process repetitions per the recorded plan, alternating variant order; one repetition gives preliminary timings.',
                    'Device evaluator uses an 8 MiB per-block cap and explicit host fallback.',
                    'Prepared-device counts require successful compression callbacks internally.',
                    'Different compression samples/refinement counts can change solve timings.'])
