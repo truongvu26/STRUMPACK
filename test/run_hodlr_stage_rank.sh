@@ -6,6 +6,8 @@ IFS=, read -r -a visible <<< "${CUDA_VISIBLE_DEVICES:-${SLURM_JOB_GPUS:?}}"
 index=$((SLURM_LOCALID / 2))
 (( index < ${#visible[@]} )) || exit 1
 export CUDA_VISIBLE_DEVICES="${visible[$index]}"
+# The executable has DT_RPATH; preload the immutable SONAME to override it.
+export LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0${LD_PRELOAD:+:$LD_PRELOAD}"
 uuid=$(nvidia-smi -i "$CUDA_VISIBLE_DEVICES" --query-gpu=uuid --format=csv,noheader)
 printf '# stage binding rank=%s local_rank=%s node=%s uuid=%s\n' "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
 if [[ "$variant" == diagnostic || "$variant" == traced ]]; then

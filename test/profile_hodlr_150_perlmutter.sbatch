@@ -21,7 +21,7 @@ n=${HODLR_PROFILE_GRID:-150}; pernode=$((HODLR_PROFILE_RANKS / SLURM_JOB_NUM_NOD
 export LD_LIBRARY_PATH="$HODLR_PROFILE_SNAPSHOT/lib:${LD_LIBRARY_PATH:-}"
 cp "$HODLR_PROFILE_SNAPSHOT/manifest.txt" "$out/manifest.txt"
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
-ldd "$HODLR_PROFILE_SNAPSHOT/diagnostic" > "$out/libraries.txt"
+LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0" ldd "$HODLR_PROFILE_SNAPSHOT/diagnostic" > "$out/libraries.txt"
 scontrol show job "$SLURM_JOB_ID" > "$out/slurm_job.txt"
 srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c 1 --gpu-bind=none \
   bash -c 'hostname; nvidia-smi --query-gpu=name,uuid,memory.total,driver_version --format=csv' > "$out/devices.txt"
