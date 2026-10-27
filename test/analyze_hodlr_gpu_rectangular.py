@@ -12,12 +12,13 @@ def number(text,pattern,kind=float):
     value=kind(found[0].replace(',',''))
     if not math.isfinite(value): raise ValueError('Nonfinite '+pattern)
     return value
-for ranks in (1,4):
+for ranks in (1,3,4):
     try:
         for rank in range(ranks):
             if 'Rectangular GPU construction/multiply and device Schur: PASS' in (root/f'direct_{ranks}.rank{rank}.log').read_text(): break
         else: raise ValueError('No direct-test PASS marker')
     except (OSError,ValueError) as error: failures.append(f'direct_{ranks}: {error}')
+    if ranks==3: continue
     for variant in ('hybrid','rectangular','constructed'):
         label=f'{variant}_{ranks}'; case=dict(label=label,status='FAIL',ranks=ranks)
         try:
@@ -44,7 +45,11 @@ for ranks in (1,4):
         except (OSError,ValueError) as error:
             case['error']=str(error); failures.append(label+': '+str(error))
         cases.append(case)
-result=dict(status='FAIL' if failures else 'PASS',job=root.name,grid=40,rhs=3,
+for name,marker in [('device_contract.log','PASS'),('device_memcheck.log','ERROR SUMMARY: 0 errors'),('square_integration.log','GPU front evaluator HODLR integration: PASS')]:
+    try:
+        if marker not in (root/name).read_text(): raise ValueError('Missing '+marker)
+    except (OSError,ValueError) as error: failures.append(name+': '+str(error))
+result=dict(status='FAIL'  if failures else 'PASS',job=root.name,grid=40,rhs=3,
     cases=cases,failures=failures,notes=[
       'One trial per variant/layout; preliminary timings, no speedup claim.',
       'Distributed entry preparation is a bounded replicated host image uploaded once per matrix.',

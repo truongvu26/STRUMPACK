@@ -47,7 +47,8 @@ arithmetic. Existing BF extraction retains valid host mirrors.
 The registered rectangular evaluator receives merged tree slots: rows
 0..M-1 and columns M..M+N-1. STRUMPACK subtracts the column base exactly
 once. Square HODLR callbacks retain their application-index convention.
-Rectangular multiplies support N/T/C and preserve padded multi-RHS views.
+GPU-built factors are reused from matrix-owned device mirrors, avoiding a
+second upload. Rectangular multiplies support N/T/C and preserve padded multi-RHS views.
 Each rank multiplies its factor rows; only rank-by-RHS coefficients need a
 collective sum. The initial implementation stages that sum through host
 memory. It does not assume GPU-aware MPI or create MPI_COMM_WORLD grids.
@@ -99,7 +100,9 @@ factor-row routing, leases with eviction and per-GPU memory accounting.
 Validation record
 -------------------
 
-Numerical validation is pending. The direct regression compares real and
+Job 60387091 passed the initial one-/four-rank direct checks and all six
+40^3 sparse variants. Final checks after factor-buffer reuse are pending.
+The direct regression compares real and
 complex rectangular GPU BACA and N/T/C multiplies against independent dense
 references, tests one/three RHS with padding and moved owners, and compares
 normal/transposed device Schur products. The sparse test compares hybrid,
@@ -107,3 +110,11 @@ rectangular-only and constructed variants at one and four ranks, with three
 RHS and multiple fronts. The constructed four-rank case must show collective
 preparation and actual rectangular GPU evaluator calls. Raw logs and builds
 are local ignored artifacts; the JSON record retains results and provenance.
+
+A separate 60^3 profiling harness runs three alternating fresh-process trials
+of CPU, original hybrid, rectangular multiplies/device Schur, and bounded
+GPU construction on one allocation with four ranks sharing two GPUs. Its
+256 MiB per-block cap and tolerance 1e-5 are recorded separately from the
+40^3 validation. Run test/profile_hodlr_rectangular_perlmutter.sbatch and
+analyze with test/analyze_hodlr_rectangular_profile.py. Timings from one
+trial are not used to claim a performance improvement.

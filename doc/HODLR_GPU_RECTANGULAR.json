@@ -1,5 +1,5 @@
 {
-  "status": "VALIDATION_PENDING",
+  "status": "FINAL_VALIDATION_PENDING",
   "butterflypack_branch": "feature/gpu-rectangular-schur",
   "butterflypack_commit": "see runtime butterflypack_commit.txt",
   "strumpack_branch": "feature/hodlr-gpu-rectangular-schur",
@@ -21,12 +21,119 @@
   ],
   "configure_checks": {
     "new_dependency": "PASS",
-    "old_dependency_rejected": "PASS"
+    "old_dependency_rejected": "PASS",
+    "old_dependency_extension_disabled": "PASS"
   },
   "limits": [
     "Butterfly levels zero; OMP_NUM_THREADS=1",
     "Distributed entry images are host-prepared, replicated and bounded per block",
     "Large images retain host compression; no unbounded tile service",
     "CPU randomized temporary Schur compression remains; its N/T operator applications use device intermediates"
-  ]
+  ],
+  "validation_60387091": {
+    "status": "PASS",
+    "job": "60387091",
+    "grid": 40,
+    "rhs": 3,
+    "cases": [
+      {
+        "label": "hybrid_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 1.0069e-10,
+        "scaled_residual": 6.66977e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 17.8834,
+        "solve_seconds": 0.340351,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 2.385e-15,
+        "scaled_residual": 3.04476e-13,
+        "hodlr_fronts": 24,
+        "factor_seconds": 17.9756,
+        "solve_seconds": 0.196996,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 8.62606e-11,
+        "scaled_residual": 5.29578e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 12.4124,
+        "solve_seconds": 0.31722,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 159394560
+      },
+      {
+        "label": "hybrid_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 1.04312e-13,
+        "scaled_residual": 4.37244e-12,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.33604,
+        "solve_seconds": 0.115521,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 1.71818e-14,
+        "scaled_residual": 1.02729e-12,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.4078,
+        "solve_seconds": 0.131827,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 1.01458e-11,
+        "scaled_residual": 5.44013e-10,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.55709,
+        "solve_seconds": 0.0960641,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 9,
+        "resident_entry_bytes_reports": 159394560
+      }
+    ],
+    "failures": [],
+    "notes": [
+      "One trial per variant/layout; preliminary timings, no speedup claim.",
+      "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
+      "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
+      "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
+    ]
+  },
+  "validated_butterflypack_commit": "69963074a92b8fe1d96178dbbe93fed2b45db667"
 }

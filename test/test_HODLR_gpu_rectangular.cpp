@@ -103,6 +103,15 @@ int main(int argc,char** argv) {
     MPIComm comm(MPI_COMM_WORLD);
     HODLR::HODLRMatrix<double>::initialize_gpu(comm);
     check<double>(comm); check<std::complex<double>>(comm);
+    // A front may use a strict subset of the solver ranks. Other ranks stay
+    // outside its collectives, exercising the original integration boundary.
+    if (comm.size()>1) {
+      if (comm.is_root()) {
+        MPIComm self(MPI_COMM_SELF);
+        check<double>(self); check<std::complex<double>>(self);
+      }
+      MPI_Barrier(comm.comm());
+    }
     if (comm.is_root()) std::cout << "Rectangular GPU construction/multiply and device Schur: PASS\n";
   } catch(const std::exception& e) { std::cerr << e.what() << std::endl; MPI_Abort(MPI_COMM_WORLD,1); }
   scalapack::Cblacs_exit(1); MPI_Finalize();

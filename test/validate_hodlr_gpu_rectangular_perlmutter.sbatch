@@ -27,6 +27,13 @@ git -C "$bpack" rev-parse HEAD > "$out/butterflypack_commit.txt"
 git -C "$bpack" diff HEAD > "$out/butterflypack.patch"
 sha256sum "$bpack/install_hodlr_gpu/lib64/"lib*butterflypack.so* > "$out/butterflypack.sha256"
 srun -n1 -c1 --gpus-per-task=1 --gpu-bind=single:1 nvidia-smi --query-gpu=name,uuid,memory.total,driver_version --format=csv > "$out/devices.csv"
+single=(srun -n1 -c8 --cpu-bind=cores --gpu-bind=none --kill-on-bad-exit=1 --wait=30)
+timeout --kill-after=30s 120s "${single[@]}" bash test/run_hodlr_shared_gpu_rank.sh \
+  "$build/test/test_HODLR_gpu_front_evaluator" > "$out/device_contract.log" 2>&1
+timeout --kill-after=30s 120s "${single[@]}" bash test/run_hodlr_shared_gpu_rank.sh \
+  compute-sanitizer --tool memcheck --error-exitcode 3 "$build/test/test_HODLR_gpu_front_evaluator" > "$out/device_memcheck.log" 2>&1
+timeout --kill-after=30s 120s "${single[@]}" bash test/run_hodlr_shared_gpu_rank.sh \
+  "$build/test/test_HODLR_gpu_front_integration" > "$out/square_integration.log" 2>&1
 for ranks in 1 4; do
   launch=(srun -n "$ranks" -c8 --cpu-bind=cores --gpu-bind=none --kill-on-bad-exit=1 --wait=30)
   timeout --kill-after=30s 240s "${launch[@]}" --output="$out/direct_${ranks}.rank%t.log" --error="$out/direct_${ranks}.rank%t.log" \
@@ -46,4 +53,7 @@ for ranks in 1 4; do
     printf '0\n' > "$out/${variant}_${ranks}.exit"
   done
 done
+timeout --kill-after=30s 240s srun -n3 -c8 --cpu-bind=cores --gpu-bind=none --kill-on-bad-exit=1 --wait=30 \
+  --output="$out/direct_3.rank%t.log" --error="$out/direct_3.rank%t.log" \
+  bash test/run_hodlr_shared_gpu_rank.sh "$build/test/test_HODLR_gpu_rectangular"
 python3 test/analyze_hodlr_gpu_rectangular.py "$out"

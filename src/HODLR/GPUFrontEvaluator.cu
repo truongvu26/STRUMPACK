@@ -136,10 +136,10 @@ public:
     // Input vectors remain owned through finish(). Pageable uploads are staged
     // by CUDA; no borrowed callback descriptors survive this call.
     if (!device_image_) {
-    checked(cudaMemcpyAsync(ptr,data_.ptr.data(),ptr_bytes,cudaMemcpyHostToDevice,stream));
-    if (col_bytes) checked(cudaMemcpyAsync(col,data_.col.data(),col_bytes,cudaMemcpyHostToDevice,stream));
-    if (sparse_bytes) checked(cudaMemcpyAsync(sparse,data_.sparse.data(),sparse_bytes,cudaMemcpyHostToDevice,stream));
-    checked(cudaMemcpyAsync(dense,data_.contribution.data(),dense_bytes,cudaMemcpyHostToDevice,stream));
+      checked(cudaMemcpyAsync(ptr,data_.ptr.data(),ptr_bytes,cudaMemcpyHostToDevice,stream));
+      if (col_bytes) checked(cudaMemcpyAsync(col,data_.col.data(),col_bytes,cudaMemcpyHostToDevice,stream));
+      if (sparse_bytes) checked(cudaMemcpyAsync(sparse,data_.sparse.data(),sparse_bytes,cudaMemcpyHostToDevice,stream));
+      checked(cudaMemcpyAsync(dense,data_.contribution.data(),dense_bytes,cudaMemcpyHostToDevice,stream));
     }
     for (int k=0; k<batch.count; ++k) {
       const auto b=batch.blocks[k];

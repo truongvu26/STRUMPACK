@@ -356,6 +356,14 @@ namespace strumpack {
      const DenseM_t& X,DenseM_t& Y) const {
 #if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
       if (!gpu_mode_ || !other.gpu_mode_ || !diagonal.gpu_mode_ || op==Trans::C) return false;
+      const auto input_rows=op==Trans::N?lcols_:other.lrows_;
+      const auto output_rows=op==Trans::N?other.lrows_:lcols_;
+      int comparison=MPI_UNEQUAL;
+      MPI_Comm_compare(c_->comm(),diagonal.c_->comm(),&comparison);
+      if (rows_!=int(diagonal.rows()) || other.cols_!=rows_ || other.rows_!=cols_ ||
+          X.rows()!=std::size_t(input_rows) || Y.rows()!=std::size_t(output_rows) || X.cols()!=Y.cols() ||
+          (comparison!=MPI_IDENT && comparison!=MPI_CONGRUENT))
+        throw std::invalid_argument("Incompatible Schur factors, communicator or RHS layout");
       // Packed host boundaries; only the two outer arrays cross the device boundary.
       const double started=MPI_Wtime();
       DenseM_t packed(X),result(Y.rows(),Y.cols());

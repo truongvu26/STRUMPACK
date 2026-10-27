@@ -61,7 +61,7 @@ namespace strumpack {
       std::size_t rhs_boundary_bytes = 0;
       std::size_t evaluator_calls = 0, evaluator_upload_bytes = 0;
       std::size_t evaluator_scratch_peak_bytes = 0;
-    std::size_t evaluator_resident_bytes = 0;
+      std::size_t evaluator_resident_bytes = 0;
     };
 
     struct ExtractionMeta {
