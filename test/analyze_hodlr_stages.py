@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate each solver case and aggregate local, nested phase measurements."""
-import argparse,csv,json,math,re,statistics
+import argparse,csv,json,math,re,statistics,subprocess,sys
 from collections import Counter,defaultdict
 from pathlib import Path
 p=argparse.ArgumentParser(); p.add_argument('directory',type=Path); p.add_argument('--require-complete',action='store_true'); a=p.parse_args(); root=a.directory
@@ -77,5 +77,6 @@ for variant in expected:
 complete=len(result['cases'])==len(expected)
 result['status']='FAIL' if failures else ('PASS' if complete else 'RUNNING'); result['failures']=failures
 (root/'stage_summary.json').write_text(json.dumps(result,indent=2)+'\n')
+subprocess.run([sys.executable,str(Path(__file__).with_name('render_hodlr_stage_report.py')),str(root)],check=True)
 print(result['status'],[(c['variant'],c['status'],c.get('factor_plus_solve_seconds'),c.get('error')) for c in result['cases']],flush=True)
 if failures or (a.require_complete and not complete): raise SystemExit(1)
