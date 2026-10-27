@@ -27,7 +27,7 @@ template<typename T> void check(const MPIComm& comm) {
   typename HODLR::HODLRMatrix<T>::delem_blocks_t diagonal_entries=[](auto& I,auto& J,auto& B,auto&) {
     for (std::size_t b=0;b<B.size();++b) for (std::size_t j=0;j<B[b].lcols();++j)
       for (std::size_t i=0;i<B[b].lrows();++i)
-        B[b](i,j)=I[b][B[b].rowl2g(i)]==J[b][B[b].coll2g(j)]?T(2):T(0);
+        B[b](i,j)=I[b][B[b].rowl2g(i)]==J[b][B[b].coll2g(j)]?value<T>(2,.25):T(0);
   };
   diagonal.compress(diagonal_entries); diagonal.factor();
   HODLR::ButterflyMatrix<T> f12(diagonal,update),f21(update,diagonal);
@@ -71,7 +71,7 @@ template<typename T> void check(const MPIComm& comm) {
   }
   // Ownership and native factor state survive moving the rectangular owner.
   HODLR::ButterflyMatrix<T> moved(std::move(f12));
-  for (auto op:{Trans::N,Trans::T}) {
+  for (auto op:{Trans::N,Trans::T,Trans::C}) {
     DenseMatrix<T> x(update.lrows(),3),y(update.lrows(),3);
     for (int j=0;j<3;++j) for (std::size_t i=0;i<x.rows();++i) x(i,j)=vector_value<T>(update.begin_row()+i,j);
     if (!moved.schur_product(op,diagonal,f21,x,y)) throw std::runtime_error("Device Schur pipeline did not run");
@@ -81,8 +81,14 @@ template<typename T> void check(const MPIComm& comm) {
       T expected=0;
       for (int k=0;k<n;++k) {
         T inner=0;
-        for (int l=0;l<u;++l) inner+=(op==Trans::N?entry<T>(k,l,false):entry<T>(l,k,true))*vector_value<T>(l,j);
-        expected+=(op==Trans::N?entry<T>(global_i,k,true):entry<T>(k,global_i,false))*inner/T(2);
+        for (int l=0;l<u;++l) {
+          auto a=op==Trans::N?entry<T>(k,l,false):entry<T>(l,k,true);
+          if (op==Trans::C) a=conjv(a);
+          inner+=a*vector_value<T>(l,j);
+        }
+        auto a=op==Trans::N?entry<T>(global_i,k,true):entry<T>(k,global_i,false);
+        if (op==Trans::C) a=conjv(a);
+        expected+=a*inner/(op==Trans::C?conjv(value<T>(2,.25)):value<T>(2,.25));
       }
       diff+=std::norm(y(i,j)-expected); norm+=std::norm(expected);
     }
@@ -90,8 +96,8 @@ template<typename T> void check(const MPIComm& comm) {
     if (!std::isfinite(err) || err>1.e-8) throw std::runtime_error("Device Schur pipeline failed");
   }
   const auto& stats=moved.backend_statistics();
-  const auto boundary=std::size_t(2)*2*update.lrows()*3*sizeof(T);
-  if (stats.schur_calls!=2 || stats.schur_boundary_bytes!=boundary || stats.schur_seconds<=0)
+  const auto boundary=std::size_t(3)*2*update.lrows()*3*sizeof(T);
+  if (stats.schur_calls!=3 || stats.schur_boundary_bytes!=boundary || stats.schur_seconds<=0)
     throw std::runtime_error("Device Schur boundary/timing accounting failed");
   if (comm.is_root()) std::cout << "Device Schur calls=" << stats.schur_calls
     << " host_boundary_bytes_local=" << stats.schur_boundary_bytes

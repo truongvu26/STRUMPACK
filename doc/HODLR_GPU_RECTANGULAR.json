@@ -135,5 +135,10 @@
       "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
     ]
   },
-  "validated_butterflypack_commit": "69963074a92b8fe1d96178dbbe93fed2b45db667"
+  "validated_butterflypack_commit": "69963074a92b8fe1d96178dbbe93fed2b45db667",
+  "cancelled_before_allocation": [
+    60389146,
+    60389147
+  ],
+  "cancellation_reason": "Complete conjugate-transpose device pipeline before freezing final executables"
 }

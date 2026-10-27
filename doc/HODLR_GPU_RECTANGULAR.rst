@@ -57,17 +57,22 @@ Device Schur intermediates
 ---------------------------
 
 The compound backend call performs F21 * inverse(F11) * F12 and its
-transpose on the backend stream. It uploads the input once and downloads
+transpose/conjugate transpose on the backend stream. It uploads the input once and downloads
 the output once. F11-sized intermediate vectors remain in the backend GPU
 heap, including across its inverse application. Internal MPI reductions
-can still use host staging. Complex conjugate-transpose sampling retains
-the existing fallback chain; rectangular C multiplies themselves are GPU.
+can still use host staging. Complex conjugation is applied on the device around the transposed
+pipeline, so complex C applications also retain device intermediates.
 The compound interface assumes the unit scaling used by STRUMPACK.
 
 ButterflyMatrix::backend_statistics reports construction, multiply and
 compound Schur call times, outer host payload bytes and intermediate device
 payload peak. These are synchronous API times, not isolated kernel times.
 The intermediate peak excludes the inverse implementation's own scratch.
+The legacy host_prepare_seconds field measures preparation wall time,
+including synchronous evaluator registration and resident-image upload.
+Resident uploads occur before compress(), so they are included in the
+sparse factor time and preparation interval, not the native construction
+API interval.
 Per-front GPU Schur reports expose the executed call count and payloads.
 The temporary Schur matrix still uses the existing host randomized
 compression, with its operator applications on the device.
@@ -105,7 +110,7 @@ Job 60387091 passed the initial one-/four-rank direct checks and all six
 The direct regression compares real and
 complex rectangular GPU BACA and N/T/C multiplies against independent dense
 references, tests one/three RHS with padding and moved owners, and compares
-normal/transposed device Schur products. The sparse test compares hybrid,
+normal/transposed/conjugate-transposed device Schur products. The sparse test compares hybrid,
 rectangular-only and constructed variants at one and four ranks, with three
 RHS and multiple fronts. The constructed four-rank case must show collective
 preparation and actual rectangular GPU evaluator calls. Raw logs and builds

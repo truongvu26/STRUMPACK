@@ -355,7 +355,7 @@ namespace strumpack {
     (Trans op,const HODLRMatrix<scalar_t>& diagonal,const ButterflyMatrix<scalar_t>& other,
      const DenseM_t& X,DenseM_t& Y) const {
 #if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
-      if (!gpu_mode_ || !other.gpu_mode_ || !diagonal.gpu_mode_ || op==Trans::C) return false;
+      if (!gpu_mode_ || !other.gpu_mode_ || !diagonal.gpu_mode_) return false;
       const auto input_rows=op==Trans::N?lcols_:other.lrows_;
       const auto output_rows=op==Trans::N?other.lrows_:lcols_;
       int comparison=MPI_UNEQUAL;
