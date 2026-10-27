@@ -30,6 +30,10 @@ for root in args.directories:
                     scheduler_exit_code=main[4] if main else None,
                     numerical_status=summary.get('status','RUNNING'),artifacts=str(root),
                     excluded_unplanned_cases=summary.get('excluded_unplanned_cases',[]))
+    if (root/'solver_snapshot.sha256').exists():
+        allocation['frozen_executable_sha256']=(root/'solver_snapshot.sha256').read_text().split()[0]
+        if allocation['frozen_executable_sha256']!=executable:
+            raise SystemExit('Frozen solver does not match the recorded study executable')
     if (root/'devices.txt').exists():
         inventory=Counter()
         for line in (root/'devices.txt').read_text().splitlines():

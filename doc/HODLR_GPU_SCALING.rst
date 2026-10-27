@@ -95,6 +95,12 @@ Job 60353035 received no resources and timed out while waiting for four
 comes from the grouped-number parser, not a solver failure; its CPU solver
 step is COMPLETED with exit zero. Its successful result is preserved.
 
+The continuation now owns a read-only solver_snapshot with the identical
+recorded executable hash. Subsequent ranks execute that job-local copy so
+unrelated builds in the shared worktree cannot change later trials. The
+source build path remains in recorded command arguments, and the snapshot
+checksum and rank-wrapper copy document the actual launch selection.
+
 .. BEGIN GENERATED SCALING RESULTS
 
 Measured results

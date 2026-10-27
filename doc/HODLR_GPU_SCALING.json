@@ -58,7 +58,7 @@
       "executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
       "source_patch_bytes": 7903,
       "scheduler_state": "RUNNING",
-      "scheduler_elapsed": "00:02:34",
+      "scheduler_elapsed": "00:05:35",
       "scheduler_exit_code": "0:0",
       "numerical_status": "RUNNING",
       "artifacts": "profile_results/60353138",
