@@ -938,3 +938,8 @@ if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
   add_executable(test_HODLR_gpu_front_integration test_HODLR_gpu_front_integration.cpp)
   target_link_libraries(test_HODLR_gpu_front_integration PRIVATE strumpack)
 endif()
+
+if(STRUMPACK_USE_HODLR_GPU_RECTANGULAR AND STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+  add_executable(test_HODLR_gpu_rectangular test_HODLR_gpu_rectangular.cpp)
+  target_link_libraries(test_HODLR_gpu_rectangular PRIVATE strumpack)
+endif()

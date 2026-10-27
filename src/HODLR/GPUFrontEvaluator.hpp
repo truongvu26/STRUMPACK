@@ -16,6 +16,7 @@ namespace strumpack { namespace HODLR {
 // negative Schur product. F22 has an empty original sparse matrix.
 template<typename T> struct GPUFrontData {
   int rows = 0;
+  int cols = 0; // zero means square; BF evaluator uses rows as column-id base
   std::vector<std::int64_t> ptr, col;
   std::vector<T> sparse, contribution;
 };
@@ -26,11 +27,13 @@ public:
   virtual bool complex_values() const = 0;
   virtual int rows() const = 0;
   virtual void register_matrix(void** matrix) = 0;
+  virtual void register_rectangular(void** matrix) = 0;
   // Fence queued reads before prepared inputs or child work can be released.
   virtual void finish() = 0;
   virtual std::size_t calls() const = 0;
   virtual std::size_t upload_bytes() const = 0;
   virtual std::size_t scratch_peak_bytes() const = 0;
+  virtual std::size_t resident_bytes() const = 0;
   // The ABI entry point is exposed for stream/stride contract regression tests.
   virtual void evaluate_blocks(const bpack_gpu_block_batch& batch) noexcept = 0;
 };

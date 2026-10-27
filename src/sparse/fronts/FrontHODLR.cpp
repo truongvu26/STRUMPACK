@@ -660,6 +660,47 @@ namespace strumpack {
           for (auto& Jk : J) for (auto& j : Jk) j += this->sep_begin_;
           element_extraction(A, I, J, B, task_depth);
         };
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      auto prepare_rectangle=[&](bool transpose) {
+        const auto m=std::size_t(transpose?dim_upd():dim_sep());
+        const auto n=std::size_t(transpose?dim_sep():dim_upd());
+        const char* name=transpose?"F21":"F12";
+        bool fits=cap>64 && m && n && m<=std::size_t(std::numeric_limits<int>::max())/n;
+        fits=fits && m<=((cap-64)/sizeof(scalar_t))/n &&
+          (m+1)*sizeof(std::int64_t)<=cap-64-m*n*sizeof(scalar_t);
+        if (!fits) {
+          if (cap) std::cout << "# GPU front evaluator block=" << name
+            << " construction=host reason=prepared_image_exceeds_byte_cap cap=" << cap << std::endl;
+          return;
+        }
+        const auto started=MPI_Wtime();
+        HODLR::GPUFrontData<scalar_t> data;
+        data.rows=m; data.cols=n; data.ptr.resize(m+1,0); data.contribution.resize(m*n);
+        VecVec_t I(1),J(1);
+        auto ids=[&](bool update) {
+          std::vector<std::size_t> v(update?dim_upd():dim_sep());
+          for (std::size_t i=0;i<v.size();++i) {
+            if (!update) v[i]=sep_begin_+i;
+            else {
+#if defined(STRUMPACK_PERMUTE_CB)
+              v[i]=this->upd_[CB_iperm_[i]];
+#else
+              v[i]=this->upd_[i];
+#endif
+            }
+          }
+          return v;
+        };
+        I[0]=ids(transpose); J[0]=ids(!transpose);
+        std::vector<DenseMW_t> blocks;
+        blocks.emplace_back(m,n,data.contribution.data(),m);
+        element_extraction(A,I,J,blocks,task_depth);
+        (transpose?F21_:F12_).set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
+        std::cout << "# GPU front evaluator block=" << name << " rows=" << m << " cols=" << n
+          << " preparation=host_sparse_and_children host_prepare_seconds=" << MPI_Wtime()-started << std::endl;
+      };
+      if (F12_.gpu_backend() && cap) { prepare_rectangle(false); prepare_rectangle(true); }
+#endif
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
         F12_.compress(extract_F12);
         F21_.compress(extract_F21); }
@@ -671,6 +712,15 @@ namespace strumpack {
         [&](Trans op, scalar_t a, const DenseM_t& R, scalar_t b, DenseM_t& S) {
           TIMER_TIME(TaskType::RANDOM_SAMPLING, 0, t_sampling);
           TIMER_TIME(TaskType::HSS_SCHUR_PRODUCT, 2, t_sprod);
+          if (F12_.gpu_backend() && F21_.gpu_backend()) {
+            DenseM_t device_product(S.rows(),S.cols());
+            if (F12_.schur_product(op,F11_,F21_,R,device_product)) {
+              device_product.scale(-a);
+              if (b==scalar_t(0)) S.copy(device_product);
+              else S.scale_and_add(b,device_product);
+              return;
+            }
+          }
           DenseM_t F12R(F12_.rows(), R.cols()),
             invF11F12R(F11_.rows(), R.cols());
           auto& F1 = (op == Trans::N) ? F12_ : F21_;
@@ -690,6 +740,15 @@ namespace strumpack {
       HODLR::ButterflyMatrix<scalar_t> Schur(*F22_, *F22_);
       { TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
         Schur.compress(sample_Schur); }
+      if (F12_.gpu_backend()) {
+        const auto& st=F12_.backend_statistics();
+        std::cout << "# GPU Schur rows=" << dim_upd() << " separator_rows=" << dim_sep()
+          << " calls_local=" << st.schur_calls << " wall_seconds_local=" << st.schur_seconds
+          << " host_boundary_bytes_local=" << st.schur_boundary_bytes
+          << " intermediate_device_peak_bytes_local=" << st.schur_intermediate_peak_bytes
+          << " rectangular_construct_seconds_local="
+          << st.construction_seconds+F21_.backend_statistics().construction_seconds << std::endl;
+      }
       auto extract_F22 =
         [&](VecVec_t& I, VecVec_t& J, std::vector<DenseMW_t>& B,
             HODLR::ExtractionMeta& e) {

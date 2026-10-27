@@ -30,6 +30,10 @@
 #include "FrontHODLRMPI.hpp"
 #include "FrontBLRMPI.hpp"
 #include "ExtendAdd.hpp"
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+#include "HODLR/GPUFrontEvaluator.hpp"
+#endif
+#include <limits>
 #include "BLR/BLRExtendAdd.hpp"
 
 namespace strumpack {
@@ -295,9 +299,53 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLRMPI<scalar_t,integer_t>::compress_extraction
   (const SpMat_t& A, const Opts_t& opts) {
-    if (opts.HODLR_options().gpu_front_max_bytes() && this->Comm().is_root())
-      std::cout << "# GPU front evaluator construction=host reason=distributed_front_requires_collective_preparation rows="
-                << dim_sep() << std::endl;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+    const auto cap=opts.HODLR_options().gpu_front_max_bytes();
+    auto eligible=[&](std::size_t m,std::size_t n,const char* block) {
+      bool fits=cap>64 && m && n && m<=std::size_t(std::numeric_limits<int>::max())/n;
+      fits=fits && m<=((cap-64)/sizeof(scalar_t))/n &&
+        (m+1)*sizeof(std::int64_t)<=cap-64-m*n*sizeof(scalar_t);
+      if (cap && !fits && Comm().is_root())
+        std::cout << "# GPU front evaluator block=" << block
+          << " construction=host reason=prepared_image_exceeds_byte_cap rows=" << m
+          << " cols=" << n << " cap=" << cap << std::endl;
+      return cap && fits;
+    };
+    auto global_ids=[&](std::size_t n,bool update) {
+      std::vector<std::size_t> ids(n);
+      for (std::size_t i=0;i<n;++i) {
+        if (!update) ids[i]=sep_begin_+i;
+        else {
+#if defined(STRUMPACK_PERMUTE_CB)
+          ids[i]=this->upd_[CB_iperm_[i]];
+#else
+          ids[i]=this->upd_[i];
+#endif
+        }
+      }
+      return ids;
+    };
+    auto prepare=[&](std::size_t m,std::size_t n,bool ru,bool cu,bool skip_sparse,
+                     HODLR::ButterflyMatrix<scalar_t>* schur,const char* block) {
+      const double started=MPI_Wtime();
+      VecVec_t I{global_ids(m,ru)},J{global_ids(n,cu)};
+      DistM_t image(grid(),m,n); image.zero();
+      std::vector<DistMW_t> blocks;
+      blocks.emplace_back(m,n,image,0,0);
+      this->extract_2d(A,I,J,blocks,skip_sparse);
+      if (schur) { auto product=schur->dense(grid()); image.scaled_add(scalar_t(1),product); }
+      auto replicated=image.all_gather();
+      HODLR::GPUFrontData<scalar_t> data;
+      data.rows=m; data.cols=n; data.ptr.resize(m+1,0);
+      data.contribution.assign(replicated.data(),replicated.data()+m*n);
+      if (Comm().is_root()) std::cout << "# GPU front evaluator block=" << block
+        << " rows=" << m << " cols=" << n << " preparation=collective_host_image ranks=" << Comm().size()
+        << " host_prepare_seconds=" << MPI_Wtime()-started << std::endl;
+      return HODLR::make_gpu_front_evaluator(std::move(data));
+    };
+    if (eligible(dim_sep(),dim_sep(),"F11"))
+      F11_.set_gpu_front_evaluator(prepare(dim_sep(),dim_sep(),false,false,false,nullptr,"F11"));
+#endif
     F11_.set_sampling_parameter(1.2);
     auto extract_F11 =
       [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,
@@ -336,6 +384,12 @@ namespace strumpack {
           for (auto& Jk : J) for (auto& j : Jk) j += sep_begin_;
           this->extract_2d(A, I, J, B);
         };
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      if (F12_.gpu_backend() && eligible(dim_sep(),dim_upd(),"F12"))
+        F12_.set_gpu_front_evaluator(prepare(dim_sep(),dim_upd(),false,true,false,nullptr,"F12"));
+      if (F21_.gpu_backend() && eligible(dim_upd(),dim_sep(),"F21"))
+        F21_.set_gpu_front_evaluator(prepare(dim_upd(),dim_sep(),true,false,false,nullptr,"F21"));
+#endif
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
         // int bsize = std::min(64.0,ceil(F11_.get_stat("Rank_max")/2.0));
         // F12_.set_BACA_block(bsize);
@@ -352,6 +406,15 @@ namespace strumpack {
         [&](Trans op, scalar_t a, const DenseM_t& R, scalar_t b, DenseM_t& S) {
           TIMER_TIME(TaskType::RANDOM_SAMPLING, 1, t_sampling);
           TIMER_TIME(TaskType::HSS_SCHUR_PRODUCT, 2, t_sprod);
+          if (F12_.gpu_backend() && F21_.gpu_backend()) {
+            DenseM_t device_product(S.rows(),S.cols());
+            if (F12_.schur_product(op,F11_,F21_,R,device_product)) {
+              device_product.scale(-a);
+              if (b==scalar_t(0)) S.copy(device_product);
+              else S.scale_and_add(b,device_product);
+              return;
+            }
+          }
           DenseM_t F12R(F12_.lrows(), R.cols()),
             invF11F12R(F11_.lrows(), R.cols());
           auto& F1 = (op == Trans::N) ? F12_ : F21_;
@@ -374,6 +437,15 @@ namespace strumpack {
       { TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
         Schur.compress(sample_Schur);
       }
+      if (F12_.gpu_backend() && Comm().is_root()) {
+        const auto& st=F12_.backend_statistics();
+        std::cout << "# GPU Schur rows=" << dim_upd() << " separator_rows=" << dim_sep()
+          << " calls_local=" << st.schur_calls << " wall_seconds_local=" << st.schur_seconds
+          << " host_boundary_bytes_local=" << st.schur_boundary_bytes
+          << " intermediate_device_peak_bytes_local=" << st.schur_intermediate_peak_bytes
+          << " rectangular_construct_seconds_local="
+          << st.construction_seconds+F21_.backend_statistics().construction_seconds << std::endl;
+      }
       auto extract_F22 =
         [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,
             HODLR::ExtractionMeta& e) {
@@ -388,6 +460,10 @@ namespace strumpack {
           TIMER_TIME(TaskType::HSS_EXTRACT_SCHUR, 3, t_ex_schur);
           Schur.extract_add_elements(e, B);
         };
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      if (eligible(dim_upd(),dim_upd(),"F22"))
+        F22_->set_gpu_front_evaluator(prepare(dim_upd(),dim_upd(),true,true,true,&Schur,"F22"));
+#endif
       TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       // int bsize = std::min(64.0,ceil(Schur.get_stat("Rank_max")/2.0));
       // F22_->set_BACA_block(bsize);

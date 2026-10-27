@@ -92,6 +92,7 @@ namespace strumpack {
          {"hodlr_BF_entry_n15",          required_argument, 0, 18},
          {"hodlr_use_gpu",               required_argument, 0, 19},
          {"hodlr_gpu_front_max_bytes",   required_argument, 0, 20},
+         {"hodlr_gpu_rectangular",       required_argument, 0, 21},
          {"hodlr_verbose",               no_argument, 0, 'v'},
          {"hodlr_quiet",                 no_argument, 0, 'q'},
          {"help",                        no_argument, 0, 'h'},
@@ -204,6 +205,11 @@ namespace strumpack {
         } break;
         case 'v': this->set_verbose(true); break;
         case 'q': this->set_verbose(false); break;
+        case 21:
+          if (std::string(optarg)!="0" && std::string(optarg)!="1")
+            throw std::invalid_argument("--hodlr_gpu_rectangular requires 0 or 1");
+          set_gpu_rectangular(std::string(optarg)=="1");
+          break;
         case 'h': describe_options(); break;
         }
       }
@@ -256,7 +262,9 @@ namespace strumpack {
                 << BF_entry_n15() << ")" << std::endl
                 << "#   --hodlr_use_gpu 0|1|2 (0: CPU, 1: GPU, 2: GPU FP64 tensor cores) (default "
                 << use_gpu() << ")" << std::endl
-                << "#   --hodlr_gpu_front_max_bytes bytes (experimental single-rank assembly, 0: off) (default "
+                << "#   --hodlr_gpu_rectangular 0|1 (experimental GPU low-rank blocks and device Schur product) (default "
+                << gpu_rectangular() << ")" << std::endl
+                << "#   --hodlr_gpu_front_max_bytes bytes (experimental bounded assembly, 0: off) (default "
                 << gpu_front_max_bytes() << ")" << std::endl
                 << "#   --hodlr_verbose or -v (default "
                 << this->verbose() << ")" << std::endl

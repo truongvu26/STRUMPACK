@@ -32,6 +32,12 @@
 #include "misc/TaskTimer.hpp"
 #include "misc/Tools.hpp"
 #include "ButterflyMatrix.hpp"
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+#include "GPUFrontEvaluator.hpp"
+#endif
+#if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
+#include <bpack_gpu.h>
+#endif
 #include "HODLRWrapper.hpp"
 #include <stdexcept>
 
@@ -63,6 +69,7 @@ namespace strumpack {
          lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          nullptr, nullptr, nullptr);
       set_dist();
+      enable_gpu(A);
     }
 
 
@@ -250,6 +257,7 @@ namespace strumpack {
            kerquant_, ptree_, nullptr, nullptr, nullptr);
       }
       set_dist();
+      enable_gpu(A);
     }
 
     template<typename scalar_t> void ButterflyMatrix<scalar_t>::set_dist() {
@@ -271,6 +279,9 @@ namespace strumpack {
     }
 
     template<typename scalar_t> void ButterflyMatrix<scalar_t>::clear() {
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      if (gpu_front_evaluator_) gpu_front_evaluator_->finish();
+#endif
       if (stats_) HODLR_deletestats<scalar_t>(stats_);
       if (msh_) HODLR_deletemesh<scalar_t>(msh_);
       if (kerquant_) HODLR_deletekernelquant<scalar_t>(kerquant_);
@@ -278,6 +289,10 @@ namespace strumpack {
       if (lr_bf_) LRBF_deletebf<scalar_t>(lr_bf_);
       lr_bf_ = options_ = stats_ = msh_ = kerquant_ = ptree_ = nullptr;
       process_tree_.reset();
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      gpu_front_evaluator_.reset();
+#endif
+      gpu_mode_=0;
     }
 
     template<typename scalar_t> ButterflyMatrix<scalar_t>&
@@ -291,6 +306,11 @@ namespace strumpack {
       msh_ = h.msh_;           h.msh_ = nullptr;
       kerquant_ = h.kerquant_; h.kerquant_ = nullptr;
       ptree_ = h.ptree_;       h.ptree_ = nullptr;
+      gpu_mode_=h.gpu_mode_;
+      backend_stats_=h.backend_stats_;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      gpu_front_evaluator_=std::move(h.gpu_front_evaluator_);
+#endif
       Fcomm_ = h.Fcomm_;
       c_ = h.c_;
       rows_ = h.rows_;
@@ -300,6 +320,62 @@ namespace strumpack {
       std::swap(rdist_, h.rdist_);
       std::swap(cdist_, h.cdist_);
       return *this;
+    }
+
+    template<typename scalar_t> void ButterflyMatrix<scalar_t>::enable_gpu
+    (const HODLRMatrix<scalar_t>& A) {
+#if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
+      if (!A.gpu_rectangular_) return;
+      gpu_mode_=A.gpu_mode_;
+      if constexpr (std::is_same<scalar_t,double>::value)
+        d_c_bf_enable_gpu(&lr_bf_,&gpu_mode_);
+      else if constexpr (std::is_same<scalar_t,std::complex<double>>::value)
+        z_c_bf_enable_gpu(&lr_bf_,&gpu_mode_);
+#endif
+    }
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+    template<typename scalar_t> void ButterflyMatrix<scalar_t>::set_gpu_front_evaluator
+    (std::shared_ptr<GPUFrontEvaluator> state) {
+      if (!gpu_mode_ || !state || state->rows()!=rows_ || gpu_front_evaluator_)
+        throw std::invalid_argument("Invalid rectangular GPU evaluator registration");
+      state->register_rectangular(&lr_bf_);
+      gpu_front_evaluator_=std::move(state);
+    }
+    template<typename scalar_t> void ButterflyMatrix<scalar_t>::finish_gpu_evaluation() {
+      if (!gpu_front_evaluator_) return;
+      gpu_front_evaluator_->finish();
+      if (!c_->all_reduce(gpu_front_evaluator_->calls(),MPI_SUM)) throw std::runtime_error("Rectangular GPU evaluator was never called");
+      if (c_->is_root()) std::cout << "# Rectangular GPU construction rows=" << rows_ << " cols=" << cols_
+          << " evaluator_calls_local=" << gpu_front_evaluator_->calls()
+          << " upload_bytes_local=" << gpu_front_evaluator_->upload_bytes()
+          << " resident_bytes_local=" << gpu_front_evaluator_->resident_bytes() << std::endl;
+    }
+#endif
+    template<typename scalar_t> bool ButterflyMatrix<scalar_t>::schur_product
+    (Trans op,const HODLRMatrix<scalar_t>& diagonal,const ButterflyMatrix<scalar_t>& other,
+     const DenseM_t& X,DenseM_t& Y) const {
+#if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
+      if (!gpu_mode_ || !other.gpu_mode_ || !diagonal.gpu_mode_ || op==Trans::C) return false;
+      // Packed host boundaries; only the two outer arrays cross the device boundary.
+      const double started=MPI_Wtime();
+      DenseM_t packed(X),result(Y.rows(),Y.cols());
+      auto a=lr_bf_,d=diagonal.ho_bf_,z=other.lr_bf_;
+      const int nrhs=X.cols(); const char trans=char(op);
+      if constexpr (std::is_same<scalar_t,double>::value)
+        d_c_bf_gpu_schur_mult(&a,&d,&z,&trans,&nrhs,packed.data(),result.data(),&gpu_mode_);
+      else if constexpr (std::is_same<scalar_t,std::complex<double>>::value)
+        z_c_bf_gpu_schur_mult(&a,&d,&z,&trans,&nrhs,packed.data(),result.data(),&gpu_mode_);
+      else return false;
+      Y.copy(result);
+      backend_stats_.schur_seconds+=MPI_Wtime()-started;
+      ++backend_stats_.schur_calls;
+      backend_stats_.schur_boundary_bytes+=(X.rows()*X.cols()+Y.rows()*Y.cols())*sizeof(scalar_t);
+      backend_stats_.schur_intermediate_peak_bytes=std::max(backend_stats_.schur_intermediate_peak_bytes,
+          2*diagonal.lrows()*X.cols()*sizeof(scalar_t));
+      return true;
+#else
+      return false;
+#endif
     }
 
     template<typename scalar_t> void LRBF_matvec_routine
@@ -313,10 +389,12 @@ namespace strumpack {
 
     template<typename scalar_t> void
     ButterflyMatrix<scalar_t>::compress(const mult_t& Amult) {
+      const double started=MPI_Wtime();
       C2Fptr f = static_cast<void*>(const_cast<mult_t*>(&Amult));
       LRBF_construct_matvec_compute
         (lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(LRBF_matvec_routine<scalar_t>), f);
+      backend_stats_.construction_seconds+=MPI_Wtime()-started;
     }
 
     template<typename scalar_t> void
@@ -327,20 +405,30 @@ namespace strumpack {
 
     template<typename scalar_t> void
     ButterflyMatrix<scalar_t>::compress(const delem_blocks_t& Aelem) {
+      const double started=MPI_Wtime();
       BLACSGrid gloc(MPIComm(MPI_COMM_SELF), 1),
         gnull(MPIComm(MPI_COMM_NULL), 1);
       AelemCommPtrs<scalar_t> AC{&Aelem, c_, &gloc, &gnull};
       LRBF_construct_element_compute<scalar_t>
         (lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_block_evaluation<scalar_t>), &AC);
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      finish_gpu_evaluation();
+#endif
+      backend_stats_.construction_seconds+=MPI_Wtime()-started;
     }
 
     template<typename scalar_t> void
     ButterflyMatrix<scalar_t>::compress(const elem_blocks_t& Aelem) {
+      const double started=MPI_Wtime();
       C2Fptr f = static_cast<void*>(const_cast<elem_blocks_t*>(&Aelem));
       LRBF_construct_element_compute<scalar_t>
         (lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_block_evaluation_seq<scalar_t>), f);
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      finish_gpu_evaluation();
+#endif
+      backend_stats_.construction_seconds+=MPI_Wtime()-started;
     }
 
     template<typename scalar_t> void
@@ -356,12 +444,14 @@ namespace strumpack {
         Y.copy(Yc);
         return;
       }
+      const double started=MPI_Wtime();
       if (op == Trans::N)
         LRBF_mult(char(op), X.data(), Y.data(), lcols_, lrows_, X.cols(),
                   lr_bf_, options_, stats_, ptree_);
       else
         LRBF_mult(char(op), X.data(), Y.data(), lrows_, lcols_, X.cols(),
                   lr_bf_, options_, stats_, ptree_);
+      backend_stats_.multiply_seconds+=MPI_Wtime()-started;
     }
 
     template<typename scalar_t> void

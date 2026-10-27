@@ -499,6 +499,7 @@ if(TPL_ENABLE_SZ3)
   endif()
 endif()
 
+option(STRUMPACK_USE_HODLR_GPU_RECTANGULAR "Build experimental rectangular GPU and device Schur path" OFF)
 option(STRUMPACK_USE_HODLR_GPU_EVALUATOR "Build the experimental bounded GPU front evaluator" OFF)
 option(STRUMPACK_REQUIRE_BPACK_GPU "Require the ButterflyPACK HODLR GPU interface" OFF)
 
@@ -557,6 +558,41 @@ endif()
 
 if(STRUMPACK_REQUIRE_BPACK_GPU AND NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
   message(FATAL_ERROR "ButterflyPACK is missing required HODLR GPU entry points")
+endif()
+
+if(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+    message(FATAL_ERROR "Rectangular GPU path requires the ButterflyPACK GPU backend")
+  endif()
+  cmake_push_check_state(RESET)
+  if(TARGET ButterflyPACK::butterflypack)
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::butterflypack)
+  else()
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::dbutterflypack ButterflyPACK::zbutterflypack)
+  endif()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${MPI_CXX_LIBRARIES})
+  set(CMAKE_REQUIRED_INCLUDES ${MPI_CXX_INCLUDE_DIRS})
+  unset(STRUMPACK_HAVE_BPACK_GPU_RECTANGULAR CACHE)
+  check_cxx_source_compiles("
+    #include <bpack_gpu.h>
+    int main() {
+      void* a=nullptr; int mode=1,nrhs=1,flags=0; char op='N';
+      size_t bytes=0; void* image=nullptr;
+      d_c_bpack_upload_entry_image(&a,nullptr,&bytes,&image);
+      z_c_bpack_upload_entry_image(&a,nullptr,&bytes,&image);
+      d_c_bf_upload_entry_image(&a,nullptr,&bytes,&image);
+      z_c_bf_upload_entry_image(&a,nullptr,&bytes,&image);
+      d_c_bf_enable_gpu(&a,&mode); z_c_bf_enable_gpu(&a,&mode);
+      d_c_bf_set_gpu_block_evaluator(&a,nullptr,nullptr,&flags);
+      z_c_bf_set_gpu_block_evaluator(&a,nullptr,nullptr,&flags);
+      d_c_bf_gpu_schur_mult(&a,&a,&a,&op,&nrhs,nullptr,nullptr,&mode);
+      z_c_bf_gpu_schur_mult(&a,&a,&a,&op,&nrhs,nullptr,nullptr,&mode);
+      return 0;
+    }" STRUMPACK_HAVE_BPACK_GPU_RECTANGULAR)
+  cmake_pop_check_state()
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_RECTANGULAR)
+    message(FATAL_ERROR "ButterflyPACK lacks the required rectangular GPU API")
+  endif()
 endif()
 
 if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)

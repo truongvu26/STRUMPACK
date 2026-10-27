@@ -118,6 +118,20 @@ namespace strumpack {
       std::size_t nonzeros() const override { return memory() / sizeof(scalar_t); }
       std::size_t rank() const override { return get_stat("Rank_max"); }
 
+      struct BackendStatistics {
+        double construction_seconds=0.,multiply_seconds=0.,schur_seconds=0.;
+        std::size_t schur_calls=0,schur_boundary_bytes=0,schur_intermediate_peak_bytes=0;
+      };
+      const BackendStatistics& backend_statistics() const { return backend_stats_; }
+      bool gpu_backend() const { return gpu_mode_!=0; }
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      void set_gpu_front_evaluator(std::shared_ptr<GPUFrontEvaluator> state);
+#endif
+      // F21*inverse(F11)*F12 (or transpose), with device intermediates.
+      // Returns false when this front cannot use the device pipeline.
+      bool schur_product(Trans op,const HODLRMatrix<scalar_t>& diagonal,
+                         const ButterflyMatrix<scalar_t>& other,
+                         const DenseM_t& X,DenseM_t& Y) const;
       void compress(const mult_t& Amult);
       void compress(const mult_t& Amult, int rank_guess);
       void compress(const delem_blocks_t& Aelem);
@@ -173,6 +187,13 @@ namespace strumpack {
       MPI_Fint Fcomm_ = 0;        // the fortran MPI communicator
       const MPIComm* c_ = nullptr;
       int rows_ = 0, cols_ = 0, lrows_ = 0, lcols_ = 0;
+      int gpu_mode_=0;
+      mutable BackendStatistics backend_stats_;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+      std::shared_ptr<GPUFrontEvaluator> gpu_front_evaluator_;
+      void finish_gpu_evaluation();
+#endif
+      void enable_gpu(const HODLRMatrix<scalar_t>& A);
       std::vector<int> rdist_, cdist_;  // begin rows/cols of each rank
 
       void set_dist();

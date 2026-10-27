@@ -345,6 +345,8 @@ namespace strumpack {
        * with FP64 tensor-core GEMMs.
        */
       int use_gpu() const { return use_gpu_; }
+      void set_gpu_rectangular(bool enable) { gpu_rectangular_=enable; }
+      bool gpu_rectangular() const { return gpu_rectangular_; }
 
       // Zero disables the experimental single-rank front evaluator. The cap
       // bounds the complete prepared image, including dense Schur data.
@@ -382,6 +384,7 @@ namespace strumpack {
       bool less_adapt_ = true;
       int BF_entry_n15_ = 0;
       int use_gpu_ = 0;
+      bool gpu_rectangular_ = false;
       std::size_t gpu_front_max_bytes_ = 0;
 
       void set_defaults() {

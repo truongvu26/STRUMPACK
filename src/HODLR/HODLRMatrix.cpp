@@ -377,6 +377,15 @@ namespace strumpack {
           throw std::invalid_argument("GPU front evaluator requires GPU mode, lr_leaf 4/5 and BF_entry_n15=0");
       }
       gpu_mode_ = opts.use_gpu();
+      gpu_rectangular_=opts.gpu_rectangular();
+      if (gpu_rectangular_) {
+#if !defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
+        throw std::invalid_argument("Rectangular GPU path was not enabled at configure time");
+#else
+        if (!gpu_mode_ || opts.butterfly_levels()!=0)
+          throw std::invalid_argument("Rectangular GPU requires HODLR GPU mode and butterfly levels zero");
+#endif
+      }
       backend_verbose_ = opts.verbose();
       if (opts.use_gpu()) {
         if (opts.compression_algorithm() != CompressionAlgorithm::ELEMENT_EXTRACTION)
@@ -496,6 +505,7 @@ namespace strumpack {
       if (this == &h) return *this;
       clear();
       gpu_mode_ = h.gpu_mode_;
+      gpu_rectangular_=h.gpu_rectangular_;
       backend_verbose_ = h.backend_verbose_;
       backend_stats_ = h.backend_stats_;
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
@@ -536,6 +546,7 @@ namespace strumpack {
                 << " evaluator_calls=" << backend_stats_.evaluator_calls
                 << " evaluator_upload_bytes_local=" << backend_stats_.evaluator_upload_bytes
                 << " evaluator_scratch_peak_bytes_local=" << backend_stats_.evaluator_scratch_peak_bytes
+                << " evaluator_resident_bytes_local=" << backend_stats_.evaluator_resident_bytes
                 << " rhs_boundary_bytes_local=" << backend_stats_.rhs_boundary_bytes;
       if (gpu_mode_) {
         std::cout << " device_factor_bytes_local=" << get_stat("Mem_Factor")*1024000.;
@@ -585,10 +596,10 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     template<typename scalar_t> void HODLRMatrix<scalar_t>::set_gpu_front_evaluator
     (std::shared_ptr<GPUFrontEvaluator> state) {
-      if (!gpu_mode_ || !state || c_->size()!=1 || state->rows()!=rows_ ||
+      if (!gpu_mode_ || !state || state->rows()!=rows_ ||
           state->complex_values()!=std::is_same<scalar_t,std::complex<double>>::value ||
           backend_stats_.construction_seconds || gpu_front_evaluator_)
-        throw std::invalid_argument("GPU front evaluator needs an uncompressed matching single-rank GPU matrix");
+        throw std::invalid_argument("GPU front evaluator needs an uncompressed matching GPU matrix");
       state->register_matrix(&ho_bf_);
       gpu_front_evaluator_ = std::move(state);
     }
@@ -598,7 +609,8 @@ namespace strumpack {
       backend_stats_.evaluator_calls = gpu_front_evaluator_->calls();
       backend_stats_.evaluator_upload_bytes = gpu_front_evaluator_->upload_bytes();
       backend_stats_.evaluator_scratch_peak_bytes = gpu_front_evaluator_->scratch_peak_bytes();
-      if (!backend_stats_.evaluator_calls)
+      backend_stats_.evaluator_resident_bytes = gpu_front_evaluator_->resident_bytes();
+      if (!c_->all_reduce(backend_stats_.evaluator_calls,MPI_SUM))
         throw std::runtime_error("Registered GPU front evaluator was never called");
     }
 #endif

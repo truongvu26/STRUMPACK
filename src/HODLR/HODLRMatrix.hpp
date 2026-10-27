@@ -61,6 +61,7 @@ namespace strumpack {
       std::size_t rhs_boundary_bytes = 0;
       std::size_t evaluator_calls = 0, evaluator_upload_bytes = 0;
       std::size_t evaluator_scratch_peak_bytes = 0;
+    std::size_t evaluator_resident_bytes = 0;
     };
 
     struct ExtractionMeta {
@@ -615,6 +616,7 @@ namespace strumpack {
       void finish_gpu_front_evaluation();
 #endif
       int gpu_mode_ = 0;
+      bool gpu_rectangular_ = false;
       bool backend_verbose_ = false;
       mutable BackendStatistics backend_stats_;
       void report_backend(const char* operation, double seconds) const;
