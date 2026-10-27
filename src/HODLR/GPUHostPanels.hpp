@@ -5,6 +5,7 @@
 #if defined(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
 #include <bpack_gpu.h>
 #include <iostream>
+#include <cstdlib>
 #include <algorithm>
 #include <type_traits>
 namespace strumpack { namespace HODLR {
@@ -37,8 +38,8 @@ public:
     stats.host_panel_prepare_seconds+=s.preparation_seconds;
     stats.host_panel_metadata_seconds+=s.metadata_seconds;
     stats.host_panel_upload_seconds+=s.upload_seconds;
-    if (comm.is_root()) std::cout << "# GPU host panels kind=" << (rectangular_?"BF":"HODLR")
-      << " rows=" << rows_ << " cols=" << cols << " calls_local=" << s.calls
+    if (comm.is_root() || std::getenv("STRUMPACK_HODLR_STAGE_FILE")) std::cout << "# GPU host panels kind=" << (rectangular_?"BF":"HODLR")
+      << " rows=" << rows_ << " cols=" << cols << " procs=" << comm.size() << " front_rank=" << comm.rank() << " calls_local=" << s.calls
       << " windows_local=" << s.windows << " upload_bytes_local=" << s.upload_bytes
       << " staging_peak_bytes_local=" << s.peak_staging_bytes
       << " host_prepare_seconds_local=" << s.preparation_seconds

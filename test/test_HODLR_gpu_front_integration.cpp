@@ -29,6 +29,7 @@ template<typename T> void run(const MPIComm& comm,bool panels=false,std::size_t 
   }
   HODLR::HODLROptions<T> opts;
   opts.set_use_gpu(1); opts.set_leaf_size(8); opts.set_rel_tol(1.e-10);
+  if (panels) opts.set_verbose(false);
   opts.set_knn_hodlrbf(0); opts.set_gpu_host_panels(panels); opts.set_gpu_panel_max_bytes(budget);
   structured::ClusterTree tree(n); tree.refine(8);
   HODLR::HODLRMatrix<T> source(comm,tree,opts), matrix;
@@ -99,7 +100,7 @@ template<typename T> T front_entry(int i,int j) {
 }
 template<typename T> void distributed(const MPIComm& comm,std::size_t budget) {
   const int n=96;
-  HODLR::HODLROptions<T> opts; opts.set_use_gpu(1); opts.set_gpu_host_panels(true);
+  HODLR::HODLROptions<T> opts; opts.set_verbose(false); opts.set_use_gpu(1); opts.set_gpu_host_panels(true);
   opts.set_gpu_panel_max_bytes(budget); opts.set_leaf_size(8); opts.set_knn_hodlrbf(0); opts.set_rel_tol(1.e-10);
   structured::ClusterTree tree(n); tree.refine(8);
   HODLR::HODLRMatrix<T> original(comm,tree,opts),matrix(std::move(original));

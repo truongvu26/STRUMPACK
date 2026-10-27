@@ -277,7 +277,7 @@ namespace strumpack {
                 << use_gpu() << ")" << std::endl
                 << "#   --hodlr_gpu_rectangular 0|1 (experimental GPU low-rank blocks and device Schur product) (default "
                 << gpu_rectangular() << ")" << std::endl
-                << "#   --hodlr_gpu_host_panels 0|1 (GPU BACA with bounded collective host preparation) (default "
+                << "#   --hodlr_gpu_host_panels 0|1 (GPU BACA with bounded host preparation; requires hodlr_quiet) (default "
                 << gpu_host_panels() << ")" << std::endl
                 << "#   --hodlr_gpu_panel_max_bytes bytes (per-rank host panel staging budget) (default "
                 << gpu_panel_max_bytes() << ")" << std::endl

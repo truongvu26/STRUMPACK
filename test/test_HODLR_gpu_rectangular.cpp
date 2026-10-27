@@ -21,6 +21,7 @@ template<typename T> T vector_value(int i,int j) { return value<T>(.01*(i+1)*(j+
 template<typename T> void check(const MPIComm& comm,bool panels=false,std::size_t budget=1024) {
   constexpr int n=48,u=64;
   HODLR::HODLROptions<T> opts; opts.set_use_gpu(1); opts.set_gpu_rectangular(true);
+  if (panels) opts.set_verbose(false);
   opts.set_gpu_host_panels(panels); opts.set_gpu_panel_max_bytes(budget);
   opts.set_leaf_size(8); opts.set_rel_tol(1.e-10); opts.set_knn_hodlrbf(0); opts.set_knn_lrbf(0);
   structured::ClusterTree tree(n),update_tree(u); tree.refine(8); update_tree.refine(8);
