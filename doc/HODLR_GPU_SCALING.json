@@ -848,5 +848,17 @@
     "Native ButterflyPACK verbose checks are disabled for these timings.",
     "All cases use the identical Release executable, host-staged MPI and zero butterfly levels.",
     "The resumed 150^3 CPU baseline originated on all-40-GB nodes; its GPU cases use a mixed 40/80-GB allocation. Treat their timings as preliminary, not a controlled speed comparison."
-  ]
+  ],
+  "retry_200": {
+    "job": "60382070",
+    "status": "QUEUED",
+    "mpi_ranks": 64,
+    "nodes": 8,
+    "gpus": 32,
+    "ranks_per_gpu": 2,
+    "rhs": 3,
+    "reason": "Reduce per-rank front/process-tree count after MPICH communicator exhaustion at 32 ranks.",
+    "executable_sha256": "6a874a3dba67cb9752ca90f5da75435f522cdce03070a60bfcabc3ade67ac6db",
+    "numerical_results": "Not available yet; original 32-rank failure remains FAIL."
+  }
 }

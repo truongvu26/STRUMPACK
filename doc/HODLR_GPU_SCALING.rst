@@ -101,6 +101,28 @@ unrelated builds in the shared worktree cannot change later trials. The
 source build path remains in recorded command arguments, and the snapshot
 checksum and rank-wrapper copy document the actual launch selection.
 
+200^3 failure and retry
+-----------------------
+
+Job 60353138 completed both GPU 150^3 cases successfully. The 200^3 CPU
+case failed on rank 31 after exhausting MPICH communicator contexts:
+"Too many communicators (0/4096 free on this process)" during MPI_Comm_create.
+The allocation later reached its four-hour limit while the failed step was
+being terminated. No 200^3 hybrid or evaluator GPU case ran. The historical
+32-rank numerical record is FAIL, not RUNNING or PASS.
+
+The raw evidence is profile_results/60353138/n200_cpu_r1.rank31.log. The
+failure predates GPU computation in that case and is distinct from NaNs or
+an evaluator accuracy failure. The report now records the communicator
+error instead of only the final SIGTERM-related exit code 143.
+
+Retry job 60382070 is queued with 64 MPI ranks over eight nodes and two
+ranks per GPU. It uses the identical frozen executable and numerical
+parameters; the larger rank count is intended to reduce the front/process-tree
+load on each MPI rank. This is a new layout, so its times must be labelled
+separately from the original 32-rank comparison. Solver steps now request
+immediate cleanup on a failed rank and have an explicit timeout guard.
+
 .. BEGIN GENERATED SCALING RESULTS
 
 Measured results
