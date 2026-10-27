@@ -26,6 +26,7 @@ public:
   virtual ~GPUFrontEvaluator() = default;
   virtual bool complex_values() const = 0;
   virtual int rows() const = 0;
+  virtual int cols() const = 0;
   virtual void register_matrix(void** matrix) = 0;
   virtual void register_rectangular(void** matrix) = 0;
   // Fence queued reads before prepared inputs or child work can be released.

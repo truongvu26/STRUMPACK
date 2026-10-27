@@ -336,7 +336,8 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     template<typename scalar_t> void ButterflyMatrix<scalar_t>::set_gpu_front_evaluator
     (std::shared_ptr<GPUFrontEvaluator> state) {
-      if (!gpu_mode_ || !state || state->rows()!=rows_ || gpu_front_evaluator_)
+      if (!gpu_mode_ || !state || state->rows()!=rows_ || state->cols()!=cols_ ||
+          state->complex_values()!=std::is_same<scalar_t,std::complex<double>>::value || gpu_front_evaluator_)
         throw std::invalid_argument("Invalid rectangular GPU evaluator registration");
       state->register_rectangular(&lr_bf_);
       gpu_front_evaluator_=std::move(state);

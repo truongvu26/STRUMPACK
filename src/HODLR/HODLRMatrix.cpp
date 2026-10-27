@@ -596,7 +596,7 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     template<typename scalar_t> void HODLRMatrix<scalar_t>::set_gpu_front_evaluator
     (std::shared_ptr<GPUFrontEvaluator> state) {
-      if (!gpu_mode_ || !state || state->rows()!=rows_ ||
+      if (!gpu_mode_ || !state || state->rows()!=rows_ || state->cols()!=rows_ ||
           state->complex_values()!=std::is_same<scalar_t,std::complex<double>>::value ||
           backend_stats_.construction_seconds || gpu_front_evaluator_)
         throw std::invalid_argument("GPU front evaluator needs an uncompressed matching GPU matrix");

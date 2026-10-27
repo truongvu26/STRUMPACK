@@ -74,6 +74,11 @@ Resident uploads occur before compress(), so they are included in the
 sparse factor time and preparation interval, not the native construction
 API interval.
 Per-front GPU Schur reports expose the executed call count and payloads.
+Compound work is recorded in ButterflyMatrix's Schur counters; it bypasses
+the individual HODLRMatrix inverse counters and legacy FLOP accounting.
+Reported Schur boundary bytes cover outer RHS payload only. Resident-byte
+report totals cover printed rectangular images, not complete solver device
+memory or all replicas. Use whole-solver wall times for speed comparisons.
 The temporary Schur matrix still uses the existing host randomized
 compression, with its operator applications on the device.
 
@@ -137,3 +142,56 @@ GPU construction on one allocation with four ranks sharing two GPUs. Its
 40^3 validation. Run test/profile_hodlr_rectangular_perlmutter.sbatch and
 analyze with test/analyze_hodlr_rectangular_profile.py. Timings from one
 trial are not used to claim a performance improvement.
+
+The controlled profiling run is job 60390292. Its twelve-case plan is still
+running; incomplete timing evidence is not a passing profiling record.
+
+Repeated 60^3 comparison
+------------------------
+
+Job 60390292 PASSED (9m18s) with three fresh-process trials per variant,
+four MPI ranks sharing two GPUs, three RHS, 113 HODLR fronts and relative
+compression tolerance 1e-5. All twelve trials pass the numerical criteria
+and use six refinement iterations. The same uninstrumented Release
+executable and one allocation were used for every variant, alternating order.
+
+.. list-table:: Median factor / solve / total seconds
+   :header-rows: 1
+
+   * - Path
+     - Factor
+     - Solve
+     - Total
+   * - CPU
+     - 44.623
+     - 0.469
+     - 45.095
+   * - Original hybrid
+     - 45.846
+     - 0.680
+     - 46.523
+   * - GPU rectangular multiplies and device Schur
+     - 45.292
+     - 0.911
+     - 46.202
+   * - Plus bounded GPU construction
+     - 30.274
+     - 0.917
+     - 31.190
+
+The constructed path reduces median factor-plus-solve time by 33.0 percent
+relative to the original hybrid and 30.8 percent relative to CPU in this
+layout. Its observed total-time range is 31.045--32.577 s; the hybrid range
+is 45.643--46.807 s. Rectangular multiplies alone give little end-to-end
+improvement, and solve times increase. The useful improvement here comes
+with device construction and resident entry images. This is a small,
+controlled regime, not evidence of a 100^3--200^3 speedup or an asymptotic
+crossover. All constructed trials report 224 rectangular GPU constructions
+and nine collective prepared images, with finite relative errors below
+1.74e-9 and scaled residuals below 2.16e-8.
+
+The timing executable predates only the final registration shape/type
+validators; its numerical implementation is unchanged. Its SHA256 and
+source/dependency commits are recorded separately in the JSON. Final-code
+sparse validation is rerun after those guards. Compute Sanitizer covers
+the evaluator device-contract test, not the full native sparse solver.

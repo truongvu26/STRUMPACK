@@ -31,6 +31,24 @@ template<typename T> void check(const MPIComm& comm) {
   };
   diagonal.compress(diagonal_entries); diagonal.factor();
   HODLR::ButterflyMatrix<T> f12(diagonal,update),f21(update,diagonal);
+  // Reject invalid callback contracts before any registration/upload can
+  // expose an undersized or differently typed output buffer to a GPU kernel.
+  {
+    HODLR::GPUFrontData<T> bad;
+    bad.rows=n; bad.cols=u-1; bad.ptr.resize(n+1,0); bad.contribution.resize(n*(u-1));
+    bool rejected=false;
+    try { f12.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(bad))); }
+    catch(const std::invalid_argument&) { rejected=true; }
+    if (!rejected) throw std::runtime_error("Wrong rectangular evaluator shape accepted");
+  }
+  if constexpr (std::is_same<T,double>::value) {
+    HODLR::GPUFrontData<std::complex<double>> bad;
+    bad.rows=n; bad.cols=u; bad.ptr.resize(n+1,0); bad.contribution.resize(n*u);
+    bool rejected=false;
+    try { f12.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(bad))); }
+    catch(const std::invalid_argument&) { rejected=true; }
+    if (!rejected) throw std::runtime_error("Wrong rectangular evaluator scalar type accepted");
+  }
   for (bool reverse:{false,true}) {
     auto& matrix=reverse?f21:f12;
     HODLR::GPUFrontData<T> data;

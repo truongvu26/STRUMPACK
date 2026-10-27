@@ -28,7 +28,8 @@
     "Butterfly levels zero; OMP_NUM_THREADS=1",
     "Distributed entry images are host-prepared, replicated and bounded per block",
     "Large images retain host compression; no unbounded tile service",
-    "CPU randomized temporary Schur compression remains; its N/T/C operator applications retain device intermediates"
+    "CPU randomized temporary Schur compression remains; N/T/C operator applications use device intermediates",
+    "Compound Schur work is recorded in ButterflyMatrix counters; individual HODLRMatrix inverse counters and legacy FLOP accounting exclude it"
   ],
   "validation_60387091": {
     "status": "PASS",
@@ -135,7 +136,7 @@
       "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
     ]
   },
-  "validated_butterflypack_commit": "69963074a92b8fe1d96178dbbe93fed2b45db667",
+  "validated_butterflypack_commit": "8285e65abc278ddca6f55fb92203295ad79e9535",
   "cancelled_before_allocation": [
     60389146,
     60389147
@@ -263,7 +264,8 @@
     "scoped_MPI_SELF_with_other_ranks_waiting": "PASS",
     "device_contract": "PASS",
     "compute_sanitizer_memcheck_errors": 0,
-    "square_evaluator_regression": "PASS"
+    "square_evaluator_regression": "PASS",
+    "compute_sanitizer_scope": "GPU front evaluator device-contract test"
   },
   "executable_sha256": {
     "test_HODLR_gpu_rectangular": "43d7d867367f09d026fbbf9fab08cbdb8705557729ba1dae07684e099f8f4437",
@@ -275,12 +277,524 @@
     "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so.5.0.0"
   ],
   "profile": {
-    "job": 60390292,
-    "status": "RUNNING",
+    "status": "PASS",
+    "job": "60390292",
     "grid": 60,
     "rhs": 3,
     "ranks": 4,
     "gpus": 2,
-    "repetitions_per_variant": 3
-  }
+    "ranks_per_gpu": 2,
+    "cap_bytes": 268435456,
+    "hodlr_relative_tolerance": 1e-05,
+    "source_commit": "a450b185715252b8aa49535ecaa8289499923229",
+    "butterflypack_commit": "8285e65abc278ddca6f55fb92203295ad79e9535",
+    "cases": [
+      {
+        "label": "cpu_r1",
+        "variant": "cpu",
+        "repeat": 1,
+        "status": "PASS",
+        "relative_error": 1.71992e-09,
+        "scaled_residual": 2.13272e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 44.6186,
+        "solve_seconds": 0.468955,
+        "total_seconds": 45.087555,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "hybrid_r1",
+        "variant": "hybrid",
+        "repeat": 1,
+        "status": "PASS",
+        "relative_error": 1.67193e-09,
+        "scaled_residual": 2.00884e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 46.1213,
+        "solve_seconds": 0.686124,
+        "total_seconds": 46.807424,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "rectangular_r1",
+        "variant": "rectangular",
+        "repeat": 1,
+        "status": "PASS",
+        "relative_error": 1.75868e-09,
+        "scaled_residual": 2.1693e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 45.1879,
+        "solve_seconds": 0.908745,
+        "total_seconds": 46.096645,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "constructed_r1",
+        "variant": "constructed",
+        "repeat": 1,
+        "status": "PASS",
+        "relative_error": 1.71069e-09,
+        "scaled_residual": 2.12276e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 31.6767,
+        "solve_seconds": 0.90064,
+        "total_seconds": 32.57734,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 224,
+        "collective_prepared_images": 9
+      },
+      {
+        "label": "cpu_r2",
+        "variant": "cpu",
+        "repeat": 2,
+        "status": "PASS",
+        "relative_error": 1.74711e-09,
+        "scaled_residual": 2.12938e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 44.6229,
+        "solve_seconds": 0.472551,
+        "total_seconds": 45.095451000000004,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "hybrid_r2",
+        "variant": "hybrid",
+        "repeat": 2,
+        "status": "PASS",
+        "relative_error": 1.73749e-09,
+        "scaled_residual": 2.14786e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 44.9622,
+        "solve_seconds": 0.680374,
+        "total_seconds": 45.642574,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "rectangular_r2",
+        "variant": "rectangular",
+        "repeat": 2,
+        "status": "PASS",
+        "relative_error": 1.74232e-09,
+        "scaled_residual": 2.15114e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 45.3433,
+        "solve_seconds": 0.916042,
+        "total_seconds": 46.259342,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "constructed_r2",
+        "variant": "constructed",
+        "repeat": 2,
+        "status": "PASS",
+        "relative_error": 1.70789e-09,
+        "scaled_residual": 2.15038e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 30.1259,
+        "solve_seconds": 0.91932,
+        "total_seconds": 31.04522,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 224,
+        "collective_prepared_images": 9
+      },
+      {
+        "label": "cpu_r3",
+        "variant": "cpu",
+        "repeat": 3,
+        "status": "PASS",
+        "relative_error": 1.29328e-09,
+        "scaled_residual": 1.66341e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 44.8103,
+        "solve_seconds": 0.46498,
+        "total_seconds": 45.275279999999995,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "hybrid_r3",
+        "variant": "hybrid",
+        "repeat": 3,
+        "status": "PASS",
+        "relative_error": 1.744e-09,
+        "scaled_residual": 2.15947e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 45.8457,
+        "solve_seconds": 0.677095,
+        "total_seconds": 46.522795,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "rectangular_r3",
+        "variant": "rectangular",
+        "repeat": 3,
+        "status": "PASS",
+        "relative_error": 1.79017e-09,
+        "scaled_residual": 2.23412e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 45.2915,
+        "solve_seconds": 0.910903,
+        "total_seconds": 46.202403,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0
+      },
+      {
+        "label": "constructed_r3",
+        "variant": "constructed",
+        "repeat": 3,
+        "status": "PASS",
+        "relative_error": 1.73211e-09,
+        "scaled_residual": 2.13804e-08,
+        "hodlr_fronts": 113,
+        "refinement_iterations": 6,
+        "factor_seconds": 30.2736,
+        "solve_seconds": 0.916558,
+        "total_seconds": 31.190157999999997,
+        "gpu_bindings": {
+          "GPU-cf945bf6-6b04-e6f3-f3eb-939bbf16f1be": 2,
+          "GPU-e57a811e-f329-750c-e86d-3841ad0fdb57": 2
+        },
+        "device_schur_calls_reported": 402,
+        "rectangular_gpu_construction_reports": 224,
+        "collective_prepared_images": 9
+      }
+    ],
+    "summaries": [
+      {
+        "variant": "cpu",
+        "trials": 3,
+        "refinement_iterations": [
+          6,
+          6,
+          6
+        ],
+        "factor_seconds": {
+          "median": 44.6229,
+          "minimum": 44.6186,
+          "maximum": 44.8103
+        },
+        "solve_seconds": {
+          "median": 0.468955,
+          "minimum": 0.46498,
+          "maximum": 0.472551
+        },
+        "total_seconds": {
+          "median": 45.095451000000004,
+          "minimum": 45.087555,
+          "maximum": 45.275279999999995
+        }
+      },
+      {
+        "variant": "hybrid",
+        "trials": 3,
+        "refinement_iterations": [
+          6,
+          6,
+          6
+        ],
+        "factor_seconds": {
+          "median": 45.8457,
+          "minimum": 44.9622,
+          "maximum": 46.1213
+        },
+        "solve_seconds": {
+          "median": 0.680374,
+          "minimum": 0.677095,
+          "maximum": 0.686124
+        },
+        "total_seconds": {
+          "median": 46.522795,
+          "minimum": 45.642574,
+          "maximum": 46.807424
+        }
+      },
+      {
+        "variant": "rectangular",
+        "trials": 3,
+        "refinement_iterations": [
+          6,
+          6,
+          6
+        ],
+        "factor_seconds": {
+          "median": 45.2915,
+          "minimum": 45.1879,
+          "maximum": 45.3433
+        },
+        "solve_seconds": {
+          "median": 0.910903,
+          "minimum": 0.908745,
+          "maximum": 0.916042
+        },
+        "total_seconds": {
+          "median": 46.202403,
+          "minimum": 46.096645,
+          "maximum": 46.259342
+        }
+      },
+      {
+        "variant": "constructed",
+        "trials": 3,
+        "refinement_iterations": [
+          6,
+          6,
+          6
+        ],
+        "factor_seconds": {
+          "median": 30.2736,
+          "minimum": 30.1259,
+          "maximum": 31.6767
+        },
+        "solve_seconds": {
+          "median": 0.916558,
+          "minimum": 0.90064,
+          "maximum": 0.91932
+        },
+        "total_seconds": {
+          "median": 31.190157999999997,
+          "minimum": 31.04522,
+          "maximum": 32.57734
+        }
+      }
+    ],
+    "failures": [],
+    "notes": [
+      "Three alternating fresh-process trials per variant, one allocation, identical Release executable.",
+      "Task timers/native verbose checks disabled; API counters and preparation messages remain enabled.",
+      "Adaptive compression samples and refinement work vary; ranges are observations, not confidence intervals.",
+      "Constructed variant uses bounded replicated host entry preparation and resident device images.",
+      "Factor/solve exclude initial sparse matrix creation and distribution."
+    ],
+    "executable_sha256": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8",
+    "scheduler_state": "COMPLETED",
+    "elapsed": "00:09:18"
+  },
+  "validation_job": 60390291,
+  "strumpack_implementation_commit": "a450b185715252b8aa49535ecaa8289499923229",
+  "validation_60390291": {
+    "status": "PASS",
+    "job": "60390291",
+    "grid": 40,
+    "rhs": 3,
+    "cases": [
+      {
+        "label": "hybrid_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 6.86827e-11,
+        "scaled_residual": 2.79866e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 18.0613,
+        "solve_seconds": 0.354215,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 7.86804e-11,
+        "scaled_residual": 3.06778e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 18.1429,
+        "solve_seconds": 0.317209,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_1",
+        "status": "PASS",
+        "ranks": 1,
+        "relative_error": 1.3654e-10,
+        "scaled_residual": 7.03759e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 12.6251,
+        "solve_seconds": 0.315951,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 116508560,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 159394560
+      },
+      {
+        "label": "hybrid_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 5.4991e-11,
+        "scaled_residual": 4.30799e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.47514,
+        "solve_seconds": 0.0824708,
+        "device_schur_calls": 0,
+        "device_schur_boundary_bytes": 0,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "rectangular_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 1.56091e-11,
+        "scaled_residual": 1.39893e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.52071,
+        "solve_seconds": 0.221806,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 0,
+        "collective_prepared_images": 0,
+        "resident_entry_bytes_reports": 0
+      },
+      {
+        "label": "constructed_4",
+        "status": "PASS",
+        "ranks": 4,
+        "relative_error": 2.64188e-11,
+        "scaled_residual": 3.41766e-09,
+        "hodlr_fronts": 24,
+        "factor_seconds": 6.69763,
+        "solve_seconds": 0.223427,
+        "device_schur_calls": 69,
+        "device_schur_boundary_bytes": 109878160,
+        "rectangular_gpu_construction_reports": 46,
+        "collective_prepared_images": 9,
+        "resident_entry_bytes_reports": 159394560
+      }
+    ],
+    "failures": [],
+    "notes": [
+      "One trial per variant/layout; preliminary timings, no speedup claim.",
+      "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
+      "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
+      "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
+    ]
+  },
+  "validation_checks": {
+    "real_complex_rectangular_baca_and_ntc_multiply": "PASS",
+    "real_complex_ntc_device_schur": "PASS",
+    "padded_one_and_three_rhs": "PASS",
+    "moved_ownership": "PASS",
+    "mpi_ranks": [
+      1,
+      3,
+      4
+    ],
+    "subset_front_communicator_with_other_ranks_waiting": "PASS",
+    "device_contract": "PASS",
+    "compute_sanitizer_errors": 0,
+    "square_evaluator_integration": "PASS",
+    "sparse_layouts": [
+      1,
+      4
+    ],
+    "sparse_grid": 40,
+    "sparse_rhs": 3,
+    "hodlr_fronts_per_case": 24,
+    "completed_sparse_cases": 6
+  },
+  "validation_scheduler_state": "COMPLETED",
+  "validation_executable_hashes": {
+    "test_HODLR_gpu_rectangular": "43d7d867367f09d026fbbf9fab08cbdb8705557729ba1dae07684e099f8f4437",
+    "testPoisson3dMPIDist": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8"
+  },
+  "validation_butterflypack_library_hashes": {
+    "libbutterflypack.so": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+    "libbutterflypack.so.5": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+    "libbutterflypack.so.5.0.0": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f"
+  },
+  "profiling": {
+    "job": 60390292,
+    "status": "RUNNING",
+    "grid": 60,
+    "ranks": 4,
+    "gpus": 2,
+    "rhs": 3,
+    "repeats_per_variant": 3,
+    "variants": [
+      "cpu",
+      "hybrid",
+      "rectangular",
+      "constructed"
+    ],
+    "cap_bytes": 268435456
+  },
+  "registration_guard_checks": "PENDING: shape/type mismatch rejection added after timing executable was frozen"
 }

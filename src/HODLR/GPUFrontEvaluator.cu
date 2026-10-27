@@ -75,6 +75,7 @@ public:
   ~Evaluator() override { finish(); if (done_) checked(cudaEventDestroy(done_)); }
   bool complex_values() const override { return !std::is_same<T,double>::value; }
   int rows() const override { return data_.rows; }
+  int cols() const override { return data_.cols; }
   std::size_t calls() const override { return calls_; }
   std::size_t upload_bytes() const override { return uploads_; }
   std::size_t scratch_peak_bytes() const override { return peak_; }
