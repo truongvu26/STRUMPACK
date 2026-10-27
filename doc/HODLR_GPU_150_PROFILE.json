@@ -1,5 +1,5 @@
 {
-  "status": "PENDING",
+  "status": "IN_PROGRESS_AFTER_RESOURCE_FAILURE",
   "preflight_job": 60395917,
   "profile_job": 60397796,
   "branch": "perf/hodlr-gpu-150-profile",
@@ -39,7 +39,8 @@
     "Executables and ButterflyPACK shared library are immutable snapshots; LD_PRELOAD overrides executable DT_RPATH.",
     "Raw logs, job folders, traces and build directories remain locally ignored.",
     "The short check produced 60,475 and 56,997 CUDA kernels on traced ranks zero and three, with valid launch-scope attribution; these are preflight observations, not 150-cubed results.",
-    "Quiet GPU and optional CPU control share one allocation; stage and trace diagnostics use separate shorter allocations and are not performance samples."
+    "Quiet GPU and optional CPU control share one allocation; stage and trace diagnostics use separate shorter allocations and are not performance samples.",
+    "Both 150-cubed attempts failed reproducibly during cuSOLVER handle creation; completed-front measurements are partial and are not full-run profiling results. Resource isolation is in progress."
   ],
   "preflight_wall_time_minutes": 5,
   "preflight_validation": "PASS after offline reporting recovery",
@@ -72,5 +73,37 @@
     "timing_gpu_and_optional_cpu": "profile_results/60397796/stage_summary.json",
     "stage_diagnostic": "profile_results/60397798/stage_summary.json",
     "cuda_nvtx_trace": "profile_results/60397800/stage_summary.json"
-  }
+  },
+  "failed_attempts": [
+    {
+      "job": 60397796,
+      "case": "gpu",
+      "status": "FAIL",
+      "elapsed_seconds": 77,
+      "reason": "cusolverDnCreate failed with status 7 during d_c_bpack_hodlr_gpu_warm_up",
+      "first_failing_ranks": [
+        0,
+        1
+      ],
+      "factorization_completed": false
+    },
+    {
+      "job": 60397798,
+      "case": "diagnostic",
+      "status": "FAIL",
+      "elapsed_seconds": 78,
+      "reason": "cusolverDnCreate failed with status 7 during d_c_bpack_hodlr_gpu_warm_up",
+      "first_failing_ranks": [
+        0,
+        1
+      ],
+      "factorization_completed": false
+    }
+  ],
+  "cancelled_trace_job": {
+    "job": 60397800,
+    "status": "CANCELLED_WHILE_PENDING",
+    "reason": "Diagnostic prerequisite failed; no trace allocation consumed"
+  },
+  "resource_probe_job": 60398989
 }
