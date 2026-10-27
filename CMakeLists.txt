@@ -499,6 +499,7 @@ if(TPL_ENABLE_SZ3)
   endif()
 endif()
 
+option(STRUMPACK_HODLR_STAGE_PROFILE "Enable diagnostic CSV/NVTX HODLR stage scopes" OFF)
 option(STRUMPACK_USE_HODLR_GPU_RECTANGULAR "Build experimental rectangular GPU and device Schur path" OFF)
 option(STRUMPACK_USE_HODLR_GPU_EVALUATOR "Build the experimental bounded GPU front evaluator" OFF)
 option(STRUMPACK_REQUIRE_BPACK_GPU "Require the ButterflyPACK HODLR GPU interface" OFF)
@@ -687,6 +688,17 @@ target_sources(strumpack
   PRIVATE ${PROJECT_BINARY_DIR}/StrumpackFortranCInterface.h)
 
 target_compile_features(strumpack PUBLIC cxx_std_17)
+if(STRUMPACK_HODLR_STAGE_PROFILE)
+  find_path(STRUMPACK_NVTX_INCLUDE_DIR nvtx3/nvToolsExt.h
+    HINTS "$ENV{CUDA_HOME}/include" "$ENV{CUDATOOLKIT_HOME}/include")
+  if(NOT STRUMPACK_NVTX_INCLUDE_DIR)
+    message(FATAL_ERROR "Diagnostic HODLR profiling requires NVTX3 headers")
+  endif()
+  target_compile_definitions(strumpack PRIVATE STRUMPACK_HODLR_STAGE_PROFILE)
+  target_include_directories(strumpack PRIVATE ${STRUMPACK_NVTX_INCLUDE_DIR})
+  target_link_libraries(strumpack PRIVATE ${CMAKE_DL_LIBS})
+endif()
+
 set_target_properties(strumpack PROPERTIES CXX_EXTENSIONS OFF)
 
 target_compile_options(strumpack PRIVATE

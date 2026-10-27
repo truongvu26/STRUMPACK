@@ -30,6 +30,7 @@
 #include "StrumpackSparseSolverMPIDist.hpp"
 #include "sparse/CSRMatrix.hpp"
 #include "misc/TaskTimer.hpp"
+#include "HODLR/StageProfile.hpp"
 
 typedef double scalar;
 //typedef int64_t integer;
@@ -114,9 +115,10 @@ int main(int argc, char* argv[]) {
 #endif
 
     spss.set_matrix(Adist);
-    spss.reorder(n, n, n);
-    spss.factor();
-    spss.solve(b, x);
+    int profile_ranks=1; MPI_Comm_size(MPI_COMM_WORLD,&profile_ranks);
+    { HODLR_STAGE_SCOPE(p_reorder,"solver.reorder",-1,n*n*n,nrhs,profile_ranks,rank,0); spss.reorder(n,n,n); }
+    { HODLR_STAGE_SCOPE(p_factor,"solver.factor",-1,n*n*n,nrhs,profile_ranks,rank,0); spss.factor(); }
+    { HODLR_STAGE_SCOPE(p_solve,"solver.solve",-1,n*n*n,nrhs,profile_ranks,rank,0); spss.solve(b,x); }
 
     auto scaled_res = Adist.max_scaled_residual(x, b);
     x.scaled_add(-1., x_exact);

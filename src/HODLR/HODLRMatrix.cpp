@@ -32,6 +32,7 @@
 #include "misc/TaskTimer.hpp"
 #include "clustering/Clustering.hpp"
 #include "HODLRMatrix.hpp"
+#include "StageProfile.hpp"
 #include "HODLRWrapper.hpp"
 #include <stdexcept>
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
@@ -696,6 +697,7 @@ namespace strumpack {
         Y.copy(Yc);
         return flops;
       }
+      HODLR_STAGE_SCOPE(p_inverse,"HODLR.inverse",-1,rows_,rows_,c_->size(),c_->rank(),(X.rows()*X.cols()+Y.rows()*Y.cols())*sizeof(scalar_t));
       const double started = MPI_Wtime();
       HODLR_inv_mult
         (char(op), X.data(), Y.data(), lrows_, lrows_, X.cols(),

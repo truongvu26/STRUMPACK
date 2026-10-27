@@ -28,6 +28,7 @@
  */
 
 #include "FrontHODLR.hpp"
+#include "HODLR/StageProfile.hpp"
 #include <limits>
 #include "ExtendAdd.hpp"
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
@@ -564,6 +565,8 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLR<scalar_t,integer_t>::compress_extraction
   (const SpMat_t& A, const Opts_t& opts, int task_depth) {
+    HODLR_STAGE_SCOPE(front_profile,"front.compress",sep_begin_,dim_sep(),dim_upd(),1,0,0);
+    bool prepared11=false,prepared12=false,prepared21=false,prepared22=false;
     F11_.set_sampling_parameter(1.2);
     auto extract_F11 =
       [&](VecVec_t& I, VecVec_t& J, std::vector<DenseMW_t>& B,
@@ -594,6 +597,7 @@ namespace strumpack {
       return cap && fits;
     };
     if (cap) {
+      HODLR_STAGE_SCOPE(p_prepare11,"F11.prepare",sep_begin_,dim_sep(),dim_sep(),1,0,0);
       const auto n=std::size_t(dim_sep());
       std::size_t nnz=0, unused12=0, unused21=0;
       const std::vector<integer_t> no_updates;
@@ -623,16 +627,19 @@ namespace strumpack {
         J=I; std::vector<DenseMW_t> blocks;
         blocks.emplace_back(n,n,data.contribution.data(),n);
         // Only children, never the original sparse matrix, in this image.
-        element_extraction(A,I,J,blocks,task_depth,true);
-        F11_.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
+        { HODLR_STAGE_SCOPE(p_child11,"prepare.extract_children",sep_begin_,n,n,1,0,n*n*sizeof(scalar_t));
+          element_extraction(A,I,J,blocks,task_depth,true); }
+        F11_.set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data))); prepared11=true;
         std::cout << "# GPU front evaluator block=F11 rows=" << n
                   << " preparation=host_children host_prepare_seconds=" << MPI_Wtime()-started << std::endl;
       }
     }
 #endif
-    { TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
+    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":"F11.construct.host",sep_begin_,dim_sep(),dim_sep(),1,0,0);
+      TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
       F11_.compress(extract_F11); }
-    { TIMER_TIME(TaskType::HSS_FACTOR, 0, t_fact);
+    { HODLR_STAGE_SCOPE(p_fact,"F11.factor.gpu",sep_begin_,dim_sep(),dim_sep(),1,0,0);
+      TIMER_TIME(TaskType::HSS_FACTOR, 0, t_fact);
       F11_.factor(); }
     compress_flops_F11();
     if (dim_upd()) {
@@ -674,6 +681,8 @@ namespace strumpack {
           return;
         }
         const auto started=MPI_Wtime();
+        const auto phase=std::string(name)+".prepare";
+        HODLR_STAGE_SCOPE(p_prepare_rect,phase.c_str(),sep_begin_,m,n,1,0,m*n*sizeof(scalar_t));
         HODLR::GPUFrontData<scalar_t> data;
         data.rows=m; data.cols=n; data.ptr.resize(m+1,0); data.contribution.resize(m*n);
         VecVec_t I(1),J(1);
@@ -694,16 +703,18 @@ namespace strumpack {
         I[0]=ids(transpose); J[0]=ids(!transpose);
         std::vector<DenseMW_t> blocks;
         blocks.emplace_back(m,n,data.contribution.data(),m);
-        element_extraction(A,I,J,blocks,task_depth);
+        { HODLR_STAGE_SCOPE(p_child_rect,"prepare.extract_sparse_children",sep_begin_,m,n,1,0,m*n*sizeof(scalar_t));
+          element_extraction(A,I,J,blocks,task_depth); }
         (transpose?F21_:F12_).set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
+        (transpose?prepared21:prepared12)=true;
         std::cout << "# GPU front evaluator block=" << name << " rows=" << m << " cols=" << n
           << " preparation=host_sparse_and_children host_prepare_seconds=" << MPI_Wtime()-started << std::endl;
       };
       if (F12_.gpu_backend() && cap) { prepare_rectangle(false); prepare_rectangle(true); }
 #endif
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
-        F12_.compress(extract_F12);
-        F21_.compress(extract_F21); }
+        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":"F12.construct.host",sep_begin_,dim_sep(),dim_upd(),1,0,0); F12_.compress(extract_F12); }
+        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":"F21.construct.host",sep_begin_,dim_upd(),dim_sep(),1,0,0); F21_.compress(extract_F21); } }
       compress_flops_F12_F21();
 
       // first construct S=-F21*inv(F11)*F12 using matvecs, then
@@ -738,7 +749,8 @@ namespace strumpack {
           compress_flops_Schur(invf11_mult_flops);
         };
       HODLR::ButterflyMatrix<scalar_t> Schur(*F22_, *F22_);
-      { TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
+      { HODLR_STAGE_SCOPE(p_schur,"Schur.compress.randomized",sep_begin_,dim_sep(),dim_upd(),1,0,0);
+        TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
         Schur.compress(sample_Schur); }
       if (F12_.gpu_backend()) {
         const auto& st=F12_.backend_statistics();
@@ -765,6 +777,7 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       const auto n=std::size_t(dim_upd());
       if (cap && eligible(n,0,"F22")) {
+        HODLR_STAGE_SCOPE(p_prepare22,"F22.prepare",sep_begin_,n,n,1,0,n*n*sizeof(scalar_t));
         const auto started=MPI_Wtime();
         HODLR::GPUFrontData<scalar_t> data;
         data.rows=n; data.ptr.resize(n+1,0); data.contribution.resize(n*n);
@@ -780,14 +793,17 @@ namespace strumpack {
         std::vector<DenseMW_t> blocks;
         blocks.emplace_back(n,n,data.contribution.data(),n);
         // NO original A(u,u). Children plus this front's negative Schur product.
-        element_extraction(A,global,global,blocks,task_depth,true);
-        Schur.extract_add_elements(ids,ids,blocks);
-        F22_->set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data)));
+        { HODLR_STAGE_SCOPE(p_child22,"prepare.extract_children",sep_begin_,n,n,1,0,n*n*sizeof(scalar_t));
+          element_extraction(A,global,global,blocks,task_depth,true); }
+        { HODLR_STAGE_SCOPE(p_current,"prepare.materialize_current_schur",sep_begin_,n,n,1,0,n*n*sizeof(scalar_t));
+          Schur.extract_add_elements(ids,ids,blocks); }
+        F22_->set_gpu_front_evaluator(HODLR::make_gpu_front_evaluator(std::move(data))); prepared22=true;
         std::cout << "# GPU front evaluator block=F22 rows=" << n
                   << " preparation=host_children_and_current_schur host_prepare_seconds="
                   << MPI_Wtime()-started << std::endl;
       }
 #endif
+      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":"F22.construct.host",sep_begin_,dim_upd(),dim_upd(),1,0,0);
       TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       F22_->compress(extract_F22);
       compress_flops_F22();
@@ -1012,6 +1028,7 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLR<scalar_t,integer_t>::forward_multifrontal_solve
   (DenseM_t& b, DenseM_t* work, int etree_level, int task_depth) const {
+    HODLR_STAGE_SCOPE(p_local,"solve.forward",sep_begin_,dim_sep(),dim_upd(),1,0,0);
     DenseMW_t bupd(dim_upd(), b.cols(), work[0], 0, 0);
     bupd.zero();
     if (lchild_) {
@@ -1056,6 +1073,7 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLR<scalar_t,integer_t>::backward_multifrontal_solve
   (DenseM_t& y, DenseM_t* work, int etree_level, int task_depth) const {
+    HODLR_STAGE_SCOPE(p_local,"solve.backward",sep_begin_,dim_sep(),dim_upd(),1,0,0);
     DenseMW_t yupd(dim_upd(), y.cols(), work[0], 0, 0);
     if (dim_sep() && dim_upd()) {
       DenseM_t tmp(dim_sep(), y.cols()), tmp2(dim_sep(), y.cols());
@@ -1128,6 +1146,7 @@ namespace strumpack {
   FrontHODLR<scalar_t,integer_t>::partition
   (const Opts_t& opts, const SpMat_t& A, integer_t* sorder,
    bool is_root, int task_depth) {
+    HODLR_STAGE_SCOPE(p_local,"front.partition",sep_begin_,dim_sep(),dim_upd(),1,0,0);
     auto g = A.extract_graph
       (opts.separator_ordering_level(), sep_begin_, sep_end_);
     sep_tree_ = g.recursive_bisection

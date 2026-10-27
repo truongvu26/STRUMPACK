@@ -1,4 +1,5 @@
 #include "GPUFrontEvaluator.hpp"
+#include "StageProfile.hpp"
 #include <bpack_gpu.h>
 #include <cuda_runtime.h>
 #include <cuComplex.h>
@@ -72,7 +73,7 @@ public:
     const auto status = cudaEventCreateWithFlags(&done_,cudaEventDisableTiming);
     if (status != cudaSuccess) throw std::runtime_error(cudaGetErrorString(status));
   }
-  ~Evaluator() override { finish(); if (done_) checked(cudaEventDestroy(done_)); }
+  ~Evaluator() override { finish(); HODLR_STAGE_IMAGE_DELTA(-static_cast<long long>(resident_bytes_)); if (done_) checked(cudaEventDestroy(done_)); }
   bool complex_values() const override { return !std::is_same<T,double>::value; }
   int rows() const override { return data_.rows; }
   int cols() const override { return data_.cols; }
@@ -167,11 +168,13 @@ private:
     const auto p=data_.ptr.size()*sizeof(std::int64_t),c=data_.col.size()*sizeof(std::int64_t);
     const auto z=data_.sparse.size()*sizeof(T),d=data_.contribution.size()*sizeof(T);
     const auto co=aligned(p),so=aligned(co+c),dd=aligned(so+z),bytes=dd+d;
+    HODLR_STAGE_SCOPE(p_pack,"prepare.pack_image",-1,data_.rows,data_.cols,0,0,bytes);
     std::vector<char> image(bytes,0);
     std::memcpy(image.data(),data_.ptr.data(),p);
     if (c) std::memcpy(image.data()+co,data_.col.data(),c);
     if (z) std::memcpy(image.data()+so,data_.sparse.data(),z);
     if (d) std::memcpy(image.data()+dd,data_.contribution.data(),d);
+    { HODLR_STAGE_SCOPE(p_upload,"prepare.upload_resident_image",-1,data_.rows,data_.cols,0,0,bytes);
     if constexpr (std::is_same<T,double>::value) {
       if (rectangular) d_c_bf_upload_entry_image(matrix,image.data(),&bytes,&device_image_);
       else d_c_bpack_upload_entry_image(matrix,image.data(),&bytes,&device_image_);
@@ -179,7 +182,9 @@ private:
       if (rectangular) z_c_bf_upload_entry_image(matrix,image.data(),&bytes,&device_image_);
       else z_c_bpack_upload_entry_image(matrix,image.data(),&bytes,&device_image_);
     }
+    }
     uploads_+=p+c+z+d; resident_bytes_=bytes;
+    HODLR_STAGE_IMAGE_DELTA(static_cast<long long>(bytes));
   }
 #endif
   std::size_t resident_bytes_=0;

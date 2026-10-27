@@ -32,6 +32,7 @@
 #include "misc/TaskTimer.hpp"
 #include "misc/Tools.hpp"
 #include "ButterflyMatrix.hpp"
+#include "StageProfile.hpp"
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
 #include "GPUFrontEvaluator.hpp"
 #endif
@@ -366,6 +367,7 @@ namespace strumpack {
           (comparison!=MPI_IDENT && comparison!=MPI_CONGRUENT))
         throw std::invalid_argument("Incompatible Schur factors, communicator or RHS layout");
       // Packed host boundaries; only the two outer arrays cross the device boundary.
+      HODLR_STAGE_SCOPE(p_device_schur,"Schur.apply.device",-1,rows_,cols_,c_->size(),c_->rank(),(X.rows()*X.cols()+Y.rows()*Y.cols())*sizeof(scalar_t));
       const double started=MPI_Wtime();
       DenseM_t packed(X),result(Y.rows(),Y.cols());
       auto a=lr_bf_,d=diagonal.ho_bf_,z=other.lr_bf_;
@@ -453,6 +455,7 @@ namespace strumpack {
         Y.copy(Yc);
         return;
       }
+      HODLR_STAGE_SCOPE(p_mult,"BF.multiply",-1,rows_,cols_,c_->size(),c_->rank(),(X.rows()*X.cols()+Y.rows()*Y.cols())*sizeof(scalar_t));
       const double started=MPI_Wtime();
       if (op == Trans::N)
         LRBF_mult(char(op), X.data(), Y.data(), lcols_, lrows_, X.cols(),

@@ -62,3 +62,9 @@ if(STRUMPACK_USE_MPI)
     testMixedPrecisionMPIDist)
 
 endif()
+
+if(STRUMPACK_HODLR_STAGE_PROFILE AND TARGET testPoisson3dMPIDist)
+  target_compile_definitions(testPoisson3dMPIDist PRIVATE STRUMPACK_HODLR_STAGE_PROFILE)
+  target_include_directories(testPoisson3dMPIDist PRIVATE ${STRUMPACK_NVTX_INCLUDE_DIR})
+  target_link_libraries(testPoisson3dMPIDist ${CMAKE_DL_LIBS})
+endif()

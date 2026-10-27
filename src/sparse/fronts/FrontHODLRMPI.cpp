@@ -28,6 +28,7 @@
  */
 #include "StrumpackParameters.hpp"
 #include "FrontHODLRMPI.hpp"
+#include "HODLR/StageProfile.hpp"
 #include "FrontBLRMPI.hpp"
 #include "ExtendAdd.hpp"
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
@@ -299,6 +300,8 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontHODLRMPI<scalar_t,integer_t>::compress_extraction
   (const SpMat_t& A, const Opts_t& opts) {
+    HODLR_STAGE_SCOPE(front_profile,"front.compress",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+    bool prepared11=false,prepared12=false,prepared21=false,prepared22=false;
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     const auto cap=opts.HODLR_options().gpu_front_max_bytes();
     auto eligible=[&](std::size_t m,std::size_t n,const char* block) {
@@ -328,13 +331,19 @@ namespace strumpack {
     auto prepare=[&](std::size_t m,std::size_t n,bool ru,bool cu,bool skip_sparse,
                      HODLR::ButterflyMatrix<scalar_t>* schur,const char* block) {
       const double started=MPI_Wtime();
+      const auto phase=std::string(block)+".prepare";
+      HODLR_STAGE_SCOPE(p_prepare,phase.c_str(),sep_begin_,m,n,Comm().size(),Comm().rank(),m*n*sizeof(scalar_t));
       VecVec_t I{global_ids(m,ru)},J{global_ids(n,cu)};
       DistM_t image(grid(),m,n); image.zero();
       std::vector<DistMW_t> blocks;
       blocks.emplace_back(m,n,image,0,0);
-      this->extract_2d(A,I,J,blocks,skip_sparse);
-      if (schur) { auto product=schur->dense(grid()); image.scaled_add(scalar_t(1),product); }
-      auto replicated=image.all_gather();
+      { HODLR_STAGE_SCOPE(p_extract,"prepare.extract_sparse_children",sep_begin_,m,n,Comm().size(),Comm().rank(),m*n*sizeof(scalar_t));
+        this->extract_2d(A,I,J,blocks,skip_sparse); }
+      if (schur) { HODLR_STAGE_SCOPE(p_dense,"prepare.materialize_current_schur",sep_begin_,m,n,Comm().size(),Comm().rank(),m*n*sizeof(scalar_t));
+        auto product=schur->dense(grid()); image.scaled_add(scalar_t(1),product); }
+      DenseM_t replicated;
+      { HODLR_STAGE_SCOPE(p_gather,"prepare.replicate",sep_begin_,m,n,Comm().size(),Comm().rank(),m*n*sizeof(scalar_t));
+        replicated=image.all_gather(); }
       HODLR::GPUFrontData<scalar_t> data;
       data.rows=m; data.cols=n; data.ptr.resize(m+1,0);
       data.contribution.assign(replicated.data(),replicated.data()+m*n);
@@ -344,7 +353,7 @@ namespace strumpack {
       return HODLR::make_gpu_front_evaluator(std::move(data));
     };
     if (eligible(dim_sep(),dim_sep(),"F11"))
-      F11_.set_gpu_front_evaluator(prepare(dim_sep(),dim_sep(),false,false,false,nullptr,"F11"));
+      { F11_.set_gpu_front_evaluator(prepare(dim_sep(),dim_sep(),false,false,false,nullptr,"F11")); prepared11=true; }
 #endif
     F11_.set_sampling_parameter(1.2);
     auto extract_F11 =
@@ -354,9 +363,11 @@ namespace strumpack {
         for (auto& Jk : J) for (auto& j : Jk) j += sep_begin_;
         this->extract_2d(A, I, J, B);
       };
-    { TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
+    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":"F11.construct.host",sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
+      TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
       F11_.compress(extract_F11); }
-    { TIMER_TIME(TaskType::HSS_FACTOR, 0, t_fact);
+    { HODLR_STAGE_SCOPE(p_fact,"F11.factor.gpu",sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
+      TIMER_TIME(TaskType::HSS_FACTOR, 0, t_fact);
       F11_.factor(); }
     compress_flops_F11();
     if (dim_upd()) {
@@ -386,17 +397,17 @@ namespace strumpack {
         };
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       if (F12_.gpu_backend() && eligible(dim_sep(),dim_upd(),"F12"))
-        F12_.set_gpu_front_evaluator(prepare(dim_sep(),dim_upd(),false,true,false,nullptr,"F12"));
+        { F12_.set_gpu_front_evaluator(prepare(dim_sep(),dim_upd(),false,true,false,nullptr,"F12")); prepared12=true; }
       if (F21_.gpu_backend() && eligible(dim_upd(),dim_sep(),"F21"))
-        F21_.set_gpu_front_evaluator(prepare(dim_upd(),dim_sep(),true,false,false,nullptr,"F21"));
+        { F21_.set_gpu_front_evaluator(prepare(dim_upd(),dim_sep(),true,false,false,nullptr,"F21")); prepared21=true; }
 #endif
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
         // int bsize = std::min(64.0,ceil(F11_.get_stat("Rank_max")/2.0));
         // F12_.set_BACA_block(bsize);
-        F12_.compress(extract_F12);
+        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":"F12.construct.host",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0); F12_.compress(extract_F12); }
         // bsize = std::min(64.0,ceil(F12_.get_stat("Rank_max")/2.0));
         // F21_.set_BACA_block(bsize);
-        F21_.compress(extract_F21); }
+        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":"F21.construct.host",sep_begin_,dim_upd(),dim_sep(),Comm().size(),Comm().rank(),0); F21_.compress(extract_F21); } }
       compress_flops_F12_F21();
 
       // first construct S=-F21*inv(F11)*F12 using matvecs, then
@@ -434,7 +445,8 @@ namespace strumpack {
           compress_flops_Schur(invf11_mult_flops);
         };
       HODLR::ButterflyMatrix<scalar_t> Schur(*F22_, *F22_);
-      { TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
+      { HODLR_STAGE_SCOPE(p_schur,"Schur.compress.randomized",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+        TIMER_TIME(TaskType::HSS_COMPUTE_SCHUR, 0, t_schur_compress);
         Schur.compress(sample_Schur);
       }
       if (F12_.gpu_backend() && Comm().is_root()) {
@@ -462,8 +474,9 @@ namespace strumpack {
         };
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       if (eligible(dim_upd(),dim_upd(),"F22"))
-        F22_->set_gpu_front_evaluator(prepare(dim_upd(),dim_upd(),true,true,true,&Schur,"F22"));
+        { F22_->set_gpu_front_evaluator(prepare(dim_upd(),dim_upd(),true,true,true,&Schur,"F22")); prepared22=true; }
 #endif
+      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":"F22.construct.host",sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       // int bsize = std::min(64.0,ceil(Schur.get_stat("Rank_max")/2.0));
       // F22_->set_BACA_block(bsize);
@@ -632,6 +645,7 @@ namespace strumpack {
   FrontHODLRMPI<scalar_t,integer_t>::forward_multifrontal_solve
   (DenseM_t& bloc, DistM_t* bdist, DistM_t& bupd, DenseM_t& seqbupd,
    int etree_level) const {
+    HODLR_STAGE_SCOPE(p_local,"solve.forward",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
     DistM_t CBl, CBr;
     DenseM_t seqCBl, seqCBr;
     if (visit(lchild_))
@@ -675,6 +689,7 @@ namespace strumpack {
   FrontHODLRMPI<scalar_t,integer_t>::backward_multifrontal_solve
   (DenseM_t& yloc, DistM_t* ydist, DistM_t& yupd, DenseM_t& seqyupd,
    int etree_level) const {
+    HODLR_STAGE_SCOPE(p_local,"solve.backward",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
     DistM_t& y = ydist[this->sep_];
     if (this->dim_sep() && this->dim_upd()) {
       TIMER_TIME(TaskType::SOLVE_UPPER, 0, t_s);
@@ -729,6 +744,7 @@ namespace strumpack {
   FrontHODLRMPI<scalar_t,integer_t>::partition
   (const Opts_t& opts, const SpMat_t& A,
    integer_t* sorder, bool is_root, int task_depth) {
+    HODLR_STAGE_SCOPE(p_local,"front.partition",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
     if (Comm().is_null()) return;
     if (Comm().is_root()) {
       auto g = A.extract_graph
