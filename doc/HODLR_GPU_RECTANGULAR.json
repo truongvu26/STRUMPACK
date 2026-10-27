@@ -25,11 +25,13 @@
     "old_dependency_extension_disabled": "PASS"
   },
   "limits": [
-    "Butterfly levels zero; OMP_NUM_THREADS=1",
-    "Distributed entry images are host-prepared, replicated and bounded per block",
-    "Large images retain host compression; no unbounded tile service",
-    "CPU randomized temporary Schur compression remains; N/T/C operator applications use device intermediates",
-    "Compound Schur work is recorded in ButterflyMatrix counters; individual HODLRMatrix inverse counters and legacy FLOP accounting exclude it"
+    "GPU mode 1 validated in double and double complex; butterfly levels zero; OMP_NUM_THREADS=1",
+    "Distributed entry preparation and replication remain on the host, with immutable matrix-owned device images",
+    "Byte cap is per block, not an aggregate device memory budget; oversized blocks use host compression",
+    "No unbounded distributed tile-request or eviction service",
+    "Temporary Schur randomized compression remains on CPU; its N/T/C operator applications keep intermediate vectors on device",
+    "Compound Schur work is recorded in ButterflyMatrix counters; individual HODLRMatrix inverse and legacy FLOP counters exclude it",
+    "Reported rectangular resident-image totals are not complete solver device memory"
   ],
   "validation_60387091": {
     "status": "PASS",
@@ -142,11 +144,11 @@
     60389147
   ],
   "cancellation_reason": "Complete conjugate-transpose device pipeline before freezing final executables",
-  "job": 60390291,
-  "strumpack_numerical_source_commit": "a450b185715252b8aa49535ecaa8289499923229",
+  "job": 60392134,
+  "strumpack_numerical_source_commit": "3525937944ca2d740acbcf8ed25c05b7055895ee",
   "validation": {
     "status": "PASS",
-    "job": "60390291",
+    "job": "60392134",
     "grid": 40,
     "rhs": 3,
     "cases": [
@@ -154,11 +156,11 @@
         "label": "hybrid_1",
         "status": "PASS",
         "ranks": 1,
-        "relative_error": 6.86827e-11,
-        "scaled_residual": 2.79866e-09,
+        "relative_error": 4.17258e-15,
+        "scaled_residual": 5.59977e-13,
         "hodlr_fronts": 24,
-        "factor_seconds": 18.0613,
-        "solve_seconds": 0.354215,
+        "factor_seconds": 17.9344,
+        "solve_seconds": 0.209664,
         "device_schur_calls": 0,
         "device_schur_boundary_bytes": 0,
         "rectangular_gpu_construction_reports": 0,
@@ -169,11 +171,11 @@
         "label": "rectangular_1",
         "status": "PASS",
         "ranks": 1,
-        "relative_error": 7.86804e-11,
-        "scaled_residual": 3.06778e-09,
+        "relative_error": 1.80023e-15,
+        "scaled_residual": 1.53157e-13,
         "hodlr_fronts": 24,
-        "factor_seconds": 18.1429,
-        "solve_seconds": 0.317209,
+        "factor_seconds": 18.0235,
+        "solve_seconds": 0.194064,
         "device_schur_calls": 69,
         "device_schur_boundary_bytes": 116508560,
         "rectangular_gpu_construction_reports": 0,
@@ -184,11 +186,11 @@
         "label": "constructed_1",
         "status": "PASS",
         "ranks": 1,
-        "relative_error": 1.3654e-10,
-        "scaled_residual": 7.03759e-09,
+        "relative_error": 7.43819e-11,
+        "scaled_residual": 3.01471e-09,
         "hodlr_fronts": 24,
-        "factor_seconds": 12.6251,
-        "solve_seconds": 0.315951,
+        "factor_seconds": 12.5228,
+        "solve_seconds": 0.316486,
         "device_schur_calls": 69,
         "device_schur_boundary_bytes": 116508560,
         "rectangular_gpu_construction_reports": 46,
@@ -199,11 +201,11 @@
         "label": "hybrid_4",
         "status": "PASS",
         "ranks": 4,
-        "relative_error": 5.4991e-11,
-        "scaled_residual": 4.30799e-09,
+        "relative_error": 3.91463e-14,
+        "scaled_residual": 3.20159e-12,
         "hodlr_fronts": 24,
-        "factor_seconds": 6.47514,
-        "solve_seconds": 0.0824708,
+        "factor_seconds": 6.44017,
+        "solve_seconds": 0.114988,
         "device_schur_calls": 0,
         "device_schur_boundary_bytes": 0,
         "rectangular_gpu_construction_reports": 0,
@@ -214,11 +216,11 @@
         "label": "rectangular_4",
         "status": "PASS",
         "ranks": 4,
-        "relative_error": 1.56091e-11,
-        "scaled_residual": 1.39893e-09,
+        "relative_error": 1.61735e-11,
+        "scaled_residual": 1.22207e-09,
         "hodlr_fronts": 24,
-        "factor_seconds": 6.52071,
-        "solve_seconds": 0.221806,
+        "factor_seconds": 6.37667,
+        "solve_seconds": 0.232886,
         "device_schur_calls": 69,
         "device_schur_boundary_bytes": 109878160,
         "rectangular_gpu_construction_reports": 0,
@@ -229,11 +231,11 @@
         "label": "constructed_4",
         "status": "PASS",
         "ranks": 4,
-        "relative_error": 2.64188e-11,
-        "scaled_residual": 3.41766e-09,
+        "relative_error": 2.07523e-10,
+        "scaled_residual": 3.29228e-08,
         "hodlr_fronts": 24,
-        "factor_seconds": 6.69763,
-        "solve_seconds": 0.223427,
+        "factor_seconds": 6.5887,
+        "solve_seconds": 0.20839,
         "device_schur_calls": 69,
         "device_schur_boundary_bytes": 109878160,
         "rectangular_gpu_construction_reports": 46,
@@ -247,9 +249,15 @@
       "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
       "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
       "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
-    ]
+    ],
+    "scheduler_state": "COMPLETED",
+    "elapsed": "00:01:51",
+    "source_commit": "3525937944ca2d740acbcf8ed25c05b7055895ee",
+    "butterflypack_commit": "8285e65abc278ddca6f55fb92203295ad79e9535"
   },
   "direct_checks": {
+    "status": "PASS",
+    "job": 60392134,
     "real_complex_N_T_C": "PASS",
     "ranks": [
       1,
@@ -263,19 +271,19 @@
     "moved_owner": "PASS",
     "scoped_MPI_SELF_with_other_ranks_waiting": "PASS",
     "device_contract": "PASS",
-    "compute_sanitizer_memcheck_errors": 0,
-    "square_evaluator_regression": "PASS",
-    "compute_sanitizer_scope": "GPU front evaluator device-contract test"
+    "compute_sanitizer_errors": 0,
+    "sanitizer_scope": "evaluator device-contract test; not full native sparse solver",
+    "square_evaluator_integration": "PASS"
   },
   "executable_sha256": {
-    "test_HODLR_gpu_rectangular": "43d7d867367f09d026fbbf9fab08cbdb8705557729ba1dae07684e099f8f4437",
-    "testPoisson3dMPIDist": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8"
+    "test_HODLR_gpu_rectangular": "353015bdac8db43414f143a8f6818835fc102cc7cea26152062148749010bb84",
+    "testPoisson3dMPIDist": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237"
   },
-  "butterflypack_library_sha256": [
-    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so",
-    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so.5",
-    "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f  /global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-rectangular/../ButterflyPACK-gpu-rectangular/install_hodlr_gpu/lib64/libbutterflypack.so.5.0.0"
-  ],
+  "butterflypack_library_sha256": {
+    "libbutterflypack.so": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+    "libbutterflypack.so.5": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+    "libbutterflypack.so.5.0.0": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f"
+  },
   "profile": {
     "status": "PASS",
     "job": "60390292",
@@ -636,165 +644,137 @@
       "Constructed variant uses bounded replicated host entry preparation and resident device images.",
       "Factor/solve exclude initial sparse matrix creation and distribution."
     ],
-    "executable_sha256": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8",
     "scheduler_state": "COMPLETED",
-    "elapsed": "00:09:18"
+    "elapsed": "00:09:18",
+    "executable_sha256": {
+      "testPoisson3dMPIDist": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8"
+    },
+    "butterflypack_library_sha256": {
+      "libbutterflypack.so": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+      "libbutterflypack.so.5": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
+      "libbutterflypack.so.5.0.0": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f"
+    },
+    "source_note": "Predates registration shape/type validators only; same numerical implementation. Final guard build is validated end to end in job 60392134."
   },
-  "validation_job": 60390291,
-  "strumpack_implementation_commit": "a450b185715252b8aa49535ecaa8289499923229",
-  "validation_60390291": {
+  "registration_guard_checks": {
     "status": "PASS",
-    "job": "60390291",
-    "grid": 40,
-    "rhs": 3,
-    "cases": [
-      {
-        "label": "hybrid_1",
-        "status": "PASS",
-        "ranks": 1,
-        "relative_error": 6.86827e-11,
-        "scaled_residual": 2.79866e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 18.0613,
-        "solve_seconds": 0.354215,
-        "device_schur_calls": 0,
-        "device_schur_boundary_bytes": 0,
-        "rectangular_gpu_construction_reports": 0,
-        "collective_prepared_images": 0,
-        "resident_entry_bytes_reports": 0
-      },
-      {
-        "label": "rectangular_1",
-        "status": "PASS",
-        "ranks": 1,
-        "relative_error": 7.86804e-11,
-        "scaled_residual": 3.06778e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 18.1429,
-        "solve_seconds": 0.317209,
-        "device_schur_calls": 69,
-        "device_schur_boundary_bytes": 116508560,
-        "rectangular_gpu_construction_reports": 0,
-        "collective_prepared_images": 0,
-        "resident_entry_bytes_reports": 0
-      },
-      {
-        "label": "constructed_1",
-        "status": "PASS",
-        "ranks": 1,
-        "relative_error": 1.3654e-10,
-        "scaled_residual": 7.03759e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 12.6251,
-        "solve_seconds": 0.315951,
-        "device_schur_calls": 69,
-        "device_schur_boundary_bytes": 116508560,
-        "rectangular_gpu_construction_reports": 46,
-        "collective_prepared_images": 0,
-        "resident_entry_bytes_reports": 159394560
-      },
-      {
-        "label": "hybrid_4",
-        "status": "PASS",
-        "ranks": 4,
-        "relative_error": 5.4991e-11,
-        "scaled_residual": 4.30799e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 6.47514,
-        "solve_seconds": 0.0824708,
-        "device_schur_calls": 0,
-        "device_schur_boundary_bytes": 0,
-        "rectangular_gpu_construction_reports": 0,
-        "collective_prepared_images": 0,
-        "resident_entry_bytes_reports": 0
-      },
-      {
-        "label": "rectangular_4",
-        "status": "PASS",
-        "ranks": 4,
-        "relative_error": 1.56091e-11,
-        "scaled_residual": 1.39893e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 6.52071,
-        "solve_seconds": 0.221806,
-        "device_schur_calls": 69,
-        "device_schur_boundary_bytes": 109878160,
-        "rectangular_gpu_construction_reports": 0,
-        "collective_prepared_images": 0,
-        "resident_entry_bytes_reports": 0
-      },
-      {
-        "label": "constructed_4",
-        "status": "PASS",
-        "ranks": 4,
-        "relative_error": 2.64188e-11,
-        "scaled_residual": 3.41766e-09,
-        "hodlr_fronts": 24,
-        "factor_seconds": 6.69763,
-        "solve_seconds": 0.223427,
-        "device_schur_calls": 69,
-        "device_schur_boundary_bytes": 109878160,
-        "rectangular_gpu_construction_reports": 46,
-        "collective_prepared_images": 9,
-        "resident_entry_bytes_reports": 159394560
-      }
+    "job": 60392134,
+    "checks": [
+      "rectangular column-count mismatch rejection",
+      "real/complex evaluator mismatch rejection"
     ],
-    "failures": [],
-    "notes": [
-      "One trial per variant/layout; preliminary timings, no speedup claim.",
-      "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
-      "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
-      "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
-    ]
-  },
-  "validation_checks": {
-    "real_complex_rectangular_baca_and_ntc_multiply": "PASS",
-    "real_complex_ntc_device_schur": "PASS",
-    "padded_one_and_three_rhs": "PASS",
-    "moved_ownership": "PASS",
-    "mpi_ranks": [
+    "ranks": [
       1,
       3,
       4
-    ],
-    "subset_front_communicator_with_other_ranks_waiting": "PASS",
-    "device_contract": "PASS",
-    "compute_sanitizer_errors": 0,
-    "square_evaluator_integration": "PASS",
-    "sparse_layouts": [
-      1,
-      4
-    ],
-    "sparse_grid": 40,
-    "sparse_rhs": 3,
-    "hodlr_fronts_per_case": 24,
-    "completed_sparse_cases": 6
+    ]
   },
-  "validation_scheduler_state": "COMPLETED",
-  "validation_executable_hashes": {
-    "test_HODLR_gpu_rectangular": "43d7d867367f09d026fbbf9fab08cbdb8705557729ba1dae07684e099f8f4437",
-    "testPoisson3dMPIDist": "29bbe0c5c94d641097d93a1f16c5f9ec300d5cfa8a33e1c8f83ab33da34935f8"
-  },
-  "validation_butterflypack_library_hashes": {
-    "libbutterflypack.so": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
-    "libbutterflypack.so.5": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f",
-    "libbutterflypack.so.5.0.0": "eb272a23017b77cfcf6017f4b890fa925217fa3327f651b0cbd566acfd3b9b9f"
-  },
-  "profiling": {
-    "job": 60390292,
-    "status": "RUNNING",
-    "grid": 60,
-    "ranks": 4,
-    "gpus": 2,
-    "rhs": 3,
-    "repeats_per_variant": 3,
-    "variants": [
-      "cpu",
-      "hybrid",
-      "rectangular",
-      "constructed"
-    ],
-    "cap_bytes": 268435456
-  },
-  "registration_guard_checks": "PENDING: shape/type mismatch rejection added after timing executable was frozen"
+  "previous_validations": {
+    "60390291": {
+      "status": "PASS",
+      "job": "60390291",
+      "grid": 40,
+      "rhs": 3,
+      "cases": [
+        {
+          "label": "hybrid_1",
+          "status": "PASS",
+          "ranks": 1,
+          "relative_error": 6.86827e-11,
+          "scaled_residual": 2.79866e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 18.0613,
+          "solve_seconds": 0.354215,
+          "device_schur_calls": 0,
+          "device_schur_boundary_bytes": 0,
+          "rectangular_gpu_construction_reports": 0,
+          "collective_prepared_images": 0,
+          "resident_entry_bytes_reports": 0
+        },
+        {
+          "label": "rectangular_1",
+          "status": "PASS",
+          "ranks": 1,
+          "relative_error": 7.86804e-11,
+          "scaled_residual": 3.06778e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 18.1429,
+          "solve_seconds": 0.317209,
+          "device_schur_calls": 69,
+          "device_schur_boundary_bytes": 116508560,
+          "rectangular_gpu_construction_reports": 0,
+          "collective_prepared_images": 0,
+          "resident_entry_bytes_reports": 0
+        },
+        {
+          "label": "constructed_1",
+          "status": "PASS",
+          "ranks": 1,
+          "relative_error": 1.3654e-10,
+          "scaled_residual": 7.03759e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 12.6251,
+          "solve_seconds": 0.315951,
+          "device_schur_calls": 69,
+          "device_schur_boundary_bytes": 116508560,
+          "rectangular_gpu_construction_reports": 46,
+          "collective_prepared_images": 0,
+          "resident_entry_bytes_reports": 159394560
+        },
+        {
+          "label": "hybrid_4",
+          "status": "PASS",
+          "ranks": 4,
+          "relative_error": 5.4991e-11,
+          "scaled_residual": 4.30799e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 6.47514,
+          "solve_seconds": 0.0824708,
+          "device_schur_calls": 0,
+          "device_schur_boundary_bytes": 0,
+          "rectangular_gpu_construction_reports": 0,
+          "collective_prepared_images": 0,
+          "resident_entry_bytes_reports": 0
+        },
+        {
+          "label": "rectangular_4",
+          "status": "PASS",
+          "ranks": 4,
+          "relative_error": 1.56091e-11,
+          "scaled_residual": 1.39893e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 6.52071,
+          "solve_seconds": 0.221806,
+          "device_schur_calls": 69,
+          "device_schur_boundary_bytes": 109878160,
+          "rectangular_gpu_construction_reports": 0,
+          "collective_prepared_images": 0,
+          "resident_entry_bytes_reports": 0
+        },
+        {
+          "label": "constructed_4",
+          "status": "PASS",
+          "ranks": 4,
+          "relative_error": 2.64188e-11,
+          "scaled_residual": 3.41766e-09,
+          "hodlr_fronts": 24,
+          "factor_seconds": 6.69763,
+          "solve_seconds": 0.223427,
+          "device_schur_calls": 69,
+          "device_schur_boundary_bytes": 109878160,
+          "rectangular_gpu_construction_reports": 46,
+          "collective_prepared_images": 9,
+          "resident_entry_bytes_reports": 159394560
+        }
+      ],
+      "failures": [],
+      "notes": [
+        "One trial per variant/layout; preliminary timings, no speedup claim.",
+        "Distributed entry preparation is a bounded replicated host image uploaded once per matrix.",
+        "GPU Schur intermediates stay on device; MPI coefficient reductions may use host staging.",
+        "Native BF host mirrors remain for existing extraction; nonzero butterfly levels remain unsupported."
+      ],
+      "strumpack_commit": "a450b185715252b8aa49535ecaa8289499923229"
+    }
+  }
 }

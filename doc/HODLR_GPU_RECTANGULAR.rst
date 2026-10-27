@@ -143,8 +143,8 @@ GPU construction on one allocation with four ranks sharing two GPUs. Its
 analyze with test/analyze_hodlr_rectangular_profile.py. Timings from one
 trial are not used to claim a performance improvement.
 
-The controlled profiling run is job 60390292. Its twelve-case plan is still
-running; incomplete timing evidence is not a passing profiling record.
+The controlled profiling run, job 60390292, completed all twelve cases
+successfully. Its complete repeated comparison is below.
 
 Repeated 60^3 comparison
 ------------------------
@@ -193,5 +193,12 @@ and nine collective prepared images, with finite relative errors below
 The timing executable predates only the final registration shape/type
 validators; its numerical implementation is unchanged. Its SHA256 and
 source/dependency commits are recorded separately in the JSON. Final-code
-sparse validation is rerun after those guards. Compute Sanitizer covers
+sparse validation job 60392134 passes after those guards, including explicit
+rejection of mismatched evaluator shapes and scalar types. Compute Sanitizer covers
 the evaluator device-contract test, not the full native sparse solver.
+
+Both implementation worktrees retain the communicator fixes and upstream
+multi-RHS correction. Validation logs, job folders, generated precision
+sources, installed dependencies and build directories remain local ignored
+artifacts. The JSON record retains failed startup attempts, prior passing
+checkpoints, final validation, repeated timings and executable/library hashes.
