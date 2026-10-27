@@ -11,6 +11,7 @@
 #SBATCH -J hodlr_150_profile
 #SBATCH -o profile_results/stage_%j.out
 set -euo pipefail
+profile_batch_started=$(date +%s)
 module load PrgEnv-gnu cudatoolkit/13.2 craype-accel-nvidia80
 module unload cray-libsci darshan
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MPICH_GPU_SUPPORT_ENABLED=0 BPACK_GPU_AWARE_MPI=0 BPACK_CHECK=''
@@ -29,6 +30,23 @@ read -r -a cases <<< "${HODLR_PROFILE_CASES:-gpu cpu diagnostic traced}"
 printf '%s\n' "${cases[@]}" > "$out/cases.txt"
 printf '%s\n' "$n" "$HODLR_PROFILE_RANKS" > "$out/layout.txt"
 for variant in "${cases[@]}"; do
+  # Short backfill allocations prioritize the requested GPU run. A CPU control
+  # is optional and must not start without its measured 150-cubed time budget.
+  if [[ "$variant" == cpu && -n "${HODLR_PROFILE_ALLOCATION_SECONDS:-}" ]]; then
+    remaining=$((HODLR_PROFILE_ALLOCATION_SECONDS - $(date +%s) + profile_batch_started))
+    if (( remaining < ${HODLR_PROFILE_CPU_SLACK:-1000} )); then
+      python3 - "$out" "$remaining" <<'PYCODE'
+import json,sys
+from pathlib import Path
+r=Path(sys.argv[1]); plan=(r/'cases.txt').read_text().split()
+(r/'planned_cases.txt').write_text('\n'.join(plan)+'\n')
+(r/'cases.txt').write_text('\n'.join(x for x in plan if x!='cpu')+'\n')
+(r/'skipped_cpu.json').write_text(json.dumps(dict(status='NOT_RUN',reason='Insufficient allocation time for the CPU control',remaining_seconds=int(sys.argv[2])),indent=2)+'\n')
+PYCODE
+      echo "CPU control not started: only $remaining allocation seconds remain"
+      continue
+    fi
+  fi
   mode=1; rect=1; cap=268435456; binary=baseline; trace=0
   [[ "$variant" == cpu ]] && { mode=0; rect=0; cap=0; }
   [[ "$variant" == diagnostic || "$variant" == traced ]] && binary=diagnostic
