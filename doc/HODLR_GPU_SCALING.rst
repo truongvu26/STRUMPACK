@@ -74,3 +74,44 @@ Collect the completed evidence with::
 
 Raw logs, commands, input configuration snapshots, memory accounting and job
 folders remain under the locally ignored profile_results directories.
+
+.. BEGIN GENERATED SCALING RESULTS
+
+Measured results
+-----------------
+
+Numerical status: RUNNING. The JSON record contains individual
+trial accuracy, device-construction coverage and allocation accounting.
+
+.. list-table:: Sparse factor / solve times in seconds
+   :header-rows: 1
+
+   * - Grid
+     - CPU
+     - Hybrid GPU
+     - Evaluator GPU
+     - Samples per variant
+   * - 100^3
+     - 141.261 / 0.592
+     - 146.255 / 1.231
+     - 145.125 / 1.238
+     - 3/3/2 (CPU/hybrid/evaluator)
+   * - 150^3
+     - pending
+     - pending
+     - pending
+     - 0/0/0 (CPU/hybrid/evaluator)
+   * - 200^3
+     - pending
+     - pending
+     - pending
+     - 0/0/0 (CPU/hybrid/evaluator)
+
+100^3 rows use medians when repetitions have completed; 150^3 and 200^3
+remain single-trial observations. Pending entries are not passing tests.
+
+Allocation states:
+
+* Job 60351838: scheduler RUNNING, numerical plan RUNNING.
+
+* Job 60352297: scheduler RUNNING, numerical plan RUNNING.
