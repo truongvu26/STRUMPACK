@@ -1,11 +1,11 @@
 {
-  "status": "PENDING",
+  "status": "QUEUED",
   "preflight_job": 60395917,
   "profile_job": 60395933,
   "branch": "perf/hodlr-gpu-150-profile",
   "numerical_source": "24c5b4ae285a82ee49af53783a1d30445a5bde6e",
   "instrumented_source": "6bb8aa290f8754ba6c9f89e7fe77966526eaf90f",
-  "harness_revision": "1014f7ec",
+  "harness_revision": "7ba3ed6e",
   "dependency_source": "ae6e81a5d735c0679aae5675869bc5c9ccc53724",
   "baseline_sha256": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237",
   "diagnostic_sha256": "e78f8aa32f84c5693c39f9848fca2d35c185fdf55d708294544e71b01d48e434",
@@ -36,8 +36,14 @@
   "results_path": "profile_results/60395933/stage_summary.json",
   "notes": [
     "No numerical or performance result is claimed until the jobs finish.",
-    "The 150-cubed job depends on a successful 40-cubed instrumentation preflight.",
+    "The 40-cubed solver and all-rank phase accounting passed; both saved Nsight traces were reprocessed successfully after fixing a Python SQLite path compatibility issue. The original failed reporting exit status remains preserved. The validated job dependency was then cleared to release the 150-cubed run.",
     "Executables and ButterflyPACK shared library are immutable snapshots; LD_PRELOAD overrides executable DT_RPATH.",
-    "Raw logs, job folders, traces and build directories remain locally ignored."
-  ]
+    "Raw logs, job folders, traces and build directories remain locally ignored.",
+    "The short check produced 60,475 and 56,997 CUDA kernels on traced ranks zero and three, with valid launch-scope attribution; these are preflight observations, not 150-cubed results."
+  ],
+  "preflight_wall_time_minutes": 5,
+  "report_path": "profile_results/60395933/stage_report.md",
+  "preflight_validation": "PASS after offline reporting recovery",
+  "preflight_batch_status": "FAILED (reporting helper only)",
+  "preflight_recovered_record": "profile_results/60395917/recovered_preflight.json"
 }
