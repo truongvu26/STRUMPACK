@@ -93,6 +93,8 @@ namespace strumpack {
          {"hodlr_use_gpu",               required_argument, 0, 19},
          {"hodlr_gpu_front_max_bytes",   required_argument, 0, 20},
          {"hodlr_gpu_rectangular",       required_argument, 0, 21},
+         {"hodlr_gpu_host_panels",       required_argument, 0, 22},
+         {"hodlr_gpu_panel_max_bytes",   required_argument, 0, 23},
          {"hodlr_verbose",               no_argument, 0, 'v'},
          {"hodlr_quiet",                 no_argument, 0, 'q'},
          {"help",                        no_argument, 0, 'h'},
@@ -210,6 +212,17 @@ namespace strumpack {
             throw std::invalid_argument("--hodlr_gpu_rectangular requires 0 or 1");
           set_gpu_rectangular(std::string(optarg)=="1");
           break;
+        case 22:
+          if (std::string(optarg)!="0" && std::string(optarg)!="1")
+            throw std::invalid_argument("--hodlr_gpu_host_panels requires 0 or 1");
+          set_gpu_host_panels(std::string(optarg)=="1"); break;
+        case 23: {
+          const std::string text(optarg);
+          std::size_t bytes=0; std::istringstream input(text);
+          if (text.empty() || text.find_first_not_of("0123456789")!=std::string::npos || !(input>>bytes))
+            throw std::invalid_argument("--hodlr_gpu_panel_max_bytes requires a byte count");
+          set_gpu_panel_max_bytes(bytes);
+        } break;
         case 'h': describe_options(); break;
         }
       }
@@ -264,6 +277,10 @@ namespace strumpack {
                 << use_gpu() << ")" << std::endl
                 << "#   --hodlr_gpu_rectangular 0|1 (experimental GPU low-rank blocks and device Schur product) (default "
                 << gpu_rectangular() << ")" << std::endl
+                << "#   --hodlr_gpu_host_panels 0|1 (GPU BACA with bounded collective host preparation) (default "
+                << gpu_host_panels() << ")" << std::endl
+                << "#   --hodlr_gpu_panel_max_bytes bytes (per-rank host panel staging budget) (default "
+                << gpu_panel_max_bytes() << ")" << std::endl
                 << "#   --hodlr_gpu_front_max_bytes bytes (experimental bounded assembly, 0: off) (default "
                 << gpu_front_max_bytes() << ")" << std::endl
                 << "#   --hodlr_verbose or -v (default "

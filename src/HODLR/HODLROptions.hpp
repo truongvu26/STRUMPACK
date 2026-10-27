@@ -36,6 +36,7 @@
 #include "structured/StructuredOptions.hpp"
 
 #include <stdexcept>
+#include <limits>
 
 namespace strumpack {
 
@@ -347,6 +348,15 @@ namespace strumpack {
       int use_gpu() const { return use_gpu_; }
       void set_gpu_rectangular(bool enable) { gpu_rectangular_=enable; }
       bool gpu_rectangular() const { return gpu_rectangular_; }
+      void set_gpu_host_panels(bool enable) { gpu_host_panels_=enable; }
+      bool gpu_host_panels() const { return gpu_host_panels_; }
+      void set_gpu_panel_max_bytes(std::size_t bytes) {
+        if (bytes<16 || bytes>std::size_t(std::numeric_limits<int>::max()))
+          throw std::invalid_argument("GPU panel budget must be 16..INT_MAX bytes");
+        gpu_panel_max_bytes_=bytes;
+      }
+      std::size_t gpu_panel_max_bytes() const { return gpu_panel_max_bytes_; }
+
 
       // Zero disables the experimental single-rank front evaluator. The cap
       // bounds the complete prepared image, including dense Schur data.
@@ -385,6 +395,8 @@ namespace strumpack {
       int BF_entry_n15_ = 0;
       int use_gpu_ = 0;
       bool gpu_rectangular_ = false;
+      bool gpu_host_panels_=false;
+      std::size_t gpu_panel_max_bytes_=64u<<20;
       std::size_t gpu_front_max_bytes_ = 0;
 
       void set_defaults() {

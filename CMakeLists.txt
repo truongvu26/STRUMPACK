@@ -502,6 +502,7 @@ endif()
 option(STRUMPACK_HODLR_STAGE_PROFILE "Enable diagnostic CSV/NVTX HODLR stage scopes" OFF)
 option(STRUMPACK_USE_HODLR_GPU_RECTANGULAR "Build experimental rectangular GPU and device Schur path" OFF)
 option(STRUMPACK_USE_HODLR_GPU_EVALUATOR "Build the experimental bounded GPU front evaluator" OFF)
+option(STRUMPACK_USE_HODLR_GPU_HOST_PANELS "Build GPU BACA with bounded collective host panel preparation" OFF)
 option(STRUMPACK_REQUIRE_BPACK_GPU "Require the ButterflyPACK HODLR GPU interface" OFF)
 
 if(TPL_ENABLE_BPACK)
@@ -593,6 +594,38 @@ if(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
   cmake_pop_check_state()
   if(NOT STRUMPACK_HAVE_BPACK_GPU_RECTANGULAR)
     message(FATAL_ERROR "ButterflyPACK lacks the required rectangular GPU API")
+  endif()
+endif()
+
+if(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+    message(FATAL_ERROR "GPU host panels require the ButterflyPACK GPU interface")
+  endif()
+  cmake_push_check_state(RESET)
+  if(TARGET ButterflyPACK::butterflypack)
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::butterflypack)
+  else()
+    set(CMAKE_REQUIRED_LIBRARIES ButterflyPACK::dbutterflypack ButterflyPACK::zbutterflypack)
+  endif()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${MPI_CXX_LIBRARIES})
+  set(CMAKE_REQUIRED_INCLUDES ${MPI_CXX_INCLUDE_DIRS})
+  unset(STRUMPACK_HAVE_BPACK_GPU_HOST_PANELS CACHE)
+  check_cxx_source_compiles("
+    #include <bpack_gpu.h>
+    int main() {
+      void* a=nullptr; int comm=0,base=0; size_t budget=1024;
+      bpack_gpu_host_panel_stats stats{};
+      d_c_bpack_set_gpu_host_panels(&a,nullptr,nullptr,&comm,&budget);
+      z_c_bpack_set_gpu_host_panels(&a,nullptr,nullptr,&comm,&budget);
+      d_c_bf_set_gpu_host_panels(&a,nullptr,nullptr,&comm,&budget,&base);
+      z_c_bf_set_gpu_host_panels(&a,nullptr,nullptr,&comm,&budget,&base);
+      d_c_bpack_finish_gpu_host_panels(&a,&stats); z_c_bpack_finish_gpu_host_panels(&a,&stats);
+      d_c_bf_finish_gpu_host_panels(&a,&stats); z_c_bf_finish_gpu_host_panels(&a,&stats);
+      return 0;
+    }" STRUMPACK_HAVE_BPACK_GPU_HOST_PANELS)
+  cmake_pop_check_state()
+  if(NOT STRUMPACK_HAVE_BPACK_GPU_HOST_PANELS)
+    message(FATAL_ERROR "ButterflyPACK lacks collective host-panel registration/lifetime/statistics symbols")
   endif()
 endif()
 

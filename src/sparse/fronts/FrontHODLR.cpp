@@ -593,7 +593,7 @@ namespace strumpack {
       }
       if (cap && !fits)
         std::cout << "# GPU front evaluator block=" << block << " rows=" << n
-                  << " construction=host reason=prepared_image_exceeds_byte_cap cap=" << cap << std::endl;
+                  << " construction=" << (opts.HODLR_options().gpu_host_panels()?"gpu_host_panels":"host") << " reason=prepared_image_exceeds_byte_cap cap=" << cap << std::endl;
       return cap && fits;
     };
     if (cap) {
@@ -635,7 +635,7 @@ namespace strumpack {
       }
     }
 #endif
-    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":"F11.construct.host",sep_begin_,dim_sep(),dim_sep(),1,0,0);
+    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":(F11_.gpu_panel_construction()?"F11.construct.gpu_panels":"F11.construct.host"),sep_begin_,dim_sep(),dim_sep(),1,0,0);
       TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
       F11_.compress(extract_F11); }
     { HODLR_STAGE_SCOPE(p_fact,"F11.factor.gpu",sep_begin_,dim_sep(),dim_sep(),1,0,0);
@@ -677,7 +677,7 @@ namespace strumpack {
           (m+1)*sizeof(std::int64_t)<=cap-64-m*n*sizeof(scalar_t);
         if (!fits) {
           if (cap) std::cout << "# GPU front evaluator block=" << name
-            << " construction=host reason=prepared_image_exceeds_byte_cap cap=" << cap << std::endl;
+            << " construction=" << (opts.HODLR_options().gpu_host_panels()?"gpu_host_panels":"host") << " reason=prepared_image_exceeds_byte_cap cap=" << cap << std::endl;
           return;
         }
         const auto started=MPI_Wtime();
@@ -713,8 +713,8 @@ namespace strumpack {
       if (F12_.gpu_backend() && cap) { prepare_rectangle(false); prepare_rectangle(true); }
 #endif
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
-        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":"F12.construct.host",sep_begin_,dim_sep(),dim_upd(),1,0,0); F12_.compress(extract_F12); }
-        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":"F21.construct.host",sep_begin_,dim_upd(),dim_sep(),1,0,0); F21_.compress(extract_F21); } }
+        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":(F12_.gpu_panel_construction()?"F12.construct.gpu_panels":"F12.construct.host"),sep_begin_,dim_sep(),dim_upd(),1,0,0); F12_.compress(extract_F12); }
+        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":(F21_.gpu_panel_construction()?"F21.construct.gpu_panels":"F21.construct.host"),sep_begin_,dim_upd(),dim_sep(),1,0,0); F21_.compress(extract_F21); } }
       compress_flops_F12_F21();
 
       // first construct S=-F21*inv(F11)*F12 using matvecs, then
@@ -803,7 +803,7 @@ namespace strumpack {
                   << MPI_Wtime()-started << std::endl;
       }
 #endif
-      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":"F22.construct.host",sep_begin_,dim_upd(),dim_upd(),1,0,0);
+      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":(F22_->gpu_panel_construction()?"F22.construct.gpu_panels":"F22.construct.host"),sep_begin_,dim_upd(),dim_upd(),1,0,0);
       TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       F22_->compress(extract_F22);
       compress_flops_F22();

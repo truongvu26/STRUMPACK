@@ -56,6 +56,8 @@ namespace strumpack {
 
     // Local-rank API wall times. Construction includes host compression/upload.
     struct BackendStatistics {
+      std::size_t host_panel_calls=0,host_panel_windows=0,host_panel_upload_bytes=0,host_panel_peak_bytes=0;
+      double host_panel_prepare_seconds=0.,host_panel_metadata_seconds=0.,host_panel_upload_seconds=0.;
       double construction_seconds = 0., factor_seconds = 0.;
       double multiply_seconds = 0., inverse_seconds = 0.;
       std::size_t rhs_boundary_bytes = 0;
@@ -108,6 +110,15 @@ namespace strumpack {
 
       const BackendStatistics& backend_statistics() const { return backend_stats_; }
       int gpu_backend() const { return gpu_mode_; }
+      bool gpu_panel_construction() const {
+        if (!gpu_mode_ || !gpu_host_panels_) return false;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+        return !gpu_front_evaluator_;
+#else
+        return true;
+#endif
+      }
+
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       // Register only after construct_init and before compress. The shared
       // owner survives matrix moves and outlives the backend handle.
@@ -616,6 +627,8 @@ namespace strumpack {
       void finish_gpu_front_evaluation();
 #endif
       int gpu_mode_ = 0;
+      bool gpu_host_panels_=false;
+      std::size_t gpu_panel_max_bytes_=64u<<20;
       bool gpu_rectangular_ = false;
       bool backend_verbose_ = false;
       mutable BackendStatistics backend_stats_;

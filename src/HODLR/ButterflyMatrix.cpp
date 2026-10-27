@@ -33,6 +33,7 @@
 #include "misc/Tools.hpp"
 #include "ButterflyMatrix.hpp"
 #include "StageProfile.hpp"
+#include "GPUHostPanels.hpp"
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
 #include "GPUFrontEvaluator.hpp"
 #endif
@@ -308,6 +309,7 @@ namespace strumpack {
       kerquant_ = h.kerquant_; h.kerquant_ = nullptr;
       ptree_ = h.ptree_;       h.ptree_ = nullptr;
       gpu_mode_=h.gpu_mode_;
+      gpu_host_panels_=h.gpu_host_panels_; gpu_panel_max_bytes_=h.gpu_panel_max_bytes_;
       backend_stats_=h.backend_stats_;
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       gpu_front_evaluator_=std::move(h.gpu_front_evaluator_);
@@ -328,6 +330,7 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
       if (!A.gpu_rectangular_) return;
       gpu_mode_=A.gpu_mode_;
+      gpu_host_panels_=A.gpu_host_panels_; gpu_panel_max_bytes_=A.gpu_panel_max_bytes_;
       if constexpr (std::is_same<scalar_t,double>::value)
         d_c_bf_enable_gpu(&lr_bf_,&gpu_mode_);
       else if constexpr (std::is_same<scalar_t,std::complex<double>>::value)
@@ -420,9 +423,16 @@ namespace strumpack {
       BLACSGrid gloc(MPIComm(MPI_COMM_SELF), 1),
         gnull(MPIComm(MPI_COMM_NULL), 1);
       AelemCommPtrs<scalar_t> AC{&Aelem, c_, &gloc, &gnull};
+#if defined(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
+      GPUHostPanelSession<scalar_t> panels(gpu_panel_construction(),&lr_bf_,Fcomm_,gpu_panel_max_bytes_,
+                                          true,false,rows_,&AC);
+#endif
       LRBF_construct_element_compute<scalar_t>
         (lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_block_evaluation<scalar_t>), &AC);
+#if defined(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
+      panels.finish(backend_stats_,*c_,cols_);
+#endif
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_evaluation();
 #endif
@@ -433,9 +443,18 @@ namespace strumpack {
     ButterflyMatrix<scalar_t>::compress(const elem_blocks_t& Aelem) {
       const double started=MPI_Wtime();
       C2Fptr f = static_cast<void*>(const_cast<elem_blocks_t*>(&Aelem));
+      if (gpu_panel_construction() && c_->size()!=1)
+        throw std::invalid_argument("Sequential host panel callbacks require a one-rank communicator");
+#if defined(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
+      GPUHostPanelSession<scalar_t> panels(gpu_panel_construction(),&lr_bf_,Fcomm_,gpu_panel_max_bytes_,
+                                          true,true,rows_,f);
+#endif
       LRBF_construct_element_compute<scalar_t>
         (lr_bf_, options_, stats_, msh_, kerquant_, ptree_,
          &(HODLR_block_evaluation_seq<scalar_t>), f);
+#if defined(STRUMPACK_USE_HODLR_GPU_HOST_PANELS)
+      panels.finish(backend_stats_,*c_,cols_);
+#endif
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_evaluation();
 #endif

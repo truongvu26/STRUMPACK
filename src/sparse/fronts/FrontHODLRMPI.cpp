@@ -310,7 +310,7 @@ namespace strumpack {
         (m+1)*sizeof(std::int64_t)<=cap-64-m*n*sizeof(scalar_t);
       if (cap && !fits && Comm().is_root())
         std::cout << "# GPU front evaluator block=" << block
-          << " construction=host reason=prepared_image_exceeds_byte_cap rows=" << m
+          << " construction=" << (opts.HODLR_options().gpu_host_panels()?"gpu_host_panels":"host") << " reason=prepared_image_exceeds_byte_cap rows=" << m
           << " cols=" << n << " cap=" << cap << std::endl;
       return cap && fits;
     };
@@ -363,7 +363,7 @@ namespace strumpack {
         for (auto& Jk : J) for (auto& j : Jk) j += sep_begin_;
         this->extract_2d(A, I, J, B);
       };
-    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":"F11.construct.host",sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
+    { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":(F11_.gpu_panel_construction()?"F11.construct.gpu_panels":"F11.construct.host"),sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
       F11_.compress(extract_F11); }
     { HODLR_STAGE_SCOPE(p_fact,"F11.factor.gpu",sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
@@ -404,10 +404,10 @@ namespace strumpack {
       { TIMER_TIME(TaskType::LRBF_COMPRESS, 0, t_lrbf_compress);
         // int bsize = std::min(64.0,ceil(F11_.get_stat("Rank_max")/2.0));
         // F12_.set_BACA_block(bsize);
-        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":"F12.construct.host",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0); F12_.compress(extract_F12); }
+        { HODLR_STAGE_SCOPE(p12,prepared12?"F12.construct.gpu":(F12_.gpu_panel_construction()?"F12.construct.gpu_panels":"F12.construct.host"),sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0); F12_.compress(extract_F12); }
         // bsize = std::min(64.0,ceil(F12_.get_stat("Rank_max")/2.0));
         // F21_.set_BACA_block(bsize);
-        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":"F21.construct.host",sep_begin_,dim_upd(),dim_sep(),Comm().size(),Comm().rank(),0); F21_.compress(extract_F21); } }
+        { HODLR_STAGE_SCOPE(p21,prepared21?"F21.construct.gpu":(F21_.gpu_panel_construction()?"F21.construct.gpu_panels":"F21.construct.host"),sep_begin_,dim_upd(),dim_sep(),Comm().size(),Comm().rank(),0); F21_.compress(extract_F21); } }
       compress_flops_F12_F21();
 
       // first construct S=-F21*inv(F11)*F12 using matvecs, then
@@ -476,7 +476,7 @@ namespace strumpack {
       if (eligible(dim_upd(),dim_upd(),"F22"))
         { F22_->set_gpu_front_evaluator(prepare(dim_upd(),dim_upd(),true,true,true,&Schur,"F22")); prepared22=true; }
 #endif
-      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":"F22.construct.host",sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),0);
+      HODLR_STAGE_SCOPE(p_f22,prepared22?"F22.construct.gpu":(F22_->gpu_panel_construction()?"F22.construct.gpu_panels":"F22.construct.host"),sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::HSS_COMPRESS_22, 0, t_f22_compress);
       // int bsize = std::min(64.0,ceil(Schur.get_stat("Rank_max")/2.0));
       // F22_->set_BACA_block(bsize);

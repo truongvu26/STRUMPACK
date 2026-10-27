@@ -21,6 +21,7 @@ if 'diagnostic' in quiet:
     def group(phase):
         if phase.endswith('.prepare') or phase.startswith('prepare.'): return 'Entry-image assembly, child extraction, replication and upload'
         if '.construct.host' in phase: return 'Compression using host callbacks (includes native waiting)'
+        if '.construct.gpu_panels' in phase: return 'GPU BACA with collective host-prepared panels'
         if '.construct.gpu' in phase: return 'Compression using device evaluator (includes native waiting)'
         if phase=='F11.factor.gpu': return 'Native GPU HODLR factorization (includes native waiting)'
         if phase=='Schur.apply.device': return 'Compound Schur GPU operator and communication'

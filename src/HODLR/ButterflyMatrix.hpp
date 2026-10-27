@@ -119,11 +119,22 @@ namespace strumpack {
       std::size_t rank() const override { return get_stat("Rank_max"); }
 
       struct BackendStatistics {
+      std::size_t host_panel_calls=0,host_panel_windows=0,host_panel_upload_bytes=0,host_panel_peak_bytes=0;
+      double host_panel_prepare_seconds=0.,host_panel_metadata_seconds=0.,host_panel_upload_seconds=0.;
         double construction_seconds=0.,multiply_seconds=0.,schur_seconds=0.;
         std::size_t schur_calls=0,schur_boundary_bytes=0,schur_intermediate_peak_bytes=0;
       };
       const BackendStatistics& backend_statistics() const { return backend_stats_; }
       bool gpu_backend() const { return gpu_mode_!=0; }
+      bool gpu_panel_construction() const {
+        if (!gpu_mode_ || !gpu_host_panels_) return false;
+#if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
+        return !gpu_front_evaluator_;
+#else
+        return true;
+#endif
+      }
+
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       void set_gpu_front_evaluator(std::shared_ptr<GPUFrontEvaluator> state);
 #endif
@@ -188,6 +199,8 @@ namespace strumpack {
       const MPIComm* c_ = nullptr;
       int rows_ = 0, cols_ = 0, lrows_ = 0, lcols_ = 0;
       int gpu_mode_=0;
+      bool gpu_host_panels_=false;
+      std::size_t gpu_panel_max_bytes_=64u<<20;
       mutable BackendStatistics backend_stats_;
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       std::shared_ptr<GPUFrontEvaluator> gpu_front_evaluator_;
