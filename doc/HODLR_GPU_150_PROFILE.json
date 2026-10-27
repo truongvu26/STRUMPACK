@@ -1,11 +1,11 @@
 {
-  "status": "IN_PROGRESS_AFTER_RESOURCE_FAILURE",
+  "status": "PASS_WITH_REPORT_RECOVERY",
   "preflight_job": 60395917,
   "profile_job": 60399062,
   "branch": "perf/hodlr-gpu-150-profile",
   "numerical_source": "24c5b4ae285a82ee49af53783a1d30445a5bde6e",
   "instrumented_source": "6bb8aa290f8754ba6c9f89e7fe77966526eaf90f",
-  "harness_revision": "c2429294 plus memory-pool configuration capture",
+  "harness_revision": "dcf237f7",
   "dependency_source": "ae6e81a5d735c0679aae5675869bc5c9ccc53724",
   "baseline_sha256": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237",
   "diagnostic_sha256": "e78f8aa32f84c5693c39f9848fca2d35c185fdf55d708294544e71b01d48e434",
@@ -35,14 +35,14 @@
     "GPU diagnostic plus CUDA/NVTX trace on ranks 0 and 31"
   ],
   "notes": [
-    "No numerical or performance result is claimed until the jobs finish.",
     "The 40-cubed solver and all-rank phase accounting passed; both saved Nsight traces were reprocessed successfully after fixing a Python SQLite path compatibility issue. The original failed reporting exit status remains preserved. The validated job dependency was then cleared to release the 150-cubed run.",
     "Executables and ButterflyPACK shared library are immutable snapshots; LD_PRELOAD overrides executable DT_RPATH.",
     "Raw logs, job folders, traces and build directories remain locally ignored.",
     "The short check produced 60,475 and 56,997 CUDA kernels on traced ranks zero and three, with valid launch-scope attribution; these are preflight observations, not 150-cubed results.",
     "Quiet GPU and optional CPU control share one allocation; stage and trace diagnostics use separate shorter allocations and are not performance samples.",
     "Both 150-cubed attempts failed reproducibly during cuSOLVER handle creation; completed-front measurements are partial and are not full-run profiling results. Resource isolation is in progress.",
-    "The default 0.85 pool reserve exhausted external CUDA memory during private cuSOLVER handle growth. The same error was isolated without solver numerics. Reruns preserve both executable and dependency hashes and use an explicit 0.50 pool reserve; this runtime workaround is not a handle-reuse fix."
+    "The default 0.85 pool reserve exhausted external CUDA memory during private cuSOLVER handle growth. The same error was isolated without solver numerics. Reruns preserve both executable and dependency hashes and use an explicit 0.50 pool reserve; this runtime workaround is not a handle-reuse fix.",
+    "Quiet GPU/CPU and diagnostic jobs completed successfully. The traced solver and all-rank accounting passed; saved CUDA reports were validated after offline recovery from a postprocessing timeout. The traced batch job remains FAILED in Slurm and its original exit files are unchanged."
   ],
   "preflight_wall_time_minutes": 5,
   "preflight_validation": "PASS after offline reporting recovery",
@@ -169,5 +169,453 @@
         }
       ]
     }
-  }
+  },
+  "solver_validation": "PASS",
+  "quiet_results": [
+    {
+      "variant": "gpu",
+      "status": "PASS",
+      "exit_code": 0,
+      "relative_error": 3.91154e-10,
+      "scaled_residual": 2.10489e-08,
+      "factor_seconds": 713.617,
+      "solve_seconds": 4.83595,
+      "factor_plus_solve_seconds": 718.45295,
+      "hodlr_fronts": 1980.0,
+      "refinement_iterations": 9.0
+    },
+    {
+      "variant": "cpu",
+      "status": "PASS",
+      "exit_code": 0,
+      "relative_error": 5.40764e-10,
+      "scaled_residual": 4.0442e-08,
+      "factor_seconds": 853.0,
+      "solve_seconds": 3.37882,
+      "factor_plus_solve_seconds": 856.37882,
+      "hodlr_fronts": 1980.0,
+      "refinement_iterations": 9.0
+    }
+  ],
+  "diagnostic_result": {
+    "variant": "diagnostic",
+    "status": "PASS",
+    "exit_code": 0,
+    "relative_error": 9.64393e-11,
+    "scaled_residual": 1.3769e-08,
+    "factor_seconds": 715.432,
+    "solve_seconds": 3.96929,
+    "factor_plus_solve_seconds": 719.40129,
+    "hodlr_fronts": 1980.0,
+    "refinement_iterations": 8.0
+  },
+  "factor_phase_budget": {
+    "job": 60399068,
+    "metric": "Exclusive mean rank wall seconds; includes waiting, not global critical path",
+    "factor_envelope_seconds": 715.442847902319,
+    "components": {
+      "host_callback_compression": {
+        "seconds": 413.8335926739437,
+        "fraction": 0.5784299806578614
+      },
+      "setup_traversal_dense_and_remaining": {
+        "seconds": 204.68859619355135,
+        "fraction": 0.28610055547231905
+      },
+      "device_evaluator_compression": {
+        "seconds": 51.25170557815363,
+        "fraction": 0.07163633786880924
+      },
+      "host_schur_compression_outside_operator": {
+        "seconds": 15.59722158943623,
+        "fraction": 0.021800793222222208
+      },
+      "entry_preparation": {
+        "seconds": 28.054061125207227,
+        "fraction": 0.03921216237951338
+      },
+      "device_schur_operator": {
+        "seconds": 1.6680353845858917,
+        "fraction": 0.002331472582997478
+      },
+      "gpu_hodlr_factorization": {
+        "seconds": 0.34963535744100227,
+        "fraction": 0.0004886978162771973
+      }
+    }
+  },
+  "construction_coverage": [
+    {
+      "phase": "F22.construct.host",
+      "unique_fronts": 94,
+      "rank_calls": 193,
+      "mean_rank_seconds": 244.52100167732533
+    },
+    {
+      "phase": "F12.construct.host",
+      "unique_fronts": 22,
+      "rank_calls": 113,
+      "mean_rank_seconds": 91.51828958987971
+    },
+    {
+      "phase": "F21.construct.host",
+      "unique_fronts": 22,
+      "rank_calls": 113,
+      "mean_rank_seconds": 68.38571173986747
+    },
+    {
+      "phase": "F22.construct.gpu",
+      "unique_fronts": 1885,
+      "rank_calls": 1885,
+      "mean_rank_seconds": 19.750565220261706
+    },
+    {
+      "phase": "F12.construct.gpu",
+      "unique_fronts": 1957,
+      "rank_calls": 1965,
+      "mean_rank_seconds": 14.79764978651474
+    },
+    {
+      "phase": "F21.construct.gpu",
+      "unique_fronts": 1957,
+      "rank_calls": 1965,
+      "mean_rank_seconds": 10.70587978318872
+    },
+    {
+      "phase": "F11.construct.host",
+      "unique_fronts": 3,
+      "rank_calls": 64,
+      "mean_rank_seconds": 9.408589666871194
+    },
+    {
+      "phase": "F11.construct.gpu",
+      "unique_fronts": 1977,
+      "rank_calls": 2046,
+      "mean_rank_seconds": 5.997610788188467
+    }
+  ],
+  "slowest_construction_fronts": [
+    {
+      "phase": "F22.construct.host",
+      "front": 3130574,
+      "rows": 16428,
+      "cols": 16428,
+      "procs": 3,
+      "calls": 3,
+      "participating_ranks": 3,
+      "max_rank": 29,
+      "max_seconds": 169.06480273400666,
+      "mean_seconds": 169.06315908732358,
+      "rank_seconds": 507.18947726197075
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 1662560,
+      "rows": 16280,
+      "cols": 16280,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 15,
+      "max_seconds": 164.42811545100994,
+      "mean_seconds": 164.42709447449306,
+      "rank_seconds": 328.8541889489861
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 1251786,
+      "rows": 16464,
+      "cols": 16464,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 11,
+      "max_seconds": 110.53736888000276,
+      "mean_seconds": 110.53719020952121,
+      "rank_seconds": 221.07438041904243
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 2922560,
+      "rows": 16280,
+      "cols": 16280,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 27,
+      "max_seconds": 98.73631885100622,
+      "mean_seconds": 98.72744003398111,
+      "rank_seconds": 197.45488006796222
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 1670700,
+      "rows": 22350,
+      "cols": 22350,
+      "procs": 8,
+      "calls": 8,
+      "participating_ranks": 8,
+      "max_rank": 15,
+      "max_seconds": 87.43971395597328,
+      "mean_seconds": 87.43917948649323,
+      "rank_seconds": 699.5134358919458
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 2825324,
+      "rows": 12136,
+      "cols": 12136,
+      "procs": 1,
+      "calls": 1,
+      "participating_ranks": 1,
+      "max_rank": 26,
+      "max_seconds": 87.36385571100982,
+      "mean_seconds": 87.36385571100982,
+      "rank_seconds": 87.36385571100982
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 2094240,
+      "rows": 11952,
+      "cols": 11952,
+      "procs": 1,
+      "calls": 1,
+      "participating_ranks": 1,
+      "max_rank": 19,
+      "max_seconds": 82.57334770000307,
+      "mean_seconds": 82.57334770000307,
+      "rank_seconds": 82.57334770000307
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 3335924,
+      "rows": 22200,
+      "cols": 22200,
+      "procs": 8,
+      "calls": 8,
+      "participating_ranks": 8,
+      "max_rank": 30,
+      "max_seconds": 80.26247978000902,
+      "mean_seconds": 80.26193041585793,
+      "rank_seconds": 642.0954433268635
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 1250490,
+      "rows": 11952,
+      "cols": 11952,
+      "procs": 1,
+      "calls": 1,
+      "participating_ranks": 1,
+      "max_rank": 11,
+      "max_seconds": 80.25575836398639,
+      "mean_seconds": 80.25575836398639,
+      "rank_seconds": 80.25575836398639
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 412254,
+      "rows": 12096,
+      "cols": 12096,
+      "procs": 1,
+      "calls": 1,
+      "participating_ranks": 1,
+      "max_rank": 3,
+      "max_seconds": 78.83800310996594,
+      "mean_seconds": 78.83800310996594,
+      "rank_seconds": 78.83800310996594
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 829911,
+      "rows": 16464,
+      "cols": 16464,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 7,
+      "max_seconds": 70.76381410099566,
+      "mean_seconds": 70.76329769351287,
+      "rank_seconds": 141.52659538702574
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 828615,
+      "rows": 11952,
+      "cols": 11952,
+      "procs": 1,
+      "calls": 1,
+      "participating_ranks": 1,
+      "max_rank": 7,
+      "max_seconds": 68.90229529101634,
+      "mean_seconds": 68.90229529101634,
+      "rank_seconds": 68.90229529101634
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 413550,
+      "rows": 16650,
+      "cols": 16650,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 3,
+      "max_seconds": 61.779524873010814,
+      "mean_seconds": 61.778821088490076,
+      "rank_seconds": 123.55764217698015
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 3030637,
+      "rows": 12321,
+      "cols": 12321,
+      "procs": 2,
+      "calls": 2,
+      "participating_ranks": 2,
+      "max_rank": 29,
+      "max_seconds": 59.482928972982336,
+      "mean_seconds": 59.48239932049182,
+      "rank_seconds": 118.96479864098364
+    },
+    {
+      "phase": "F22.construct.host",
+      "front": 2508974,
+      "rows": 16576,
+      "cols": 16576,
+      "procs": 4,
+      "calls": 4,
+      "participating_ranks": 4,
+      "max_rank": 23,
+      "max_seconds": 56.48042948398506,
+      "mean_seconds": 56.47937064174039,
+      "rank_seconds": 225.91748256696155
+    }
+  ],
+  "peak_logical_resident_entry_image_bytes_per_rank": 2856853608,
+  "rank_balance": {
+    "host_compression_seconds": {
+      "min_seconds": 239.83252128510503,
+      "max_seconds": 607.2035054098815
+    },
+    "device_compression_seconds": {
+      "min_seconds": 27.314626320963725,
+      "max_seconds": 80.6263678164105
+    },
+    "uninstrumented_factor_seconds": {
+      "min_seconds": 8.109379368077498,
+      "max_seconds": 385.575689771038
+    },
+    "largest_pre_compression_gap": {
+      "front": 1665224,
+      "rows": 5476,
+      "cols": 16576,
+      "procs": 4,
+      "max_seconds": 241.48494637501426,
+      "min_seconds": 0.8809724349994212,
+      "mean_seconds": 121.1829612612637
+    }
+  },
+  "report_path": "doc/HODLR_GPU_150_PROFILE.rst",
+  "trace_recovery": {
+    "status": "PASS_FOR_NUMERICS_AND_RECOVERED_TRACE",
+    "job": 60399073,
+    "original_batch_status": "FAILED",
+    "original_step_exit_code": 137,
+    "reason": "Slurm --wait=60 terminated rank 31 during CPU-only report conversion after the solver and report capture completed",
+    "recovery": "Exported preserved rank31.nsys-rep and analyzed it offline; original exit codes and failed canonical stage summary remain unchanged",
+    "metrics": {
+      "factor_seconds": 716.697,
+      "solve_seconds": 5.8823,
+      "relative_error": 7.55519e-11,
+      "scaled_residual": 1.81176e-08,
+      "refinement_iterations": 8.0
+    },
+    "cuda": [
+      {
+        "rank": 0,
+        "kernels": 723387,
+        "launch_attributed_kernels": 723387,
+        "gpu_activity_union_seconds": 20.602311266,
+        "kernel_duration_sum_seconds": 19.469004763,
+        "nvtx_events": 117286,
+        "memory_copies": [
+          {
+            "direction": "Host-to-Device",
+            "calls": 68952,
+            "bytes": 6898833964,
+            "seconds": 0.5589485389999718
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 53237,
+            "bytes": 6611685940,
+            "seconds": 0.49025631100000966
+          },
+          {
+            "direction": "Device-to-Device",
+            "calls": 12044,
+            "bytes": 5866439448,
+            "seconds": 0.033480723999999594
+          }
+        ],
+        "largest_host_api": {
+          "name": "cudaMemcpyAsync_v3020",
+          "calls": 123297,
+          "host_seconds": 24.780769808999963
+        }
+      },
+      {
+        "rank": 31,
+        "kernels": 1390362,
+        "launch_attributed_kernels": 1390362,
+        "gpu_activity_union_seconds": 38.95664845,
+        "kernel_duration_sum_seconds": 36.663818818,
+        "nvtx_events": 232793,
+        "memory_copies": [
+          {
+            "direction": "Host-to-Device",
+            "calls": 134528,
+            "bytes": 11429800120,
+            "seconds": 0.8699388510000343
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 107451,
+            "bytes": 17170150800,
+            "seconds": 1.2733947520002713
+          },
+          {
+            "direction": "Device-to-Device",
+            "calls": 21805,
+            "bytes": 10948593584,
+            "seconds": 0.0592275899999966
+          }
+        ],
+        "largest_host_api": {
+          "name": "cudaMemcpyAsync_v3020",
+          "calls": 245881,
+          "host_seconds": 40.73267060899995
+        }
+      }
+    ],
+    "all_rank_factor_and_solve_accounting": "PASS (32 ranks)"
+  },
+  "postprocessing_fix": "1565498a moves CPU-only conversion after the MPI step and records target/report statuses separately",
+  "next_targets": [
+    {
+      "priority": 1,
+      "target": "Bound and reuse cuSOLVER handles per device/stream",
+      "evidence": "Default 0.85 pool reserve failed at 150 cubed; isolated handle growth exhausted external device memory."
+    },
+    {
+      "priority": 2,
+      "target": "Bounded distributed device evaluation of large F22, then F12/F21",
+      "evidence": "These host fallbacks account for 56.5 percent of exclusive mean rank factor time."
+    },
+    {
+      "priority": 3,
+      "target": "Reassess subtree balance using measured compression cost",
+      "evidence": "Host compression spans 240 to 607 rank seconds; parent arrival gaps reach 241 seconds."
+    }
+  ]
 }
