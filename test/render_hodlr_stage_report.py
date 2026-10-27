@@ -47,5 +47,21 @@ for c in data['cases']:
     lines += ['', '## Selected-rank CUDA activity', '', 'Only ranks zero and the last rank are traced; each shares a GPU with an untraced peer.', '',
       '| Rank | Kernel count | GPU active union (s) | Sum kernel duration (s) | NVTX events |', '|---|---:|---:|---:|---:|']
     for x in c['cuda']: lines.append(f"| {x['rank']} | {x['kernel_count']} | {x['gpu_active_union_seconds']:.3f} | {x['kernel_duration_sum_seconds']:.3f} | {x.get('nvtx_events',0)} |")
+for c in data['cases']:
+    if 'cuda' not in c: continue
+    for x in c['cuda']:
+        a=x.get('launch_scope_attribution')
+        if not a: continue
+        phases=[p for p in a['phases'] if p['section']=='solver.factor']
+        lines += ['',f"### Rank {x['rank']}: CUDA work by launch phase",'',
+          'GPU durations are sums of this process\'s operations; they can overlap and are not host phase times.', '',
+          '| Phase | Kernels | Kernel sum (s) | Copy sum (s) | Copy payload (GiB) |',
+          '|---|---:|---:|---:|---:|']
+        for q in sorted(phases,key=lambda p:p['kernel_sum_seconds']+p['copy_sum_seconds'],reverse=True)[:10]:
+            lines.append(f"| {q['phase']} | {q['kernels']} | {q['kernel_sum_seconds']:.3f} | {q['copy_sum_seconds']:.3f} | {q['copy_bytes']/2**30:.3f} |")
+        lines += ['',f"### Rank {x['rank']}: highest CUDA host API costs",'',
+          '| API | Calls | Host duration sum (s) |', '|---|---:|---:|']
+        for q in a['cuda_runtime_api'][:8]:
+            lines.append(f"| {q['name']} | {q['calls']} | {q['host_seconds']:.3f} |")
 lines += ['', '## Measurement limits', '']+['- '+x for x in data['notes']]
 (root/'stage_report.md').write_text('\n'.join(lines)+'\n')
