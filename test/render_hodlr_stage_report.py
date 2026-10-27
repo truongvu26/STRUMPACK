@@ -5,6 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 root=Path(sys.argv[1]); data=json.loads((root/'stage_summary.json').read_text())
 lines=[f"# {data['grid']}³ GPU HODLR profiling — job {data['job']}", '',f"Status: {data['status']}", '',
+       f"ButterflyPACK device-pool fraction: {data.get('bpack_gpu_heap_fraction',.85):.2f}.", '',
        'Quiet cases measure solver performance. Diagnostic cases explain local phase costs; tracing adds overhead.', '',
        '| Case | Factor (s) | Solve (s) | Total (s) | Relative error | Scaled residual |',
        '|---|---:|---:|---:|---:|---:|']

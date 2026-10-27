@@ -1,11 +1,11 @@
 {
   "status": "IN_PROGRESS_AFTER_RESOURCE_FAILURE",
   "preflight_job": 60395917,
-  "profile_job": 60397796,
+  "profile_job": 60399062,
   "branch": "perf/hodlr-gpu-150-profile",
   "numerical_source": "24c5b4ae285a82ee49af53783a1d30445a5bde6e",
   "instrumented_source": "6bb8aa290f8754ba6c9f89e7fe77966526eaf90f",
-  "harness_revision": "7ba3ed6e",
+  "harness_revision": "c2429294 plus memory-pool configuration capture",
   "dependency_source": "ae6e81a5d735c0679aae5675869bc5c9ccc53724",
   "baseline_sha256": "ed69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237",
   "diagnostic_sha256": "e78f8aa32f84c5693c39f9848fca2d35c185fdf55d708294544e71b01d48e434",
@@ -25,7 +25,8 @@
     "relative_solver_tolerance": 1e-10,
     "leaf_size": 128,
     "butterfly_levels": 0,
-    "evaluator_cap_bytes": 268435456
+    "evaluator_cap_bytes": 268435456,
+    "bpack_gpu_heap_fraction": 0.5
   },
   "cases": [
     "quiet GPU current interface",
@@ -40,16 +41,17 @@
     "Raw logs, job folders, traces and build directories remain locally ignored.",
     "The short check produced 60,475 and 56,997 CUDA kernels on traced ranks zero and three, with valid launch-scope attribution; these are preflight observations, not 150-cubed results.",
     "Quiet GPU and optional CPU control share one allocation; stage and trace diagnostics use separate shorter allocations and are not performance samples.",
-    "Both 150-cubed attempts failed reproducibly during cuSOLVER handle creation; completed-front measurements are partial and are not full-run profiling results. Resource isolation is in progress."
+    "Both 150-cubed attempts failed reproducibly during cuSOLVER handle creation; completed-front measurements are partial and are not full-run profiling results. Resource isolation is in progress.",
+    "The default 0.85 pool reserve exhausted external CUDA memory during private cuSOLVER handle growth. The same error was isolated without solver numerics. Reruns preserve both executable and dependency hashes and use an explicit 0.50 pool reserve; this runtime workaround is not a handle-reuse fix."
   ],
   "preflight_wall_time_minutes": 5,
   "preflight_validation": "PASS after offline reporting recovery",
   "preflight_batch_status": "FAILED (reporting helper only)",
   "preflight_recovered_record": "profile_results/60395917/recovered_preflight.json",
   "profile_jobs": {
-    "timing_gpu_and_optional_cpu": 60397796,
-    "stage_diagnostic": 60397798,
-    "cuda_nvtx_trace": 60397800
+    "timing_gpu_and_optional_cpu": 60399062,
+    "stage_diagnostic": 60399068,
+    "cuda_nvtx_trace": 60399073
   },
   "superseded_profile_job": {
     "job": 60395933,
@@ -67,12 +69,12 @@
     "minutes_per_job": 30,
     "concurrent_jobs_limit": 2,
     "cpu_control_minimum_remaining_seconds": 1000,
-    "trace_dependency": "afterok:60397798"
+    "trace_dependency": "afterok:60399068"
   },
   "results_paths": {
-    "timing_gpu_and_optional_cpu": "profile_results/60397796/stage_summary.json",
-    "stage_diagnostic": "profile_results/60397798/stage_summary.json",
-    "cuda_nvtx_trace": "profile_results/60397800/stage_summary.json"
+    "timing_gpu_and_optional_cpu": "profile_results/60399062/stage_summary.json",
+    "stage_diagnostic": "profile_results/60399068/stage_summary.json",
+    "cuda_nvtx_trace": "profile_results/60399073/stage_summary.json"
   },
   "failed_attempts": [
     {
@@ -105,5 +107,67 @@
     "status": "CANCELLED_WHILE_PENDING",
     "reason": "Diagnostic prerequisite failed; no trace allocation consumed"
   },
-  "resource_probe_job": 60398989
+  "resource_probe_job": 60398989,
+  "resource_probe": {
+    "job": 60398989,
+    "status": "RESOURCE_EXHAUSTION_REPRODUCED",
+    "ranks": 2,
+    "gpus": 1,
+    "cases": {
+      ".85": [
+        {
+          "rank": 0,
+          "initial_free_bytes": 6186860544,
+          "maximum_handles": 283,
+          "failure": {
+            "rank": 0,
+            "handles": 283,
+            "status": 7,
+            "free_bytes": 2359296,
+            "total_bytes": 42404806656,
+            "host_status": [
+              "VmSize:\t27233432 kB",
+              "VmRSS:\t  391376 kB",
+              "Threads:\t4"
+            ]
+          },
+          "minimum_free_bytes": 2359296
+        },
+        {
+          "rank": 1,
+          "initial_free_bytes": 6224609280,
+          "maximum_handles": 206,
+          "failure": {
+            "rank": 1,
+            "handles": 206,
+            "status": 7,
+            "free_bytes": 2359296,
+            "total_bytes": 42404806656,
+            "host_status": [
+              "VmSize:\t26276580 kB",
+              "VmRSS:\t  385828 kB",
+              "Threads:\t4"
+            ]
+          },
+          "minimum_free_bytes": 2359296
+        }
+      ],
+      ".50": [
+        {
+          "rank": 0,
+          "initial_free_bytes": 20753678336,
+          "maximum_handles": 400,
+          "failure": null,
+          "minimum_free_bytes": 11209539584
+        },
+        {
+          "rank": 1,
+          "initial_free_bytes": 20753678336,
+          "maximum_handles": 400,
+          "failure": null,
+          "minimum_free_bytes": 11209539584
+        }
+      ]
+    }
+  }
 }

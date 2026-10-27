@@ -29,6 +29,7 @@ srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c 1 --gpu-bind=none \
 read -r -a cases <<< "${HODLR_PROFILE_CASES:-gpu cpu diagnostic traced}"
 printf '%s\n' "${cases[@]}" > "$out/cases.txt"
 printf '%s\n' "$n" "$HODLR_PROFILE_RANKS" > "$out/layout.txt"
+printf '%s\n' "${BPACK_GPU_HEAP_FRACTION:-0.85}" > "$out/heap_fraction.txt"
 for variant in "${cases[@]}"; do
   # Short backfill allocations prioritize the requested GPU run. A CPU control
   # is optional and must not start without its measured 150-cubed time budget.

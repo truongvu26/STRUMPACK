@@ -12,6 +12,8 @@ result=dict(status='RUNNING',job=root.name,grid=n,unknowns=n**3,ranks=ranks,rhs=
  'Resident-image bytes exclude ButterflyPACK factors, pool reservations and temporary device allocations.',
  'One quiet trial per backend gives a preliminary comparison, not a repeated benchmark.'])
 failures=[]
+heap_file=root/'heap_fraction.txt'
+result['bpack_gpu_heap_fraction']=float(heap_file.read_text()) if heap_file.exists() else .85
 def number(text,pattern):
     matches=re.findall(pattern,text)
     if len(matches)!=1: raise ValueError('Expected one '+pattern)
