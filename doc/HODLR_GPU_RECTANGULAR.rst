@@ -105,8 +105,22 @@ factor-row routing, leases with eviction and per-GPU memory accounting.
 Validation record
 -------------------
 
-Job 60387091 passed the initial one-/four-rank direct checks and all six
-40^3 sparse variants. Final checks after factor-buffer reuse are pending.
+Job 60390291 PASSED on the final numerical source (STRUMPACK a450b185,
+ButterflyPACK 8285e65): device contract tests, zero Compute Sanitizer memory
+errors, square-evaluator regression, real/complex direct checks at one,
+three and four ranks, scoped MPI_SELF work while other ranks wait, and all
+six 40^3 sparse variants with three RHS and 24 HODLR fronts. The four-rank
+constructed case reports 46 rectangular GPU constructions, nine collective
+prepared images and 69 device Schur calls across front roots. Its relative
+error is 2.64e-11 and scaled residual 3.42e-9. Raw logs remain under the
+ignored profile_results/60390291 folder. Exact executable and library hashes
+are retained in HODLR_GPU_RECTANGULAR.json.
+
+The initial job 60387091 also passed before device-factor reuse and the
+conjugate-transpose extension. Failed integration attempts 60386850 and
+60386973 remain in the JSON with their causes and corrections; neither
+reached the sparse tests. Jobs 60389146/60389147 were cancelled while
+pending to finish the complex path and used no compute allocation.
 The direct regression compares real and
 complex rectangular GPU BACA and N/T/C multiplies against independent dense
 references, tests one/three RHS with padding and moved owners, and compares
