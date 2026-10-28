@@ -1,5 +1,5 @@
 {
-  "status": "AWAITING_FAILED_FRONT_CAPTURE",
+  "status": "QR_SVD_FIXED_COMPONENTS_PASS_SPARSE_PROFILING_IN_PROGRESS",
   "native_recompression": {
     "status": "PASS",
     "job": 60419636,
@@ -62,6 +62,330 @@
     "snapshot": "accuracy_capture_snapshot_v2",
     "strumpack_revision": "e3e130a6",
     "native_library_sha256": "1728db2f70dd8da2e7a526629eeb22a51ace245e786299158f17a184d6dbdc49",
-    "plan": "CPU control, up to five small GPU trials, stop and capture callback reference, compressed output and prepared image at the first discrepancy."
+    "plan": "CPU control, up to five small GPU trials, stop and capture callback reference, compressed output and prepared image at the first discrepancy.",
+    "status": "NO_DISCREPANCY_IN_CPU_CONTROL_AND_FIVE_GPU_TRIALS",
+    "completed_cases": [
+      {
+        "case": "cpu",
+        "relative_error": 3.11164e-11,
+        "scaled_residual": 1.95267e-09
+      },
+      {
+        "case": "gpu1",
+        "relative_error": 7.93887e-12,
+        "scaled_residual": 5.80873e-10
+      },
+      {
+        "case": "gpu2",
+        "relative_error": 2.84959e-11,
+        "scaled_residual": 4.88741e-09
+      },
+      {
+        "case": "gpu3",
+        "relative_error": 4.01649e-11,
+        "scaled_residual": 8.60653e-09
+      },
+      {
+        "case": "gpu4",
+        "relative_error": 1.06538e-11,
+        "scaled_residual": 6.78063e-10
+      },
+      {
+        "case": "gpu5",
+        "relative_error": 9.72206e-12,
+        "scaled_residual": 2.9908e-10
+      }
+    ]
+  },
+  "medium_capture": {
+    "job": 60420335,
+    "grid": 100,
+    "mpi_ranks": 4,
+    "gpus": 2,
+    "rows": 1368,
+    "cols": 1368,
+    "scalar": "double",
+    "file": "profile_results/60420335/gpu1.HODLR.rank2.bin",
+    "sha256": "e7b3a1b345f9aa7a67077ecbc938ccf18bd16095aaf2173fada26ae016098002",
+    "prepared_vs_reference": 0.0,
+    "compressed_vs_reference": 0.02576984205887523,
+    "relative_diagonal_error": 0.0,
+    "reference_asymmetry": 1.414469406355382e-09,
+    "compressed_asymmetry": 0.036458299072978914,
+    "largest_error_row": 1271,
+    "largest_error_columns": [
+      121,
+      551
+    ],
+    "largest_entry_error": 0.1715728753381423,
+    "interpretation": "Prepared frontal entries exactly match the callback reference; discrepancy occurs in the native compressed representation or its extraction. Replay separates those.",
+    "other_capture": "rank1 at 2976 square has incomplete prepared data after the other rank aborted; excluded from complete three-way comparison."
+  },
+  "captured_matrix_replay": {
+    "job": 60420593,
+    "status": "REPLAY_COMPLETED_WITH_APPROXIMATION_FAILURES",
+    "cases": 32,
+    "groups": [
+      {
+        "gpu": 0,
+        "leaf": 5,
+        "cases": 8,
+        "errors_above_1e_minus4": 4,
+        "minimum_error": 2.03395e-06,
+        "maximum_error": 0.036444
+      },
+      {
+        "gpu": 0,
+        "leaf": 4,
+        "cases": 8,
+        "errors_above_1e_minus4": 6,
+        "minimum_error": 2.08677e-06,
+        "maximum_error": 0.036444
+      },
+      {
+        "gpu": 1,
+        "leaf": 5,
+        "cases": 8,
+        "errors_above_1e_minus4": 4,
+        "minimum_error": 2.11309e-06,
+        "maximum_error": 0.0446347
+      },
+      {
+        "gpu": 1,
+        "leaf": 4,
+        "cases": 8,
+        "errors_above_1e_minus4": 6,
+        "minimum_error": 2.17296e-06,
+        "maximum_error": 0.0515397
+      }
+    ],
+    "maximum_multiply_vs_extraction": 9.82243e-16,
+    "maximum_extraction_state_change": 0.0,
+    "native_library_sha256": "1728db2f70dd8da2e7a526629eeb22a51ace245e786299158f17a184d6dbdc49",
+    "limitation": "Replay uses knn=0; original sparse capture used graph hints. Exit zero meant replay completion, not numerical PASS.",
+    "interpretation": "Native BACA returns an inaccurate approximation intermittently on both CPU and GPU; multiply and extraction agree, and extraction does not change the representation."
+  },
+  "experimental_residual_guard": {
+    "status": "COMPONENT_TESTS_PASS_RUNTIME_BOUND_AND_SATURATED_FACTOR_FIX_VALIDATING",
+    "job": 60421021,
+    "snapshot": "profile_results/baca_guard_snapshot_v1",
+    "enable": "BPACK_GPU_BACA_RESIDUAL_GUARD=1",
+    "native_library_sha256": "5b3c65446c9aae754919be7f270509b011452dcf1a504d8f05831ef63f140dbb",
+    "cases": [
+      {
+        "case": "capture",
+        "gpu_cases": 64,
+        "gpu_maximum_matrix_error": 2.67094e-06,
+        "gpu_maximum_probe_error": 1.53909e-06,
+        "gpu_maximum_multiply_vs_extraction": 1.02143e-15,
+        "cpu_cases": 64,
+        "cpu_errors_above_1e_minus4": 46
+      },
+      {
+        "case": "localized",
+        "gpu_cases": 64,
+        "gpu_maximum_matrix_error": 9.05485e-18,
+        "gpu_maximum_probe_error": 7.55959e-16,
+        "gpu_maximum_multiply_vs_extraction": 7.5234e-16,
+        "cpu_cases": 64,
+        "cpu_errors_above_1e_minus4": 64
+      }
+    ],
+    "limitations": "GPU only, disabled by default; complete residual sweep adds construction cost. CPU BACA unchanged. No final sparse-solver or large-run claim yet.",
+    "component_cost": {
+      "job": 60421064,
+      "status": "GUARDED_GPU_ACCURACY_PASS",
+      "cases": [
+        {
+          "guard": 0,
+          "leaf": 5,
+          "gpu_cases": 16,
+          "errors_above_1e_minus4": 10,
+          "median_compress_seconds_excluding_trial_zero": 0.292912,
+          "max_matrix_error": 0.036444
+        },
+        {
+          "guard": 0,
+          "leaf": 4,
+          "gpu_cases": 16,
+          "errors_above_1e_minus4": 14,
+          "median_compress_seconds_excluding_trial_zero": 0.2542995,
+          "max_matrix_error": 0.0515397
+        },
+        {
+          "guard": 1,
+          "leaf": 5,
+          "gpu_cases": 16,
+          "errors_above_1e_minus4": 0,
+          "median_compress_seconds_excluding_trial_zero": 0.2857145,
+          "max_matrix_error": 3.09746e-06
+        },
+        {
+          "guard": 1,
+          "leaf": 4,
+          "gpu_cases": 16,
+          "errors_above_1e_minus4": 0,
+          "median_compress_seconds_excluding_trial_zero": 0.28304549999999995,
+          "max_matrix_error": 2.60262e-06
+        }
+      ],
+      "checks": {
+        "checks": 123,
+        "checks_exceeding_tol": 27,
+        "maximum_detected_residual": 0.2106921868
+      },
+      "caveat": "Small captured matrix with two ranks sharing one GPU; unguarded controls frequently inaccurate, so this does not measure production solver overhead."
+    },
+    "sparse_40": {
+      "job": 60421036,
+      "status": "TIMEOUT",
+      "exit_code": 124,
+      "snapshot": "profile_results/baca_guard_snapshot_v1",
+      "ranks": 4,
+      "gpus": 2,
+      "host_panels": true,
+      "investigation": "Superseded by stripe trace: repeated complete residual sweeps, not a CUDA/MPI deadlock. The Release build compiled out assert(), so the no-progress branch retried indefinitely. Runtime handling and an exact-factor fallback are now implemented, pending sparse validation."
+    },
+    "stripe_diagnostic": {
+      "job": 60421207,
+      "status": "TIMEOUT_WITH_ACTIONABLE_TRACE",
+      "ranks": 1,
+      "gpus": 1,
+      "rows": 200,
+      "columns": 800,
+      "baca_rank": 200,
+      "repeated_relative_residual": 0.0002895608386,
+      "limitation": "Compute Sanitizer reported warm-up launch-resource and CUDA internal-library lookup errors; not a clean memory-check result.",
+      "finding": "BACA factors saturated at full rank but did not meet tol_comp. Guard repeated because assert() was disabled in Release."
+    },
+    "cancelled_diagnostic": 60421283,
+    "final_factor_certification": {
+      "status": "IMPLEMENTED_BUILDING",
+      "previous_job": 60421594,
+      "previous_status": "SPARSE_FAILURE_AFTER_RECOMPRESSION",
+      "independent_recompression_cases_passed": 176,
+      "native_library_sha256": "04c304fb27ff8c2b891d9ed0e34b3a9026f158c728320199eb309f01a7047827",
+      "sparse_failures": [
+        {
+          "rows": 1121,
+          "rank": 3,
+          "relative_sample_error": 1.00519
+        },
+        {
+          "rows": 1160,
+          "rank": 2,
+          "relative_sample_error": 0.0101637
+        }
+      ],
+      "interpretation": "Experimental repaired factors passed pre-recompression residual checks but final extracted fronts failed. Actual final factors will be certified, with one exact-factor fallback and retry. Not yet a proof of a particular QR/SVD defect."
+    }
+  },
+  "polar_svd_reproducer": {
+    "job": 60422299,
+    "status": "FAIL_INDEPENDENT_DIRECT_SVD_RECONSTRUCTION",
+    "matrix": "Root A21 quadrant of captured 1368-square front, represented as exact I*A factors",
+    "rows": 684,
+    "columns": 684,
+    "reference_frobenius_norm": 2.26377982924,
+    "reported_perturbation": 0.50266009782,
+    "relative_reconstruction_error": 5.80721996296,
+    "native_library_sha256": "6e54e55cb8bd41131a187a248fb6ec2f8c4ea12b19571d4f287ddbe325ef982d",
+    "finding": "cusolverDnXgesvdp returned info=0 but a substantial perturbation; callers ignored its error estimate. Default changed to QR-based cusolverDnXgesvd.",
+    "source": "https://docs.nvidia.com/cuda/cusolver/index.html#cusolverdnxgesvdp",
+    "fix_validation_jobs": [
+      60422460,
+      60422461
+    ]
+  },
+  "qr_svd_fix": {
+    "status": "CAPTURED_INPUTS_AND_40_PASS_STRICT_100_TIMEOUT",
+    "backend": "QR-based cusolverDnXgesvd, default; legacy polar option retained for diagnostics",
+    "native_library_sha256": "79be1dc0fc5bb9e34fbbe0f6905be4ae1fa6ad827f08554219b6318a43869f05",
+    "captured_factor_job": 60422461,
+    "captured_recompression_cases": 24,
+    "captured_direct_svd_cases": [
+      {
+        "rank": "1",
+        "m": "684",
+        "n": "684",
+        "k": "684",
+        "err_sigma": "0",
+        "norm": "2.26377982924",
+        "relative_error": "4.59525662666e-15"
+      },
+      {
+        "rank": "1",
+        "m": "580",
+        "n": "580",
+        "k": "580",
+        "err_sigma": "0",
+        "norm": "1.60141883322",
+        "relative_error": "3.89644704387e-15"
+      },
+      {
+        "rank": "0",
+        "m": "684",
+        "n": "684",
+        "k": "684",
+        "err_sigma": "0",
+        "norm": "2.26377982924",
+        "relative_error": "4.59525662666e-15"
+      },
+      {
+        "rank": "0",
+        "m": "580",
+        "n": "580",
+        "k": "580",
+        "err_sigma": "0",
+        "norm": "1.60141883322",
+        "relative_error": "3.89644704387e-15"
+      }
+    ],
+    "maximum_captured_recompression_error": 5.63772361001e-06,
+    "sparse_job": 60422460,
+    "poisson_40": {
+      "status": "PASS",
+      "relative_error": 5.29004e-12,
+      "scaled_residual": 1.44147e-11,
+      "ranks": 4,
+      "gpus": 2,
+      "nrhs": 3,
+      "guard_enabled": true
+    },
+    "poisson_100_strict_guard": {
+      "status": "TIMEOUT",
+      "job": 60422460,
+      "step_seconds": 360,
+      "accuracy_failures_reported": false,
+      "interpretation": "Incomplete solver run; no numerical PASS. Strict pre-SVD tol_comp Frobenius check forced repeated sweeps and exact-factor fallback."
+    }
+  },
+  "norm_budget_revision": {
+    "job": 60422977,
+    "status": "SPARSE40_PASS_100_RUNNING",
+    "native_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
+    "pre_svd_relative_frobenius_bound": "sqrt(min(m,n))*tol_comp",
+    "final_relative_frobenius_bound": "2*sqrt(min(m,n))*tol_comp (unchanged)",
+    "reason": "Avoid over-certifying BACA relative to the Frobenius budget of a relative singular-value cutoff; compression tolerance itself is unchanged.",
+    "poisson_40": {
+      "status": "PASS",
+      "relative_error": 1.00841e-11,
+      "scaled_residual": 1.51105e-10
+    },
+    "component_evidence_reused": {
+      "independent_svd_and_recompression_job": 60422460,
+      "captured_inputs_job": 60422461,
+      "rationale": "Only the Fortran pre-recompression norm budget changed; native QR/SVD code is unchanged. Captured-front and sparse replays are rerun."
+    }
+  },
+  "updated_150_profiling": {
+    "status": "CPU_BASELINE_RUNNING_GPU_PENDING_SMALL_SPARSE_CHECK",
+    "cpu_job": 60423044,
+    "grid": 150,
+    "mpi_ranks": 32,
+    "gpus": 16,
+    "nrhs": 3,
+    "omp_threads": 1,
+    "snapshot": "profile_results/qr_svd_profile_snapshot_v1"
   }
 }
