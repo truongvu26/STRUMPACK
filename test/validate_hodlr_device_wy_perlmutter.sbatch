@@ -26,24 +26,28 @@ cp "$HODLR_WY_AFTER/manifest.txt" "$out/manifest.txt"
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
 scontrol show job "$SLURM_JOB_ID" > "$out/slurm_job.txt"
 export HODLR_RANKS_PER_GPU=2 HODLR_PROFILE_RANKS=2
-timeout --kill-after=15s 180s srun -n2 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+step_cpus=${SLURM_CPUS_PER_TASK:-8}
+if [[ ${HODLR_WY_SKIP_COMPONENTS:-0} != 1 ]]; then
+timeout --kill-after=15s 180s srun -n2 -c "$step_cpus" --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
   --output="$out/native.rank%t.log" --error="$out/native.rank%t.log" \
   bash test/run_hodlr_stage_rank.sh "$out" native 0 "$HODLR_WY_AFTER/test"
 export HODLR_RANKS_PER_GPU=1 HODLR_PROFILE_RANKS=1
-timeout --kill-after=15s 240s srun -n1 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+timeout --kill-after=15s 240s srun -n1 -c "$step_cpus" --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
   --output="$out/benchmark.rank%t.log" --error="$out/benchmark.rank%t.log" \
   bash test/run_hodlr_stage_rank.sh "$out" benchmark 0 "$HODLR_WY_AFTER/test" --wy-benchmark
 if [[ -n ${HODLR_WY_CAPTURE_ONE:-} && -n ${HODLR_WY_CAPTURE_TWO:-} ]]; then
   export HODLR_RANKS_PER_GPU=2 HODLR_PROFILE_RANKS=2
-  timeout --kill-after=15s 90s srun -n2 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+  timeout --kill-after=15s 90s srun -n2 -c "$step_cpus" --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
     --output="$out/capture.rank%t.log" --error="$out/capture.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" capture 0 "$HODLR_WY_AFTER/test" "$HODLR_WY_CAPTURE_ONE" "$HODLR_WY_CAPTURE_TWO"
+fi
 fi
 export HODLR_RANKS_PER_GPU=2 HODLR_PROFILE_RANKS=${HODLR_WY_CHECK_RANKS:-8}
 (( HODLR_PROFILE_RANKS >= 2 && HODLR_PROFILE_RANKS % 2 == 0 )) || exit 1
 printf '%s\n' "$HODLR_PROFILE_RANKS" > "$out/sparse_ranks.txt"
 for grid in ${HODLR_WY_CHECK_GRIDS:-40 100}; do
-  timeout --kill-after=15s 360s srun -n "$HODLR_PROFILE_RANKS" -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+  timeout --kill-after=15s 360s srun -n "$HODLR_PROFILE_RANKS" -c "$step_cpus" \
+    --gpus-per-node="$((HODLR_PROFILE_RANKS/2))" --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
     --output="$out/g$grid.rank%t.log" --error="$out/g$grid.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" "g$grid" 0 "$HODLR_WY_AFTER/panels" "$grid" 3 \
     --sp_compression HODLR --sp_compression_min_sep_size 1000 --sp_compression_min_front_size 1000 \

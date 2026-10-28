@@ -1,5 +1,5 @@
 {
-  "status": "VALIDATION_QUEUED",
+  "status": "COMPONENT_PASS_SPARSE_RETRY_QUEUED",
   "branches": {
     "strumpack": "perf/hodlr-gpu-efficiency",
     "butterflypack": "perf/hodlr-device-wy"
@@ -9,7 +9,7 @@
   "executable_sha256": "b44f0de180b1b7a67b18b320b02939bfb311ecfaaffabe6761b4ae6d9c9fb29a",
   "before_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
   "after_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
-  "validation_job": 60465148,
+  "validation_job": 60465717,
   "paired_150_job": 60464807,
   "layout_16_rank_job": 60464839,
   "construction_tolerance": 1e-05,
@@ -32,5 +32,139 @@
     "ranks": 4,
     "gpus": 2
   },
-  "native_revision": "ab40497"
+  "native_revision": "ab40497",
+  "component_validation": {
+    "job": 60465148,
+    "status": "PASS",
+    "native": [
+      {
+        "rank": 0,
+        "wy_cases": 84,
+        "recompression_cases": 144,
+        "svd_cases": 6,
+        "maximum_wy_relative_error": 9.09212618345e-16
+      },
+      {
+        "rank": 1,
+        "wy_cases": 84,
+        "recompression_cases": 144,
+        "svd_cases": 6,
+        "maximum_wy_relative_error": 9.09212618345e-16
+      }
+    ],
+    "captured_factors": [
+      {
+        "rank": 0,
+        "recompression_cases": 12,
+        "maximum_relative_error": 5.63772361001e-06
+      },
+      {
+        "rank": 1,
+        "recompression_cases": 12,
+        "maximum_relative_error": 5.63772361001e-06
+      }
+    ],
+    "isolated_wy_benchmark": [
+      {
+        "rank": "0",
+        "scalar": "d",
+        "k": "256",
+        "nrhs": "128",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.00012355",
+        "legacy_host_median_seconds": "0.024099609",
+        "speedup": "195.06"
+      },
+      {
+        "rank": "0",
+        "scalar": "d",
+        "k": "512",
+        "nrhs": "256",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.000271957",
+        "legacy_host_median_seconds": "0.327302938",
+        "speedup": "1203.51"
+      },
+      {
+        "rank": "0",
+        "scalar": "d",
+        "k": "1024",
+        "nrhs": "512",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.0007204325",
+        "legacy_host_median_seconds": "5.44022134",
+        "speedup": "7551.33"
+      },
+      {
+        "rank": "0",
+        "scalar": "z",
+        "k": "256",
+        "nrhs": "128",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.0003911785",
+        "legacy_host_median_seconds": "0.0399847955",
+        "speedup": "102.216"
+      },
+      {
+        "rank": "0",
+        "scalar": "z",
+        "k": "512",
+        "nrhs": "256",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.0008422885",
+        "legacy_host_median_seconds": "0.402619609",
+        "speedup": "478.007"
+      },
+      {
+        "rank": "0",
+        "scalar": "z",
+        "k": "1024",
+        "nrhs": "512",
+        "batch": "2",
+        "repetitions": "4",
+        "scope": "isolated_zero_tau_fallback",
+        "metadata_upload": "excluded",
+        "input_creation": "excluded",
+        "reset": "excluded",
+        "legacy_transfers": "included",
+        "device_median_seconds": "0.002484172",
+        "legacy_host_median_seconds": "7.21862827",
+        "speedup": "2905.85"
+      }
+    ],
+    "gpu_model": "NVIDIA A100-SXM4-40GB",
+    "gpu_driver": "580.178.04"
+  },
+  "component_job_overall_status": "FAILED_SPARSE_LAUNCH_BEFORE_SOLVER_START",
+  "sparse_launcher_correction": "Shared allocation reserved16 CPUs/task but sparse step requested8; only one GPU was exposed. Retry uses allocation CPU count and explicitly requests ranks/2 GPUs for the single-node sparse step; production library is unchanged."
 }
