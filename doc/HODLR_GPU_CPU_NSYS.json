@@ -1,0 +1,1300 @@
+{
+  "status": "COMPLETED_WITH_GPU_NUMERICAL_FAILURE",
+  "grid": 150,
+  "unknowns": 3375000,
+  "rhs": 3,
+  "jobs": {
+    "matched_cpu_gpu": 60416297,
+    "first_nsight": 60416427,
+    "repeat_nsight": 60417148
+  },
+  "layout": {
+    "nodes": 4,
+    "mpi_ranks": 32,
+    "gpus": 16,
+    "gpu": "A100-SXM4-40GB",
+    "ranks_per_gpu": 2,
+    "omp_threads": 1,
+    "allocated_cpus_per_rank": 8
+  },
+  "settings": {
+    "leaf_size": 128,
+    "minimum_front_and_separator": 1000,
+    "relative_compression_tolerance": 1e-05,
+    "relative_solve_tolerance": 1e-10,
+    "butterfly_levels": 0,
+    "pool_fraction": 0.85,
+    "image_cap_bytes": 268435456,
+    "panel_budget_bytes": 67108864
+  },
+  "manifest": "BPACK dc3b0fce207a055a754f3c3c45530405fbcf7f7b\nSTRUMPACK 8d908c5607a9d13748b9f1a6f9785d04173cac5c\nBaseline executable numerical source: 24c5b4ae\n1728db2f70dd8da2e7a526629eeb22a51ace245e786299158f17a184d6dbdc49  lib/libbutterflypack.so.5.0.0\ned69c6a4e8214826b820328e8a4fe820b22ecc1e3af133ff2172efda6bf8f237  baseline\n91a6a24acdd534c64a2aa03f646146a069f248e3ffedc9fe3480630f9ab7ab42  panels\n4571313c2d791ac637db99db409419250b819405016d86a4ffb266340c08d4ef  diagnostic\n",
+  "quiet_comparison": {
+    "status": "FAIL",
+    "cases": [
+      {
+        "variant": "cpu",
+        "status": "PASS",
+        "factor_seconds": 854.156,
+        "solve_seconds": 2.6076,
+        "factor_plus_solve_seconds": 856.7636,
+        "relative_error": 4.74426e-10,
+        "scaled_residual": 3.11758e-08,
+        "refinement_iterations": 7.0,
+        "hodlr_fronts": 1980.0
+      },
+      {
+        "variant": "panels",
+        "status": "FAIL",
+        "factor_seconds": 558.144,
+        "solve_seconds": 204.398,
+        "refinement_iterations": 391,
+        "relative_error": "-nan",
+        "scaled_residual": 1,
+        "note": "Failed solve; excluded from speed ratios."
+      }
+    ],
+    "usable_speed_ratio": false
+  },
+  "nsight": {
+    "status": "COMPLETE_FROM_FAILED_NUMERICAL_CASE",
+    "job": 60417148,
+    "version": "2026.2.1.210-262137639646v0",
+    "ranks": [
+      0,
+      11,
+      15,
+      31
+    ],
+    "trace": "cuda,nvtx,cublas,osrt",
+    "cpu_sampling": "process-tree, DWARF, period 8000000, one backtrace per sample",
+    "context_switches": "process-tree",
+    "kernel_space_cpu_sampling": "unavailable; user-space sampling supported",
+    "maximum_refinement_iterations": 30,
+    "solver_exit_code": 0,
+    "accuracy_status": "FAIL",
+    "trace_export_exit_code": 0,
+    "factor_seconds": 729.443,
+    "solve_seconds": 16.0322,
+    "refinement_iterations": 31,
+    "relative_error": 16356100000.0,
+    "scaled_residual": 1,
+    "selected_ranks": [
+      {
+        "rank": 0,
+        "factor_scope_wall_seconds": 729.4515686210943,
+        "main_thread_scheduled_cpu_seconds": 728.1186747969997,
+        "gpu_kernel_union_seconds": 25.839031725,
+        "gpu_activity_union_seconds": 27.708112262,
+        "running_cpu_backtraces": 96177,
+        "entry_frame_fraction": 0.254780248916061,
+        "unresolved_leaf_fraction": 0.6360772326023894,
+        "cpu_categories": [
+          {
+            "category": "MPI/transport outside ScaLAPACK",
+            "samples": 21903,
+            "fraction": 0.2277363610842509
+          },
+          {
+            "category": "MPI/transport (caller incomplete)",
+            "samples": 21019,
+            "fraction": 0.21854497437017167
+          },
+          {
+            "category": "ButterflyPACK host work outside the above",
+            "samples": 20296,
+            "fraction": 0.2110275845576385
+          },
+          {
+            "category": "CUDA/library host work",
+            "samples": 19119,
+            "fraction": 0.198789731432671
+          },
+          {
+            "category": "Host BLAS/LAPACK (caller incomplete)",
+            "samples": 8832,
+            "fraction": 0.09183068717052933
+          },
+          {
+            "category": "STRUMPACK/other host work or unresolved",
+            "samples": 3396,
+            "fraction": 0.03530989737671169
+          },
+          {
+            "category": "ScaLAPACK/PBLAS/BLACS outside MPI",
+            "samples": 1294,
+            "fraction": 0.013454360190066232
+          },
+          {
+            "category": "MPI/transport under ScaLAPACK or BLACS",
+            "samples": 318,
+            "fraction": 0.0033064038179606353
+          }
+        ],
+        "top_cpu_leaf_functions": [
+          {
+            "name": "0xffffffff95600233",
+            "module": "[kernel.kallsyms]",
+            "samples": 10663,
+            "fraction": 0.11086850286451022
+          },
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 5685,
+            "fraction": 0.05910976636825852
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 5518,
+            "fraction": 0.05737338448901504
+          },
+          {
+            "name": "0xffffffff94988edd",
+            "module": "[kernel.kallsyms]",
+            "samples": 2803,
+            "fraction": 0.029144182080954907
+          },
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 2603,
+            "fraction": 0.02706468282437589
+          },
+          {
+            "name": "0x7f851f86a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 2554,
+            "fraction": 0.02655520550651403
+          },
+          {
+            "name": "0xffffffff95460eea",
+            "module": "[kernel.kallsyms]",
+            "samples": 1992,
+            "fraction": 0.020711812595527
+          },
+          {
+            "name": "strumpack::DenseMatrix<int> strumpack::HODLR::get_odiag_neighbors<int>(int, strumpack::CSRGraph<int> const&, strumpack::CSRGraph<int> const&, strumpack::CSRGraph<int> const&)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/diagnostic",
+            "samples": 1859,
+            "fraction": 0.01932894558990195
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 1748,
+            "fraction": 0.018174823502500596
+          },
+          {
+            "name": "0x7f85563a0b67",
+            "module": "[vdso]",
+            "samples": 1446,
+            "fraction": 0.015034779625066283
+          }
+        ],
+        "top_scalapack_inclusive_functions": [
+          {
+            "name": "pdgesvd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 952,
+            "fraction": 0.009898416461316116
+          },
+          {
+            "name": "pdgebrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 441,
+            "fraction": 0.004585295860756729
+          },
+          {
+            "name": "pdlabrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 414,
+            "fraction": 0.004304563461118563
+          },
+          {
+            "name": "pdgemv_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 395,
+            "fraction": 0.004107011031743556
+          },
+          {
+            "name": "pdlarf_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 377,
+            "fraction": 0.003919856098651445
+          },
+          {
+            "name": "Cpdgemr2d",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 183,
+            "fraction": 0.0019027418197697995
+          },
+          {
+            "name": "pdormbr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 129,
+            "fraction": 0.001341277020493465
+          },
+          {
+            "name": "pdormqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 125,
+            "fraction": 0.0012996870353618848
+          },
+          {
+            "name": "pdlarfb_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 110,
+            "fraction": 0.0011437245911184587
+          },
+          {
+            "name": "BI_Srecv",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 97,
+            "fraction": 0.0010085571394408226
+          }
+        ],
+        "top_cuda_runtime_api": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 182056,
+            "host_seconds": 35.018381911000226
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 79142,
+            "host_seconds": 6.6382408699999855
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 887529,
+            "host_seconds": 3.6931963349998447
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 39812,
+            "host_seconds": 3.606054385999978
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 20483,
+            "host_seconds": 1.895611113000008
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 3636,
+            "host_seconds": 0.7911609770000002
+          }
+        ],
+        "top_cuda_kernels": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 81079,
+            "seconds": 11.048024439999496
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 4487,
+            "seconds": 2.9402723259999965
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 162158,
+            "seconds": 2.018794833999797
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 29050,
+            "seconds": 1.5525192279999906
+          },
+          {
+            "name": "qrcp_pivots_kernel",
+            "calls": 7698,
+            "seconds": 1.2595635210000014
+          },
+          {
+            "name": "Kernel2",
+            "calls": 83621,
+            "seconds": 0.9551583399999438
+          }
+        ],
+        "panel_callback_samples": [
+          {
+            "section": "solver.factor",
+            "phase": "prepare.host_panels",
+            "running_samples": 23753,
+            "categories": {
+              "ButterflyPACK host work outside the above": 10190,
+              "MPI/transport (caller incomplete)": 9900,
+              "Host BLAS/LAPACK (caller incomplete)": 2539,
+              "CUDA/library host work": 1079,
+              "STRUMPACK/other host work or unresolved": 38,
+              "ScaLAPACK/PBLAS/BLACS outside MPI": 7
+            }
+          }
+        ],
+        "nsys_report": "profile_results/60417148/rank0.nsys-rep",
+        "nsys_report_sha256": "4d6f8c135026a19c21de2a502ee78c89a9b3ec7ca28509840764d583f9c19e94",
+        "outer_factor_scope_cross_check_seconds": 4.054905616612814e-06,
+        "diagnostics": [
+          "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1.",
+          "Not all NVTX events might have been collected.",
+          "Number of incomplete CUPTI events dropped: 5. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+        ]
+      },
+      {
+        "rank": 11,
+        "factor_scope_wall_seconds": 729.4514173889766,
+        "main_thread_scheduled_cpu_seconds": 728.0032988350027,
+        "gpu_kernel_union_seconds": 31.078113715,
+        "gpu_activity_union_seconds": 42.361772444,
+        "running_cpu_backtraces": 159948,
+        "entry_frame_fraction": 0.08489008927901567,
+        "unresolved_leaf_fraction": 0.3412296496361317,
+        "cpu_categories": [
+          {
+            "category": "ButterflyPACK host work outside the above",
+            "samples": 75320,
+            "fraction": 0.470903043489134
+          },
+          {
+            "category": "CUDA/library host work",
+            "samples": 28581,
+            "fraction": 0.17868932403030985
+          },
+          {
+            "category": "Host BLAS/LAPACK (caller incomplete)",
+            "samples": 21793,
+            "fraction": 0.13625053142271237
+          },
+          {
+            "category": "MPI/transport (caller incomplete)",
+            "samples": 17687,
+            "fraction": 0.11057968839872959
+          },
+          {
+            "category": "MPI/transport outside ScaLAPACK",
+            "samples": 11317,
+            "fraction": 0.07075424512966715
+          },
+          {
+            "category": "STRUMPACK/other host work or unresolved",
+            "samples": 3229,
+            "fraction": 0.02018781103858754
+          },
+          {
+            "category": "ScaLAPACK/PBLAS/BLACS outside MPI",
+            "samples": 1778,
+            "fraction": 0.011116112736639408
+          },
+          {
+            "category": "MPI/transport under ScaLAPACK or BLACS",
+            "samples": 243,
+            "fraction": 0.0015192437542201215
+          }
+        ],
+        "top_cpu_leaf_functions": [
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 26342,
+            "fraction": 0.16469102458298948
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 12920,
+            "fraction": 0.08077625228199165
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 9951,
+            "fraction": 0.062213969540100535
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 9496,
+            "fraction": 0.059369295020881785
+          },
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 9177,
+            "fraction": 0.057374896841473476
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 6999,
+            "fraction": 0.04375797134068572
+          },
+          {
+            "name": "0xffffffffaea00233",
+            "module": "[kernel.kallsyms]",
+            "samples": 6129,
+            "fraction": 0.038318703578663064
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 5746,
+            "fraction": 0.03592417535699102
+          },
+          {
+            "name": "0x7f3aae46a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 3517,
+            "fraction": 0.02198839622877435
+          },
+          {
+            "name": "dgemm_oncopy",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 3365,
+            "fraction": 0.02103808737839798
+          }
+        ],
+        "top_scalapack_inclusive_functions": [
+          {
+            "name": "pdgesvd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 1280,
+            "fraction": 0.008002600845274715
+          },
+          {
+            "name": "pdlarf_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 559,
+            "fraction": 0.0034948858378973167
+          },
+          {
+            "name": "pdgebrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 558,
+            "fraction": 0.0034886338059869457
+          },
+          {
+            "name": "pdlabrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 536,
+            "fraction": 0.0033510891039587867
+          },
+          {
+            "name": "pdgemv_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 515,
+            "fraction": 0.0032197964338409983
+          },
+          {
+            "name": "pdormbr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 166,
+            "fraction": 0.0010378372971215646
+          },
+          {
+            "name": "pdormqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 158,
+            "fraction": 0.0009878210418385975
+          },
+          {
+            "name": "Cpdgemr2d",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 122,
+            "fraction": 0.0007627478930652462
+          },
+          {
+            "name": "pdlarfb_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 111,
+            "fraction": 0.0006939755420511666
+          },
+          {
+            "name": "pdorgqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 92,
+            "fraction": 0.0005751869357541201
+          }
+        ],
+        "top_cuda_runtime_api": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 330444,
+            "host_seconds": 57.84005638200006
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 153024,
+            "host_seconds": 7.919145628999949
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 42995,
+            "host_seconds": 4.78214227500012
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 1059773,
+            "host_seconds": 4.539014214000246
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 20697,
+            "host_seconds": 2.3763982670000123
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 4196,
+            "host_seconds": 0.8338408789999993
+          }
+        ],
+        "top_cuda_kernels": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 83126,
+            "seconds": 11.199450107999569
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 5831,
+            "seconds": 4.215783478000004
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 29745,
+            "seconds": 2.0139174719999553
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 166252,
+            "seconds": 1.9942155389995815
+          },
+          {
+            "name": "Kernel2",
+            "calls": 107265,
+            "seconds": 1.3878323030000292
+          },
+          {
+            "name": "geqr2_gmem_domino",
+            "calls": 1346,
+            "seconds": 1.2933439680000018
+          }
+        ],
+        "panel_callback_samples": [
+          {
+            "section": "solver.factor",
+            "phase": "prepare.host_panels",
+            "running_samples": 76862,
+            "categories": {
+              "Host BLAS/LAPACK (caller incomplete)": 12937,
+              "MPI/transport (caller incomplete)": 15259,
+              "ButterflyPACK host work outside the above": 41401,
+              "CUDA/library host work": 7200,
+              "STRUMPACK/other host work or unresolved": 63,
+              "ScaLAPACK/PBLAS/BLACS outside MPI": 2
+            }
+          }
+        ],
+        "nsys_report": "profile_results/60417148/rank11.nsys-rep",
+        "nsys_report_sha256": "ca78fd0ff0dd163d09316368fa106385f056e752f0ea70c87a2eb192bf603020",
+        "outer_factor_scope_cross_check_seconds": 5.097023404232459e-06,
+        "diagnostics": [
+          "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1.",
+          "Not all NVTX events might have been collected.",
+          "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+        ]
+      },
+      {
+        "rank": 15,
+        "factor_scope_wall_seconds": 729.4514220479177,
+        "main_thread_scheduled_cpu_seconds": 728.112185936001,
+        "gpu_kernel_union_seconds": 32.167504687,
+        "gpu_activity_union_seconds": 51.783447381,
+        "running_cpu_backtraces": 207665,
+        "entry_frame_fraction": 0.01183637107841957,
+        "unresolved_leaf_fraction": 0.2033130281944478,
+        "cpu_categories": [
+          {
+            "category": "ButterflyPACK host work outside the above",
+            "samples": 129816,
+            "fraction": 0.62512219199191
+          },
+          {
+            "category": "CUDA/library host work",
+            "samples": 29165,
+            "fraction": 0.14044253966725254
+          },
+          {
+            "category": "Host BLAS/LAPACK (caller incomplete)",
+            "samples": 26369,
+            "fraction": 0.12697854717935136
+          },
+          {
+            "category": "MPI/transport (caller incomplete)",
+            "samples": 16976,
+            "fraction": 0.08174704451881637
+          },
+          {
+            "category": "STRUMPACK/other host work or unresolved",
+            "samples": 2975,
+            "fraction": 0.014325957672212458
+          },
+          {
+            "category": "ScaLAPACK/PBLAS/BLACS outside MPI",
+            "samples": 1874,
+            "fraction": 0.009024149471504588
+          },
+          {
+            "category": "MPI/transport under ScaLAPACK or BLACS",
+            "samples": 251,
+            "fraction": 0.0012086774372185973
+          },
+          {
+            "category": "MPI/transport outside ScaLAPACK",
+            "samples": 239,
+            "fraction": 0.0011508920617340427
+          }
+        ],
+        "top_cpu_leaf_functions": [
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 60017,
+            "fraction": 0.28900874003804206
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 19630,
+            "fraction": 0.09452724339681699
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 16230,
+            "fraction": 0.07815472034285989
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 15003,
+            "fraction": 0.0722461656995642
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 10167,
+            "fraction": 0.04895865937928876
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 9604,
+            "fraction": 0.04624756217947174
+          },
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 7551,
+            "fraction": 0.03636144752365589
+          },
+          {
+            "name": "dgemm_oncopy",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 4886,
+            "fraction": 0.023528278718127755
+          },
+          {
+            "name": "dgemm_itcopy",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 3625,
+            "fraction": 0.01745599884429249
+          },
+          {
+            "name": "0x7f8076a6a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 3329,
+            "fraction": 0.016030626249006814
+          }
+        ],
+        "top_scalapack_inclusive_functions": [
+          {
+            "name": "pdgesvd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 1349,
+            "fraction": 0.00649603929405533
+          },
+          {
+            "name": "pdlarf_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 616,
+            "fraction": 0.0029663159415404617
+          },
+          {
+            "name": "pdgebrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 599,
+            "fraction": 0.002884453326270676
+          },
+          {
+            "name": "pdlabrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 584,
+            "fraction": 0.0028122216069149833
+          },
+          {
+            "name": "pdgemv_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 564,
+            "fraction": 0.0027159126477740592
+          },
+          {
+            "name": "pdormbr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 182,
+            "fraction": 0.0008764115281824092
+          },
+          {
+            "name": "pdormqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 176,
+            "fraction": 0.0008475188404401319
+          },
+          {
+            "name": "pdlarfb_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 116,
+            "fraction": 0.0005585919630173596
+          },
+          {
+            "name": "Cpdgemr2d",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 113,
+            "fraction": 0.0005441456191462211
+          },
+          {
+            "name": "pdorgqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 87,
+            "fraction": 0.0004189439722630198
+          }
+        ],
+        "top_cuda_runtime_api": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 292702,
+            "host_seconds": 65.63645516999996
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 133544,
+            "host_seconds": 7.401926238999999
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 1065404,
+            "host_seconds": 4.582241362001123
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 43214,
+            "host_seconds": 4.199865836000007
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 20196,
+            "host_seconds": 2.310681170000005
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 4108,
+            "host_seconds": 0.8281190940000018
+          }
+        ],
+        "top_cuda_kernels": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 85421,
+            "seconds": 11.58243691100078
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 5768,
+            "seconds": 4.035585041000004
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 170842,
+            "seconds": 2.2242755309992157
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 29259,
+            "seconds": 2.0997208550000503
+          },
+          {
+            "name": "Kernel2",
+            "calls": 104797,
+            "seconds": 1.5119361620001732
+          },
+          {
+            "name": "qrcp_pivots_kernel",
+            "calls": 8111,
+            "seconds": 1.269412065999998
+          }
+        ],
+        "panel_callback_samples": [
+          {
+            "section": "solver.factor",
+            "phase": "prepare.host_panels",
+            "running_samples": 102593,
+            "categories": {
+              "Host BLAS/LAPACK (caller incomplete)": 19305,
+              "ButterflyPACK host work outside the above": 63010,
+              "CUDA/library host work": 7761,
+              "MPI/transport (caller incomplete)": 12480,
+              "STRUMPACK/other host work or unresolved": 32,
+              "ScaLAPACK/PBLAS/BLACS outside MPI": 5
+            }
+          }
+        ],
+        "nsys_report": "profile_results/60417148/rank15.nsys-rep",
+        "nsys_report_sha256": "e480448247bdbb599b3f6bad151d87903e0fc4b70bd95af28d038ba29fbba0a4",
+        "outer_factor_scope_cross_check_seconds": 5.323082291397441e-06,
+        "diagnostics": [
+          "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1.",
+          "Not all NVTX events might have been collected.",
+          "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+        ]
+      },
+      {
+        "rank": 31,
+        "factor_scope_wall_seconds": 729.4514046940021,
+        "main_thread_scheduled_cpu_seconds": 727.7910598390001,
+        "gpu_kernel_union_seconds": 44.964714186,
+        "gpu_activity_union_seconds": 50.296901292,
+        "running_cpu_backtraces": 133980,
+        "entry_frame_fraction": 0.23891625615763548,
+        "unresolved_leaf_fraction": 0.49349902970592624,
+        "cpu_categories": [
+          {
+            "category": "ButterflyPACK host work outside the above",
+            "samples": 42609,
+            "fraction": 0.31802507836990596
+          },
+          {
+            "category": "CUDA/library host work",
+            "samples": 32790,
+            "fraction": 0.24473802060008956
+          },
+          {
+            "category": "MPI/transport outside ScaLAPACK",
+            "samples": 29623,
+            "fraction": 0.22110016420361248
+          },
+          {
+            "category": "Host BLAS/LAPACK (caller incomplete)",
+            "samples": 18135,
+            "fraction": 0.13535602328705776
+          },
+          {
+            "category": "MPI/transport (caller incomplete)",
+            "samples": 5761,
+            "fraction": 0.042998955067920584
+          },
+          {
+            "category": "STRUMPACK/other host work or unresolved",
+            "samples": 4007,
+            "fraction": 0.029907448872966116
+          },
+          {
+            "category": "ScaLAPACK/PBLAS/BLACS outside MPI",
+            "samples": 871,
+            "fraction": 0.006500970294073742
+          },
+          {
+            "category": "MPI/transport under ScaLAPACK or BLACS",
+            "samples": 184,
+            "fraction": 0.0013733393043737871
+          }
+        ],
+        "top_cpu_leaf_functions": [
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 12044,
+            "fraction": 0.08989401403194507
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 10709,
+            "fraction": 0.07992984027466786
+          },
+          {
+            "name": "0xffffffff95c00233",
+            "module": "[kernel.kallsyms]",
+            "samples": 9577,
+            "fraction": 0.07148081803254216
+          },
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 9435,
+            "fraction": 0.07042095835199283
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 4440,
+            "fraction": 0.033139274518584866
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 4137,
+            "fraction": 0.030877742946708465
+          },
+          {
+            "name": "0x7f88e1e6a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 3910,
+            "fraction": 0.029183460217942978
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 3467,
+            "fraction": 0.02587699656665174
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/host_panel_benchmark_snapshot/lib/libbutterflypack.so.5.0.0",
+            "samples": 3196,
+            "fraction": 0.0238543066129273
+          },
+          {
+            "name": "dgemv_kernel_4x4",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 2249,
+            "fraction": 0.01678608747574265
+          }
+        ],
+        "top_scalapack_inclusive_functions": [
+          {
+            "name": "pdgesvd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 648,
+            "fraction": 0.00483654276757725
+          },
+          {
+            "name": "pdgebrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 318,
+            "fraction": 0.0023734885803851323
+          },
+          {
+            "name": "pdlabrd_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 305,
+            "fraction": 0.002276459173010897
+          },
+          {
+            "name": "pdgemv_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 285,
+            "fraction": 0.00212718316166592
+          },
+          {
+            "name": "pdlarf_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 283,
+            "fraction": 0.0021122555605314224
+          },
+          {
+            "name": "pdormbr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 83,
+            "fraction": 0.000619495447081654
+          },
+          {
+            "name": "pdormqr_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 79,
+            "fraction": 0.0005896402448126586
+          },
+          {
+            "name": "Cpdgemr2d",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 73,
+            "fraction": 0.0005448574414091656
+          },
+          {
+            "name": "pdlarfb_",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 61,
+            "fraction": 0.00045529183460217944
+          },
+          {
+            "name": "PB_CInV",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/scalapack-2.2.0/build/install/lib/libscalapack.so",
+            "samples": 60,
+            "fraction": 0.0004478280340349306
+          }
+        ],
+        "top_cuda_runtime_api": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 413097,
+            "host_seconds": 63.11050018700067
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 178868,
+            "host_seconds": 7.69217699699974
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 1623431,
+            "host_seconds": 6.7200196890023625
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 69101,
+            "host_seconds": 4.831963978000025
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 31815,
+            "host_seconds": 2.4439258190000124
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 6556,
+            "host_seconds": 1.2984255020000015
+          }
+        ],
+        "top_cuda_kernels": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 153301,
+            "seconds": 20.623491180003498
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 7272,
+            "seconds": 4.443228883999996
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 306602,
+            "seconds": 3.6559736000042107
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 49929,
+            "seconds": 2.687561880000027
+          },
+          {
+            "name": "qrcp_pivots_kernel",
+            "calls": 14001,
+            "seconds": 2.201259310999992
+          },
+          {
+            "name": "Kernel2",
+            "calls": 144408,
+            "seconds": 1.3733678740001958
+          }
+        ],
+        "panel_callback_samples": [
+          {
+            "section": "solver.factor",
+            "phase": "prepare.host_panels",
+            "running_samples": 36094,
+            "categories": {
+              "ButterflyPACK host work outside the above": 20668,
+              "CUDA/library host work": 4733,
+              "Host BLAS/LAPACK (caller incomplete)": 5847,
+              "MPI/transport (caller incomplete)": 4824,
+              "STRUMPACK/other host work or unresolved": 18,
+              "ScaLAPACK/PBLAS/BLACS outside MPI": 4
+            }
+          }
+        ],
+        "nsys_report": "profile_results/60417148/rank31.nsys-rep",
+        "nsys_report_sha256": "985bf9e29d9baa731bc2ba480b4a35926d9e72426ae306594310076e0ed1cf2e",
+        "outer_factor_scope_cross_check_seconds": 8.387997922909562e-06,
+        "diagnostics": [
+          "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1.",
+          "Not all NVTX events might have been collected.",
+          "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+        ]
+      }
+    ],
+    "factor_phase_accounting": "PASS: exclusive scopes partition factor envelope on all 32 ranks; numerical status remains FAIL",
+    "exclusive_factor_phases": [
+      {
+        "phase": "solver.factor",
+        "mean_rank_seconds": 353.49163190379477,
+        "max_rank_seconds": 495.3026203252375
+      },
+      {
+        "phase": "prepare.host_panels",
+        "mean_rank_seconds": 220.7919073315461,
+        "max_rank_seconds": 425.91525926138274
+      },
+      {
+        "phase": "F22.construct.gpu_panels",
+        "mean_rank_seconds": 39.89888520839304,
+        "max_rank_seconds": 163.8875152854016
+      },
+      {
+        "phase": "F22.construct.gpu",
+        "mean_rank_seconds": 20.396931554765615,
+        "max_rank_seconds": 38.890182285918854
+      },
+      {
+        "phase": "Schur.compress.randomized",
+        "mean_rank_seconds": 16.365368885963107,
+        "max_rank_seconds": 29.681596554466523
+      },
+      {
+        "phase": "F12.construct.gpu",
+        "mean_rank_seconds": 15.080357886054117,
+        "max_rank_seconds": 23.322348743327893
+      },
+      {
+        "phase": "prepare.extract_sparse_children",
+        "mean_rank_seconds": 11.29400419277954,
+        "max_rank_seconds": 15.52599263121374
+      },
+      {
+        "phase": "F21.construct.gpu",
+        "mean_rank_seconds": 10.692043078743154,
+        "max_rank_seconds": 16.441846646135673
+      },
+      {
+        "phase": "prepare.materialize_current_schur",
+        "mean_rank_seconds": 8.834672997836606,
+        "max_rank_seconds": 15.580196413444355
+      },
+      {
+        "phase": "F21.construct.gpu_panels",
+        "mean_rank_seconds": 8.427315654855192,
+        "max_rank_seconds": 17.235141532029957
+      },
+      {
+        "phase": "F11.construct.gpu",
+        "mean_rank_seconds": 5.631744074245944,
+        "max_rank_seconds": 7.363821664941497
+      },
+      {
+        "phase": "prepare.extract_children",
+        "mean_rank_seconds": 5.619531884378375,
+        "max_rank_seconds": 10.368170578731224
+      },
+      {
+        "phase": "F12.construct.gpu_panels",
+        "mean_rank_seconds": 4.740062209279131,
+        "max_rank_seconds": 8.562379362178035
+      },
+      {
+        "phase": "F11.construct.gpu_panels",
+        "mean_rank_seconds": 3.4170101035670086,
+        "max_rank_seconds": 3.4762212646892294
+      },
+      {
+        "phase": "Schur.apply.device",
+        "mean_rank_seconds": 1.8493887270306004,
+        "max_rank_seconds": 2.3423743037274107
+      },
+      {
+        "phase": "prepare.pack_image",
+        "mean_rank_seconds": 0.6452368953687255,
+        "max_rank_seconds": 1.1056445436552167
+      },
+      {
+        "phase": "prepare.replicate",
+        "mean_rank_seconds": 0.6334025297073822,
+        "max_rank_seconds": 0.9677347830729559
+      },
+      {
+        "phase": "F11.factor.gpu",
+        "mean_rank_seconds": 0.432949749090767,
+        "max_rank_seconds": 0.559835076215677
+      },
+      {
+        "phase": "prepare.upload_resident_image",
+        "mean_rank_seconds": 0.30858813809027197,
+        "max_rank_seconds": 0.5032215391984209
+      },
+      {
+        "phase": "F22.prepare",
+        "mean_rank_seconds": 0.27704264286876423,
+        "max_rank_seconds": 1.5304485198576003
+      },
+      {
+        "phase": "F11.prepare",
+        "mean_rank_seconds": 0.1902258889786026,
+        "max_rank_seconds": 1.3517058540601283
+      },
+      {
+        "phase": "F12.prepare",
+        "mean_rank_seconds": 0.15554381886613555,
+        "max_rank_seconds": 1.465948946774006
+      },
+      {
+        "phase": "F21.prepare",
+        "mean_rank_seconds": 0.1391667688913003,
+        "max_rank_seconds": 1.3220364394364879
+      },
+      {
+        "phase": "front.compress",
+        "mean_rank_seconds": 0.13842948905949015,
+        "max_rank_seconds": 1.3135447623208165
+      }
+    ],
+    "data_quality": [
+      "All selected outer NVTX factor scopes agree with direct CSV scopes to less than 0.001 second.",
+      "Nsight warns some NVTX events might be missing, so fine-grained launch attribution is approximate.",
+      "Each report dropped four or five incomplete CUPTI events at profiling shutdown.",
+      "CPU kernel-space backtraces unavailable; user-space backtraces collected.",
+      "Only 1.18% to 25.48% of collected factor backtraces reach a known entry frame; unobserved callers cannot be ruled out."
+    ]
+  },
+  "failed_attempt": {
+    "job": 60416427,
+    "status": "FAILED_NUMERICS_AND_REPORT_COLLECTION",
+    "factor_seconds": 550.992,
+    "solve_seconds": 110.612,
+    "refinement_iterations": 210,
+    "relative_error": "-nan",
+    "reported_scaled_residual": 0,
+    "scaled_residual_valid": false,
+    "refinement": "First correction finite; residual then grew rapidly, overflowed to infinity and ended with NaNs.",
+    "collection": "srun --wait=30 killed Nsight report generation after untraced ranks exited; no nsys-rep files were retained.",
+    "correction": "--wait=0 with the existing outer timeout; repeat capped at 30 refinement iterations",
+    "cause": "not established"
+  },
+  "methodology": [
+    "CPU and quiet GPU cases use the same frozen Release executable and native library in one allocation.",
+    "Only the selected processes are traced; each shares a GPU with an untraced process.",
+    "Running-CPU sample fractions are not wall-time fractions. MPI under ScaLAPACK/BLACS is separate.",
+    "Incomplete stacks do not rule out an unobserved ScaLAPACK caller.",
+    "CUDA active union is not SM occupancy; host/GPU times can overlap.",
+    "Original failed runs are retained and excluded from speed comparisons.",
+    "No numerical source or tolerance changes were made for these studies; the profile retry only bounded refinement iterations and fixed report collection."
+  ],
+  "finding": "The quiet GPU repeat also diverged, so Nsight cannot be the sole cause. The underlying numerical cause remains unestablished.",
+  "findings": [
+    "Matched CPU control passes; quiet GPU and both profiled GPU attempts fail accuracy. Do not compute a valid matched GPU speed ratio.",
+    "Selected-process factor kernel union is 25.839..44.965 s versus 729.45 s factor wall; GPU occupancy and whole-device utilization were not measured.",
+    "Visible CPU hotspots are ButterflyPACK host WY recompression, GPU-factor row gathering, low-rank extraction, all-to-all preparation, MPI and local BLAS.",
+    "ScaLAPACK/PBLAS/BLACS outside MPI is directly visible in 0.65..1.35% of collected factor backtraces. Incomplete callers prevent complete ScaLAPACK attribution.",
+    "host_wy is a zero-Householder-tau fallback that copies data down, forms a triangular factor using serial CPU loops, and copies results back. This is a measured performance target, not a proven cause of numerical failure.",
+    "Numerical correctness must be explained and fixed before further optimization or production speed claims."
+  ],
+  "analysis_revision": "f6b67c18",
+  "numerical_source_changed_for_study": false
+}
