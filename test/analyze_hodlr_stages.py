@@ -152,6 +152,9 @@ for variant in expected:
             if '--hodlr_gpu_host_panels' in args and args[args.index('--hodlr_gpu_host_panels')+1]=='1':
                 budget=int(args[args.index('--hodlr_gpu_panel_max_bytes')+1]) if '--hodlr_gpu_panel_max_bytes' in args else 67108864
                 case['host_panels']=panel_statistics(logs,budget)
+                if case['host_panels']['construction_rank_calls']!=sum(
+                    phase['calls'] for phase in phases if '.construct.gpu_panels' in phase['phase']):
+                    raise ValueError('Host-panel counters do not cover every construction rank call')
         if variant=='traced':
             report_status=root/'traced.report_exit_code'
             if report_status.exists() and int(report_status.read_text()): raise ValueError('CUDA report conversion failed')

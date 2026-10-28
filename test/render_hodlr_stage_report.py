@@ -82,7 +82,8 @@ if 'diagnostic' in quiet:
     lines += ['',f"Maximum logical resident entry-image payload: {max(c['peak_resident_image_bytes_by_rank'])/2**30:.3f} GiB per rank. This excludes native factors and pool reservations.", '',
       '## Selecting the next change', '',
       'Use the largest measured component together with the slowest front calls and CUDA traces:', '',
-      '- Large host-callback construction calls: replace full replicated images with bounded tiled device evaluation, retaining sparse entries and child Schur contributions. Raising the cap alone increases memory pressure.',
+      ('- Large blocks now use bounded GPU panel compression. Target the measured host-preparation cost next, preserving sparse entries and child/current Schur terms.' if 'host_panels' in c else
+       '- Large host-callback construction calls: replace full replicated images with bounded tiled device evaluation, retaining sparse entries and child Schur contributions. Raising the cap alone increases memory pressure.'),
       '- Entry-image preparation: reduce host child materialization, replication and repeated packing; define distributed child ownership and stream dependencies before changing evaluation.',
       '- Collective host panels: compare host callback time with request metadata and fences. High callback cost points to child extraction and repeated Schur applications; high metadata cost points to collective scheduling and repeated index movement. Upload payload is not peak device memory.',
       '- Schur compression outside the GPU operator: target the host randomized-compression control and transfers at its outer boundary. Device Schur intermediate vectors already remain resident.',
