@@ -125,13 +125,14 @@ for c in data['cases']:
     if 'cpu_sampling' not in c: continue
     cuda={x['rank']:x for x in c.get('cuda',[])}
     lines += ['', '## CPU call stacks versus CUDA activity', '',
+      f"Numerical case status: {c['status']}. Trace-data status: {c.get('trace_data_status','unknown')}. A failed solve does not supply a valid solver speed result.", '',
       'CPU categories are fractions of running-CPU backtraces inside solver.factor, not fractions of solver wall time. ScaLAPACK includes PBLAS and BLACS. MPI/transport below ScaLAPACK is separated. CPU work can overlap GPU work; durations must not be added.', '',
       '| Rank | Factor wall (s) | Main-thread scheduled CPU (s) | CUDA kernel union (s) | CUDA activity union (s) | Factor CPU backtraces | Stacks reaching entry |',
       '|---|---:|---:|---:|---:|---:|---:|']
     for x in c['cpu_sampling']:
         section=next(q for q in x['sections'] if q['section']=='solver.factor')
         activity=cuda[x['rank']]['launch_scope_attribution']['section_activity'].get('solver.factor',{})
-        wall=c['rank_accounting'][x['rank']]['factor_envelope_seconds']
+        wall=c['rank_accounting'][x['rank']]['factor_envelope_seconds'] if 'rank_accounting' in c else x['scope_wall_seconds']['solver.factor']
         lines.append(f"| {x['rank']} | {wall:.3f} | {x['main_thread_scheduled_cpu_seconds'].get('solver.factor',0):.3f} | {activity.get('gpu_kernel_union_seconds',0):.3f} | {activity.get('gpu_activity_union_seconds',0):.3f} | {section['running_samples']} | {100*section['entry_frame_fraction']:.1f}% |")
     lines += ['', '| Rank | CPU stack category | Running samples | Fraction |', '|---|---|---:|---:|']
     for x in c['cpu_sampling']:

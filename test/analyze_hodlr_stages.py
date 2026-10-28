@@ -63,6 +63,18 @@ def panel_statistics(logs,budget):
         staging_peak_bytes_max=max(x['staging_peak_bytes_local'] for x in totals),
         staging_budget_bytes_per_rank=budget,rank_totals=totals,wall_seconds=seconds,
         records=records)
+def trace_statistics():
+    report_status=root/'traced.report_exit_code'
+    if report_status.exists() and int(report_status.read_text()): raise ValueError('CUDA report conversion failed')
+    selected=sorted({int(x) for x in (root/'traced_ranks.txt').read_text().strip().split(',')}) if (root/'traced_ranks.txt').exists() else sorted({0,ranks-1})
+    cuda=[json.loads((root/f'rank{rank}.cuda.json').read_text()) for rank in selected]
+    if not all(x['kernel_count']>0 and x.get('nvtx_events',0)>0 for x in cuda): raise ValueError('Missing CUDA/NVTX evidence')
+    result=dict(cuda=cuda,trace_data_status='COMPLETE')
+    if (root/'nsys_cpu_sampling.txt').exists() and (root/'nsys_cpu_sampling.txt').read_text().strip()=='1':
+        result['cpu_sampling']=[json.loads((root/f'rank{rank}.cpu.json').read_text()) for rank in selected]
+        if not all(any(s['section']=='solver.factor' and s['running_samples']>0 for s in x['sections']) for x in result['cpu_sampling']):
+            raise ValueError('Missing factorization CPU call-stack samples')
+    return result
 for variant in expected:
     status=root/(variant+'.exit_code')
     if not status.exists(): continue
@@ -156,18 +168,16 @@ for variant in expected:
                     phase['calls'] for phase in phases if '.construct.gpu_panels' in phase['phase']):
                     raise ValueError('Host-panel counters do not cover every construction rank call')
         if variant=='traced':
-            report_status=root/'traced.report_exit_code'
-            if report_status.exists() and int(report_status.read_text()): raise ValueError('CUDA report conversion failed')
-            selected=sorted({int(x) for x in (root/'traced_ranks.txt').read_text().strip().split(',')}) if (root/'traced_ranks.txt').exists() else sorted({0,ranks-1})
-            case['cuda']=[json.loads((root/f'rank{rank}.cuda.json').read_text()) for rank in selected]
-            if not all(x['kernel_count']>0 and x.get('nvtx_events',0)>0 for x in case['cuda']): raise ValueError('Missing CUDA/NVTX evidence')
-            if (root/'nsys_cpu_sampling.txt').exists() and (root/'nsys_cpu_sampling.txt').read_text().strip()=='1':
-                case['cpu_sampling']=[json.loads((root/f'rank{rank}.cpu.json').read_text()) for rank in selected]
-                if not all(any(s['section']=='solver.factor' and s['running_samples']>0 for s in x['sections']) for x in case['cpu_sampling']):
-                    raise ValueError('Missing factorization CPU call-stack samples')
+            case.update(trace_statistics())
         case['status']='PASS'
     except (ValueError,OSError,KeyError) as e:
         case['error']=str(e); failures.append(variant+': '+str(e))
+        if variant=='traced':
+            try:
+                case.update(trace_statistics())
+                case['trace_data_status']='COMPLETE_FROM_FAILED_NUMERICAL_CASE'
+            except (ValueError,OSError,KeyError) as trace_error:
+                case['trace_data_status']='INCOMPLETE'; case['trace_data_error']=str(trace_error)
     result['cases'].append(case)
 complete=len(result['cases'])==len(expected)
 result['status']='FAIL' if failures else ('PASS' if complete else 'RUNNING'); result['failures']=failures

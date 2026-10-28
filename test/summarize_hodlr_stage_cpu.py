@@ -82,7 +82,10 @@ if 'SCHED_EVENTS' in tables:
             begin=running.pop(tid)
             for start,end,label in roots[tid]:
                 scheduled[label]+=max(0,min(end,instant)-max(start,begin))/1e9
-result=dict(rank=int(path.stem.replace('rank','')),sections=sections,
+scope_wall=defaultdict(float)
+for intervals in roots.values():
+    for start,end,label in intervals: scope_wall[label]+=(end-start)/1e9
+result=dict(rank=int(path.stem.replace('rank','')),sections=sections,scope_wall_seconds=dict(scope_wall),
     main_thread_scheduled_cpu_seconds=dict(scheduled),
     diagnostics=[dict(row) for row in db.execute('SELECT severity,text FROM DIAGNOSTIC_EVENT')] if 'DIAGNOSTIC_EVENT' in tables else [],
     phases=[dict(section=k[0],phase=k[1],running_samples=sum(v.values()),categories=dict(v)) for k,v in counts.items()],
