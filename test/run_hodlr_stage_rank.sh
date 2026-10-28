@@ -2,7 +2,10 @@
 # One or two MPI ranks per GPU; optionally trace selected ranks.
 set -euo pipefail
 out=$1; variant=$2; trace=$3; shift 3
-IFS=, read -r -a visible <<< "${CUDA_VISIBLE_DEVICES:-${SLURM_JOB_GPUS:?}}"
+# Slurm step/job GPU IDs are physical IDs, while CUDA_VISIBLE_DEVICES can
+# be renumbered inside a shared allocation's device cgroup. Query the
+# physical ID and pass a UUID to CUDA so NVML and CUDA identify the same GPU.
+IFS=, read -r -a visible <<< "${SLURM_STEP_GPUS:-${SLURM_JOB_GPUS:-${CUDA_VISIBLE_DEVICES:?}}}"
 ranks_per_gpu=${HODLR_RANKS_PER_GPU:-2}
 case "$ranks_per_gpu" in
   1|2) ;;
@@ -10,11 +13,15 @@ case "$ranks_per_gpu" in
 esac
 index=$((SLURM_LOCALID / ranks_per_gpu))
 (( index < ${#visible[@]} )) || { echo 'MPI local rank exceeds the visible GPU layout' >&2; exit 1; }
-export CUDA_VISIBLE_DEVICES="${visible[$index]}"
+if ! uuid=$(nvidia-smi -i "${visible[$index]}" --query-gpu=uuid --format=csv,noheader); then
+  printf 'GPU UUID lookup failed: physical=%s CUDA_VISIBLE_DEVICES=%s step=%s job=%s\n' \
+    "${visible[$index]}" "${CUDA_VISIBLE_DEVICES:-}" "${SLURM_STEP_GPUS:-}" "${SLURM_JOB_GPUS:-}" >&2
+  exit 1
+fi
+export CUDA_VISIBLE_DEVICES="$uuid"
+printf '# stage binding rank=%s local_rank=%s node=%s uuid=%s\n' "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
 # The executable has DT_RPATH; preload the immutable SONAME to override it.
 export LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0${LD_PRELOAD:+:$LD_PRELOAD}"
-uuid=$(nvidia-smi -i "$CUDA_VISIBLE_DEVICES" --query-gpu=uuid --format=csv,noheader)
-printf '# stage binding rank=%s local_rank=%s node=%s uuid=%s\n' "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
 if [[ -n "${HODLR_CUSOLVER_AUDIT_LIBRARY:-}" ]]; then
   export HODLR_CUSOLVER_AUDIT="$out/$variant.cusolver"
   export LD_PRELOAD="$LD_PRELOAD:$HODLR_CUSOLVER_AUDIT_LIBRARY"

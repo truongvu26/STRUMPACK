@@ -1,5 +1,5 @@
 {
-  "status": "COMPONENT_PASS_SPARSE_RETRY_QUEUED",
+  "status": "VALIDATION_PASS_150_TIMING_QUEUED",
   "branches": {
     "strumpack": "perf/hodlr-gpu-efficiency",
     "butterflypack": "perf/hodlr-device-wy"
@@ -9,7 +9,7 @@
   "executable_sha256": "b44f0de180b1b7a67b18b320b02939bfb311ecfaaffabe6761b4ae6d9c9fb29a",
   "before_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
   "after_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
-  "validation_job": 60465717,
+  "validation_job": 60466018,
   "paired_150_job": 60464807,
   "layout_16_rank_job": 60464839,
   "construction_tolerance": 1e-05,
@@ -166,5 +166,51 @@
     "gpu_driver": "580.178.04"
   },
   "component_job_overall_status": "FAILED_SPARSE_LAUNCH_BEFORE_SOLVER_START",
-  "sparse_launcher_correction": "Shared allocation reserved16 CPUs/task but sparse step requested8; only one GPU was exposed. Retry uses allocation CPU count and explicitly requests ranks/2 GPUs for the single-node sparse step; production library is unchanged."
+  "sparse_launcher_correction": "Shared allocation reserved16 CPUs/task but sparse step requested8; only one GPU was exposed. Retry uses allocation CPU count and explicitly requests ranks/2 GPUs for the single-node sparse step; production library is unchanged.",
+  "launcher_retry_job": {
+    "job": 60465717,
+    "status": "FAILED_BEFORE_SOLVER_START",
+    "cause": "CUDA_VISIBLE_DEVICES was cgroup-relative while nvidia-smi requires physical IDs; binding now resolves SLURM_STEP_GPUS physical IDs to UUIDs before selecting CUDA device."
+  },
+  "validation_status": "PASS",
+  "sparse_validation": {
+    "job": 60466018,
+    "status": "PASS",
+    "cases": [
+      {
+        "factor_seconds": 8.12944,
+        "solve_seconds": 0.0897196,
+        "relative_error": 6.73939e-12,
+        "scaled_residual": 6.30458e-10,
+        "maximum_hodlr_rank": 218.0,
+        "refinement_iterations": 2.0,
+        "grid": 40,
+        "ranks": 4,
+        "gpus": 2,
+        "rhs": 3,
+        "status": "PASS",
+        "factor_plus_solve_seconds": 8.219159600000001
+      },
+      {
+        "factor_seconds": 223.866,
+        "solve_seconds": 5.01999,
+        "relative_error": 1.21013e-10,
+        "scaled_residual": 2.60245e-08,
+        "maximum_hodlr_rank": 611.0,
+        "refinement_iterations": 7.0,
+        "grid": 100,
+        "ranks": 4,
+        "gpus": 2,
+        "rhs": 3,
+        "status": "PASS",
+        "factor_plus_solve_seconds": 228.88599000000002
+      }
+    ]
+  },
+  "cancelled_100_pair": {
+    "job": 60466135,
+    "status": "CANCELLED_BEFORE_START",
+    "reason": "100-cubed validation took224 seconds per new-library factorization; a full four-trial comparison needs more than the requested15minutes. Prioritize the matched150-cubed pair rather than duplicating the expensive benchmark."
+  },
+  "benchmark_gate": "Native component and captured-factor validation passed; the150-cubed benchmark was released while corrected sparse launches ran. All comparison solves must pass individually."
 }
