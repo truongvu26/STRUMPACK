@@ -72,6 +72,13 @@ if 'diagnostic' in quiet:
       '|---|---:|---|---:|---:|---:|---:|']
     for p in c.get('construction_fronts',[])[:15]:
         lines.append(f"| {p['phase']} | {p['front']} | {p['rows']}×{p['cols']} | {p['procs']} | {p['max_rank']} | {p['max_seconds']:.3f} | {p['mean_seconds']:.3f} |")
+    if c.get('parent_precompression_gaps'):
+        lines += ['', '## Gaps before parent compression', '',
+          'Each gap is measured on one rank, from its last completed front-compression scope to entry into the next distributed front. It includes hierarchy setup and waits for other subtrees; it is not isolated MPI wait time. Only local time differences are compared, avoiding cross-node clock assumptions.', '',
+          '| Front | Front ranks | Minimum gap (s) | Maximum gap (s) | Spread (s) |',
+          '|---|---:|---:|---:|---:|']
+        for q in c['parent_precompression_gaps'][:5]:
+            lines.append(f"| {q['front']} | {q['procs']} | {q['min_seconds']:.3f} | {q['max_seconds']:.3f} | {q['spread_seconds']:.3f} |")
     lines += ['',f"Maximum logical resident entry-image payload: {max(c['peak_resident_image_bytes_by_rank'])/2**30:.3f} GiB per rank. This excludes native factors and pool reservations.", '',
       '## Selecting the next change', '',
       'Use the largest measured component together with the slowest front calls and CUDA traces:', '',

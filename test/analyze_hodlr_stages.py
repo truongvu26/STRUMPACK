@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate each solver case and aggregate local, nested phase measurements."""
-import argparse,csv,json,math,re,shlex,statistics,subprocess,sys
+import argparse,bisect,csv,json,math,re,shlex,statistics,subprocess,sys
 from collections import Counter,defaultdict
 from pathlib import Path
 p=argparse.ArgumentParser(); p.add_argument('directory',type=Path); p.add_argument('--require-complete',action='store_true'); a=p.parse_args(); root=a.directory
@@ -86,6 +86,7 @@ for variant in expected:
             case['cusolver_resource_audit']=dict(ranks=ranks,handles_per_process=1,params_per_process=1,creation_failures=0)
         if variant in ('diagnostic','traced'):
             by_phase=defaultdict(lambda:defaultdict(list)); fronts=[]; peaks=[]; accounting=[]
+            arrival_gaps=defaultdict(list)
             for rank in range(ranks):
                 path=root/f'{variant}.stages.rank{rank}.csv'
                 with path.open() as f: rows=list(csv.DictReader(f))
@@ -95,6 +96,13 @@ for variant in expected:
                 if any(labels[k]!=1 for k in ('solver.reorder','solver.factor','solver.solve')): raise ValueError('Missing or duplicate solver scope')
                 if not (labels['prepare.upload_resident_image'] or labels['prepare.host_panels']): raise ValueError('Missing GPU image or host-panel preparation measurement')
                 factor_rows=[row for row in rows if row['section']=='solver.factor']
+                compress=[row for row in factor_rows if row['phase']=='front.compress']
+                ends=sorted(float(row['end']) for row in compress)
+                for row in compress:
+                    start=float(row['start']); before=bisect.bisect_right(ends,start)
+                    if int(row['procs'])>1 and before:
+                        arrival_gaps[(int(row['front']),int(row['procs']))].append(
+                            dict(rank=rank,seconds=start-ends[before-1]))
                 factor_wall=next(float(row['inclusive']) for row in factor_rows if row['phase']=='solver.factor')
                 partition=sum(float(row['exclusive']) for row in factor_rows)
                 if abs(partition-factor_wall)>max(.001,1e-8*factor_wall): raise ValueError('Exclusive scopes do not partition factor envelope')
@@ -131,6 +139,14 @@ for variant in expected:
             case['construction_fronts']=sorted(unique,key=lambda row:row['max_seconds'],reverse=True)
             case['peak_resident_image_bytes_by_rank']=peaks
             case['rank_accounting']=accounting
+            gaps=[]
+            for (front,procs),local in arrival_gaps.items():
+                slowest=max(local,key=lambda row:row['seconds'])
+                low=min(row['seconds'] for row in local)
+                gaps.append(dict(front=front,procs=procs,participating_ranks=len(local),
+                    min_seconds=low,max_seconds=slowest['seconds'],
+                    spread_seconds=slowest['seconds']-low,max_rank=slowest['rank']))
+            case['parent_precompression_gaps']=sorted(gaps,key=lambda row:row['spread_seconds'],reverse=True)[:20]
             command=root/(variant+'.command')
             args=shlex.split(command.read_text()) if command.exists() else []
             if '--hodlr_gpu_host_panels' in args and args[args.index('--hodlr_gpu_host_panels')+1]=='1':
