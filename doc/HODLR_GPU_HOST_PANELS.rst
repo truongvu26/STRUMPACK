@@ -8,13 +8,15 @@ matrix entries, child Schur contributions and the current negative Schur
 term still come from STRUMPACK's existing batched host extraction callbacks.
 This is hybrid GPU construction, not device-side frontal-entry assembly.
 
-Follow-up profile 60416427 and the quiet GPU case of matched job 60416297
+Historical profile 60416427 and the quiet GPU case of matched job 60416297
 exposed divergent refinement ending in NaNs, despite the passing samples
 below. The matched CPU case passed. Nsight therefore cannot be the sole
-cause. Stability is under investigation; explaining the numerical failure
-takes priority over further feature optimization. Previous passing samples
-alone do not establish reliability. Details and the Nsight repeat are
-recorded in HODLR_GPU_CPU_NSYS.json. The cause has not been established.
+cause. These failed runs remain recorded in HODLR_GPU_CPU_NSYS.json.
+The subsequent investigation reproduced a native polar-SVD failure and
+changed the large-block SVD to QR-based cuSOLVER (ButterflyPACK 88e859d).
+The updated matched 150-cubed CPU/GPU solves and Nsight profile passed;
+see HODLR_GPU_QR_SVD_PROFILE.rst for timings, attribution and limitations.
+This does not establish a single cause for every historical failure.
 
 The previous 256 MiB image cap caused 94 large F22 and 22 blocks of each
 rectangular orientation to use host compression at 150 cubed. The new path
@@ -25,8 +27,9 @@ No complete large frontal image is all-gathered or retained by this path.
 Build and select
 ----------------
 
-Use ButterflyPACK branch ``feature/gpu-host-panels``, based on the validated
-cuSOLVER resource-reuse branch. Configure STRUMPACK with
+Use ButterflyPACK branch ``fix/hodlr-gpu-recompression``, which retains
+the host-panel and cuSOLVER resource-reuse changes and includes the SVD
+accuracy fix. Configure STRUMPACK with
 ``STRUMPACK_USE_HODLR_GPU_HOST_PANELS=ON``. Configure-time link checks require
 all real/complex registration, completion and statistics symbols. The flag
 is off by default and STRUMPACK's own dense CUDA backend can remain off.

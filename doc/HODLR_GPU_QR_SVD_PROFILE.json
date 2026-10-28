@@ -1,0 +1,1095 @@
+{
+  "status": "PASS",
+  "implementation": {
+    "butterflypack_revision": "88e859d",
+    "strumpack_branch": "fix/hodlr-gpu-accuracy",
+    "strumpack_validation_revision": "d503414b",
+    "quiet_executable_sha256": "b44f0de180b1b7a67b18b320b02939bfb311ecfaaffabe6761b4ae6d9c9fb29a",
+    "butterflypack_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
+    "strumpack_production_changes_after_executable_build": "None; subsequent STRUMPACK changes are tests and documentation.",
+    "diagnostic_executable_sha256": "ae7158cae1a7ad12d23b0f6b23ef05423cb8b8ecfe672ab09389e1838ca4a5f1",
+    "nsys_build": "Release diagnostic executable; same production source and native library as quiet runs, with stage instrumentation enabled"
+  },
+  "layout": {
+    "grid": 150,
+    "unknowns": 3375000,
+    "ranks": 32,
+    "nodes": 4,
+    "reserved_gpus": 16,
+    "gpu_model": "NVIDIA A100-SXM4-40GB",
+    "rhs": 3,
+    "omp_threads": 1,
+    "leaf_size": 128,
+    "relative_compression_tolerance": 1e-05,
+    "butterfly_levels": 0
+  },
+  "gpu_settings": {
+    "hodlr_use_gpu": 1,
+    "gpu_rectangular": 1,
+    "host_panels": 1,
+    "front_image_byte_cap": 268435456,
+    "panel_byte_cap": 67108864,
+    "BPACK_GPU_HODLR_SVD": "qr"
+  },
+  "cpu": {
+    "job": 60423044,
+    "summary": "profile_results/60423044/stage_summary.json",
+    "status": "PASS",
+    "factor_seconds": 838.071,
+    "solve_seconds": 3.31297,
+    "factor_plus_solve_seconds": 841.38397,
+    "relative_error": 6.92735e-10,
+    "scaled_residual": 4.40636e-08,
+    "refinement_iterations": 9.0,
+    "maximum_hodlr_rank": 988
+  },
+  "gpu_nsys": {
+    "job": 60425000,
+    "status": "PASS",
+    "traced_ranks": [
+      0,
+      11,
+      15,
+      31
+    ],
+    "summary": "profile_results/60425000/stage_summary.json",
+    "BPACK_GPU_BACA_RESIDUAL_GUARD": "0",
+    "superseded_held_job": 60423202,
+    "factor_seconds": 391.597,
+    "solve_seconds": 7.90356,
+    "factor_plus_solve_seconds": 399.50056,
+    "relative_error": 5.31009e-10,
+    "scaled_residual": 3.11648e-08,
+    "refinement_iterations": 15.0,
+    "hodlr_fronts": 1980.0,
+    "maximum_hodlr_rank": 985,
+    "trace_data_status": "COMPLETE"
+  },
+  "sparse_100_validation": {
+    "job": 60423305,
+    "status": "PASS",
+    "ranks": 32,
+    "gpus": 16,
+    "rhs": 3,
+    "factor_seconds": 132.915,
+    "solve_seconds": 0.605141,
+    "maximum_hodlr_rank": 590.0,
+    "relative_error": 1.63058e-13,
+    "scaled_residual": 1.43934e-11,
+    "factor_plus_solve_seconds": 133.520141
+  },
+  "svd_reproducer": {
+    "old_polar_job": 60422299,
+    "qr_job": 60422461,
+    "rows": 684,
+    "reference_norm": 2.26377982924,
+    "polar_reported_perturbation": 0.50266009782,
+    "polar_relative_reconstruction_error": 5.80721996296,
+    "qr_relative_reconstruction_error": 4.59525662666e-15,
+    "nvidia_documentation": "https://docs.nvidia.com/cuda/cusolver/index.html#cusolverdnxgesvdp"
+  },
+  "notes": [
+    "Residual certification is explicitly enabled only for certified cases and remains opt-in; default GPU and Nsight cases disable it.",
+    "Quiet CPU and GPU cases provide the timing comparison; tracing adds overhead.",
+    "The same quiet executable and native library are used for both backends.",
+    "Earlier failed GPU studies remain in HODLR_GPU_CPU_NSYS.json; their timings do not establish a speedup.",
+    "Phase sums are local rank work, not global elapsed time.",
+    "GPU kernel unions for selected processes do not establish whole-device utilization.",
+    "The certified and default GPU cases are separated to measure certification overhead; a default GPU timing is usable only after numerical validation.",
+    "The profiled run uses 15 refinement iterations versus nine in the quiet matched pair; randomized compression varies, so their timing difference is not purely tracing overhead."
+  ],
+  "gpu_certified": {
+    "job": 60423201,
+    "status": "PASS",
+    "summary": "profile_results/60423201/stage_summary.json",
+    "BPACK_GPU_BACA_RESIDUAL_GUARD": "1",
+    "factor_seconds": 1174.06,
+    "solve_seconds": 1.59843,
+    "factor_plus_solve_seconds": 1175.65843,
+    "relative_error": 8.89732e-13,
+    "scaled_residual": 7.75199e-11,
+    "refinement_iterations": 3.0,
+    "cpu_relative_total_ratio": 1.3972912153294292,
+    "maximum_hodlr_rank": 962,
+    "total_relative_to_default_gpu": 3.0554481968475766
+  },
+  "gpu_default": {
+    "job": 60424358,
+    "status": "PASS",
+    "BPACK_GPU_BACA_RESIDUAL_GUARD": "0",
+    "summary": "profile_results/60424358/stage_summary.json",
+    "factor_seconds": 379.926,
+    "solve_seconds": 4.84846,
+    "factor_plus_solve_seconds": 384.77446,
+    "relative_error": 3.21923e-10,
+    "scaled_residual": 2.47194e-08,
+    "refinement_iterations": 9.0,
+    "cpu_over_gpu_total_speedup": 2.186693914143886,
+    "maximum_hodlr_rank": 989
+  },
+  "profiling": {
+    "interpretation": "Host construction, extraction and coordination are the leading measured targets. GPU kernel execution is a small part of the sampled-process factor envelope. ScaLAPACK is visible, especially in Schur randomized compression, but incomplete CPU stacks prevent a precise exclusive ScaLAPACK percentage.",
+    "factor_exclusive_rank_seconds": 12531.274528994923,
+    "factor_phases": [
+      {
+        "phase": "prepare.host_panels",
+        "exclusive_rank_seconds": {
+          "sum": 4657.7960284809815,
+          "mean": 145.55612589003067,
+          "max": 215.24688569305,
+          "max_rank": 26
+        },
+        "fraction_of_factor_rank_seconds": 0.3716937186001113
+      },
+      {
+        "phase": "solver.factor",
+        "exclusive_rank_seconds": {
+          "sum": 3319.8588686800795,
+          "mean": 103.74558964625248,
+          "max": 181.63221160508692,
+          "max_rank": 0
+        },
+        "fraction_of_factor_rank_seconds": 0.2649258749378265
+      },
+      {
+        "phase": "F22.construct.gpu_panels",
+        "exclusive_rank_seconds": {
+          "sum": 1020.499250452267,
+          "mean": 31.890601576633344,
+          "max": 69.07447594357654,
+          "max_rank": 14
+        },
+        "fraction_of_factor_rank_seconds": 0.08143618975795566
+      },
+      {
+        "phase": "F22.construct.gpu",
+        "exclusive_rank_seconds": {
+          "sum": 685.74363696808,
+          "mean": 21.4294886552525,
+          "max": 40.32811309269164,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.054722577131432484
+      },
+      {
+        "phase": "Schur.compress.randomized",
+        "exclusive_rank_seconds": {
+          "sum": 504.17923232982866,
+          "mean": 15.755601010307146,
+          "max": 19.243444122257642,
+          "max_rank": 14
+        },
+        "fraction_of_factor_rank_seconds": 0.04023367544644053
+      },
+      {
+        "phase": "F12.construct.gpu",
+        "exclusive_rank_seconds": {
+          "sum": 425.2134471696336,
+          "mean": 13.28792022405105,
+          "max": 21.395497807767242,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.03393217874093913
+      },
+      {
+        "phase": "prepare.extract_sparse_children",
+        "exclusive_rank_seconds": {
+          "sum": 361.2002611908829,
+          "mean": 11.28750816221509,
+          "max": 15.604100125725381,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.028823904572127596
+      },
+      {
+        "phase": "F21.construct.gpu",
+        "exclusive_rank_seconds": {
+          "sum": 356.90831432689447,
+          "mean": 11.153384822715452,
+          "max": 17.890843283035792,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.02848140574217557
+      },
+      {
+        "phase": "prepare.materialize_current_schur",
+        "exclusive_rank_seconds": {
+          "sum": 283.2560662381584,
+          "mean": 8.85175206994245,
+          "max": 15.633868386037648,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.022603931115127925
+      },
+      {
+        "phase": "F11.construct.gpu",
+        "exclusive_rank_seconds": {
+          "sum": 206.81442750652786,
+          "mean": 6.462950859578996,
+          "max": 9.066197022679262,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.016503862159271958
+      },
+      {
+        "phase": "prepare.extract_children",
+        "exclusive_rank_seconds": {
+          "sum": 181.75008191622328,
+          "mean": 5.6796900598819775,
+          "max": 10.330860109999776,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.014503718795377842
+      },
+      {
+        "phase": "F12.construct.gpu_panels",
+        "exclusive_rank_seconds": {
+          "sum": 167.122721400694,
+          "mean": 5.222585043771687,
+          "max": 8.944895291002467,
+          "max_rank": 26
+        },
+        "fraction_of_factor_rank_seconds": 0.013336450415638459
+      },
+      {
+        "phase": "F21.construct.gpu_panels",
+        "exclusive_rank_seconds": {
+          "sum": 145.53246167686302,
+          "mean": 4.547889427401969,
+          "max": 7.426317209727131,
+          "max_rank": 14
+        },
+        "fraction_of_factor_rank_seconds": 0.011613540293936528
+      },
+      {
+        "phase": "F11.construct.gpu_panels",
+        "exclusive_rank_seconds": {
+          "sum": 70.96867980458774,
+          "mean": 2.2177712438933668,
+          "max": 2.4054512404836714,
+          "max_rank": 22
+        },
+        "fraction_of_factor_rank_seconds": 0.0056633249587166945
+      },
+      {
+        "phase": "Schur.apply.device",
+        "exclusive_rank_seconds": {
+          "sum": 58.91182673443109,
+          "mean": 1.8409945854509715,
+          "max": 2.213514171424322,
+          "max_rank": 14
+        },
+        "fraction_of_factor_rank_seconds": 0.004701183953644988
+      },
+      {
+        "phase": "prepare.pack_image",
+        "exclusive_rank_seconds": {
+          "sum": 20.693506313255057,
+          "mean": 0.6466720722892205,
+          "max": 1.0833283703541383,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.0016513488923552287
+      },
+      {
+        "phase": "prepare.replicate",
+        "exclusive_rank_seconds": {
+          "sum": 20.498995742877014,
+          "mean": 0.6405936169649067,
+          "max": 0.9615323038306087,
+          "max_rank": 17
+        },
+        "fraction_of_factor_rank_seconds": 0.0016358268822094942
+      },
+      {
+        "phase": "F11.factor.gpu",
+        "exclusive_rank_seconds": {
+          "sum": 12.15568548894953,
+          "mean": 0.3798651715296728,
+          "max": 0.5243797947186977,
+          "max_rank": 6
+        },
+        "fraction_of_factor_rank_seconds": 0.0009700278659464084
+      },
+      {
+        "phase": "prepare.upload_resident_image",
+        "exclusive_rank_seconds": {
+          "sum": 9.91032549389638,
+          "mean": 0.3096976716842619,
+          "max": 0.5101529196836054,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.0007908473691934385
+      },
+      {
+        "phase": "F22.prepare",
+        "exclusive_rank_seconds": {
+          "sum": 7.614952203119174,
+          "mean": 0.23796725634747418,
+          "max": 0.3759501820895821,
+          "max_rank": 31
+        },
+        "fraction_of_factor_rank_seconds": 0.0006076757943096418
+      },
+      {
+        "phase": "F11.prepare",
+        "exclusive_rank_seconds": {
+          "sum": 4.929350015125237,
+          "mean": 0.15404218797266367,
+          "max": 0.21602925029583275,
+          "max_rank": 3
+        },
+        "fraction_of_factor_rank_seconds": 0.0003933638197551002
+      },
+      {
+        "phase": "F12.prepare",
+        "exclusive_rank_seconds": {
+          "sum": 3.8178654060466215,
+          "mean": 0.11930829393895692,
+          "max": 0.21772858360782266,
+          "max_rank": 1
+        },
+        "fraction_of_factor_rank_seconds": 0.000304666967211741
+      },
+      {
+        "phase": "F21.prepare",
+        "exclusive_rank_seconds": {
+          "sum": 3.239680812926963,
+          "mean": 0.10124002540396759,
+          "max": 0.1476337896892801,
+          "max_rank": 1
+        },
+        "fraction_of_factor_rank_seconds": 0.00025852763862374686
+      },
+      {
+        "phase": "front.compress",
+        "exclusive_rank_seconds": {
+          "sum": 2.658862642594613,
+          "mean": 0.08308945758108166,
+          "max": 0.15895982435904443,
+          "max_rank": 3
+        },
+        "fraction_of_factor_rank_seconds": 0.00021217814967204842
+      }
+    ],
+    "selected_ranks": [
+      {
+        "rank": 0,
+        "factor_scope_seconds": 391.602248476,
+        "factor_scope_nvtx_minus_csv_seconds": 3.6541951317303756e-05,
+        "gpu_kernel_union_seconds": 26.544206069,
+        "gpu_activity_union_seconds": 28.863562236,
+        "factor_cpu_samples": 72063,
+        "factor_cpu_categories": {
+          "CUDA/library host work": 0.28452881506459626,
+          "ButterflyPACK host work outside the above": 0.2758419716081762,
+          "MPI/transport (caller incomplete)": 0.2425100259495164,
+          "Host BLAS/LAPACK (caller incomplete)": 0.12383608786756033,
+          "STRUMPACK/other host work or unresolved": 0.045945908441225036,
+          "ScaLAPACK/PBLAS/BLACS outside MPI": 0.01866422435924122,
+          "MPI/transport outside ScaLAPACK": 0.0048984915976298515,
+          "MPI/transport under ScaLAPACK or BLACS": 0.00377447511205473
+        },
+        "factor_cpu_unresolved_leaf_fraction": 0.5155211412236516,
+        "factor_cpu_entry_frame_fraction": 0.03136144762221945,
+        "factor_host_wy_leaf_fraction": 0.03696765330335956,
+        "memory_copies_all_solver": [
+          {
+            "direction": "Device-to-Device",
+            "calls": 15336,
+            "bytes": 9608983624,
+            "seconds": 0.04673395
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 71285,
+            "bytes": 13437099976,
+            "seconds": 1.080291277
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 400660,
+            "bytes": 8730290700,
+            "seconds": 1.177602629
+          }
+        ],
+        "cuda_runtime_api_all_solver": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 465850,
+            "host_seconds": 33.81373170300105
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 1602357,
+            "host_seconds": 6.852530821004137
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 67218,
+            "host_seconds": 5.6421077429999755
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 31839,
+            "host_seconds": 3.3504380810000205
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 13877,
+            "host_seconds": 1.317170199000002
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 3638,
+            "host_seconds": 0.843497716
+          }
+        ],
+        "top_kernels_all_solver": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 81178,
+            "seconds": 11.181694058
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 162356,
+            "seconds": 2.030393878
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 2594,
+            "seconds": 1.933510045
+          },
+          {
+            "name": "qrcp_pivots_kernel",
+            "calls": 7675,
+            "seconds": 1.256436274
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 18865,
+            "seconds": 1.11223246
+          }
+        ],
+        "top_factor_leaf_functions": [
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 5686,
+            "fraction": 0.07890318193802645
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 5575,
+            "fraction": 0.07736286305038646
+          },
+          {
+            "name": "0xffffffff9a000233",
+            "module": "[kernel.kallsyms]",
+            "samples": 3946,
+            "fraction": 0.054757642618264574
+          },
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 2664,
+            "fraction": 0.03696765330335956
+          },
+          {
+            "name": "0x7f3d8a46a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 2388,
+            "fraction": 0.03313767120436285
+          },
+          {
+            "name": "strumpack::DenseMatrix<int> strumpack::HODLR::get_odiag_neighbors<int>(int, strumpack::CSRGraph<int> const&, strumpack::CSRGraph<int> const&, strumpack::CSRGraph<int> const&)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/diagnostic",
+            "samples": 1877,
+            "fraction": 0.026046653622524736
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 1722,
+            "fraction": 0.02389575787852296
+          },
+          {
+            "name": "0x7ffde229eb67",
+            "module": "[vdso]",
+            "samples": 1417,
+            "fraction": 0.019663350124196885
+          }
+        ],
+        "diagnostics": [
+          {
+            "severity": 2,
+            "text": "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1."
+          },
+          {
+            "severity": 2,
+            "text": "Not all NVTX events might have been collected."
+          },
+          {
+            "severity": 1,
+            "text": "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+          }
+        ]
+      },
+      {
+        "rank": 11,
+        "factor_scope_seconds": 391.602373621,
+        "factor_scope_nvtx_minus_csv_seconds": 1.1467996102965117e-05,
+        "gpu_kernel_union_seconds": 31.802381252,
+        "gpu_activity_union_seconds": 40.899670405,
+        "factor_cpu_samples": 116886,
+        "factor_cpu_categories": {
+          "ButterflyPACK host work outside the above": 0.46746402477627774,
+          "CUDA/library host work": 0.24472563010112416,
+          "Host BLAS/LAPACK (caller incomplete)": 0.16806974316855738,
+          "MPI/transport (caller incomplete)": 0.05750047054394881,
+          "STRUMPACK/other host work or unresolved": 0.02665845353592389,
+          "MPI/transport outside ScaLAPACK": 0.017897780743630545,
+          "ScaLAPACK/PBLAS/BLACS outside MPI": 0.015425286176274318,
+          "MPI/transport under ScaLAPACK or BLACS": 0.002258610954263128
+        },
+        "factor_cpu_unresolved_leaf_fraction": 0.2953048269253803,
+        "factor_cpu_entry_frame_fraction": 0.037207193333675545,
+        "factor_host_wy_leaf_fraction": 0.10905497664390945,
+        "memory_copies_all_solver": [
+          {
+            "direction": "Device-to-Device",
+            "calls": 17036,
+            "bytes": 12969069832,
+            "seconds": 0.055255701
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 143717,
+            "bytes": 82383032576,
+            "seconds": 7.315315341
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 578927,
+            "bytes": 11901159672,
+            "seconds": 1.707825601
+          }
+        ],
+        "cuda_runtime_api_all_solver": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 711522,
+            "host_seconds": 50.929978369001105
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 2049794,
+            "host_seconds": 9.572990704007953
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 140084,
+            "host_seconds": 6.045657383999762
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 34590,
+            "host_seconds": 4.34166143899999
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 14041,
+            "host_seconds": 1.4101310780000047
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 4173,
+            "host_seconds": 0.8842141590000028
+          }
+        ],
+        "top_kernels_all_solver": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 86202,
+            "seconds": 11.67576781
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 2779,
+            "seconds": 2.151566232
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 172404,
+            "seconds": 2.083779781
+          },
+          {
+            "name": "lasr_RVF_kernel_v3",
+            "calls": 100805,
+            "seconds": 1.523378891
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 19540,
+            "seconds": 1.502336933
+          }
+        ],
+        "top_factor_leaf_functions": [
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 12747,
+            "fraction": 0.10905497664390945
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 11661,
+            "fraction": 0.09976387249114523
+          },
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 9051,
+            "fraction": 0.07743442328422566
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 7773,
+            "fraction": 0.06650069298290642
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 7008,
+            "fraction": 0.059955854422257586
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 6037,
+            "fraction": 0.05164861488972161
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 4965,
+            "fraction": 0.04247728556028951
+          },
+          {
+            "name": "0x7f0e5526a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 3126,
+            "fraction": 0.026744006981161132
+          }
+        ],
+        "diagnostics": [
+          {
+            "severity": 2,
+            "text": "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1."
+          },
+          {
+            "severity": 2,
+            "text": "Not all NVTX events might have been collected."
+          },
+          {
+            "severity": 1,
+            "text": "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+          }
+        ]
+      },
+      {
+        "rank": 15,
+        "factor_scope_seconds": 391.602386858,
+        "factor_scope_nvtx_minus_csv_seconds": 1.4115043484252965e-05,
+        "gpu_kernel_union_seconds": 31.9974222,
+        "gpu_activity_union_seconds": 37.772929445,
+        "factor_cpu_samples": 109988,
+        "factor_cpu_categories": {
+          "ButterflyPACK host work outside the above": 0.48001600174564496,
+          "CUDA/library host work": 0.24019893079245008,
+          "Host BLAS/LAPACK (caller incomplete)": 0.12842310070189475,
+          "MPI/transport (caller incomplete)": 0.10334763792413718,
+          "STRUMPACK/other host work or unresolved": 0.027257519002072954,
+          "ScaLAPACK/PBLAS/BLACS outside MPI": 0.017583736407608103,
+          "MPI/transport under ScaLAPACK or BLACS": 0.00246390515328945,
+          "MPI/transport outside ScaLAPACK": 0.0007091682729024985
+        },
+        "factor_cpu_unresolved_leaf_fraction": 0.3210986653089428,
+        "factor_cpu_entry_frame_fraction": 0.02096592355529694,
+        "factor_host_wy_leaf_fraction": 0.20063097792486453,
+        "memory_copies_all_solver": [
+          {
+            "direction": "Device-to-Device",
+            "calls": 15356,
+            "bytes": 10730005840,
+            "seconds": 0.047683726
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 119184,
+            "bytes": 48092214944,
+            "seconds": 4.170910537
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 521628,
+            "bytes": 10418912356,
+            "seconds": 1.538921453
+          }
+        ],
+        "cuda_runtime_api_all_solver": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 631108,
+            "host_seconds": 45.91132254000126
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 1953436,
+            "host_seconds": 9.661192016005913
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 114692,
+            "host_seconds": 5.611789065999968
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 34174,
+            "host_seconds": 3.7441814639999786
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 13626,
+            "host_seconds": 1.3203471640000068
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 3916,
+            "host_seconds": 0.8739450819999993
+          }
+        ],
+        "top_kernels_all_solver": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 86562,
+            "seconds": 11.823838311
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 2854,
+            "seconds": 2.188076369
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 173124,
+            "seconds": 2.087283169
+          },
+          {
+            "name": "lasr_RVF_kernel_v3",
+            "calls": 93170,
+            "seconds": 1.65783337
+          },
+          {
+            "name": "lasr_LVF_kernel_v2",
+            "calls": 93170,
+            "seconds": 1.540853537
+          }
+        ],
+        "top_factor_leaf_functions": [
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 22067,
+            "fraction": 0.20063097792486453
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 8409,
+            "fraction": 0.07645379495945012
+          },
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 7275,
+            "fraction": 0.06614357929955995
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 4660,
+            "fraction": 0.04236825835545696
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 4581,
+            "fraction": 0.04164999818161981
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 4109,
+            "fraction": 0.037358620940466235
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 3578,
+            "fraction": 0.032530821544168455
+          },
+          {
+            "name": "0x7f0816c6a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 2800,
+            "fraction": 0.025457322617012765
+          }
+        ],
+        "diagnostics": [
+          {
+            "severity": 2,
+            "text": "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1."
+          },
+          {
+            "severity": 2,
+            "text": "Not all NVTX events might have been collected."
+          },
+          {
+            "severity": 1,
+            "text": "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+          }
+        ]
+      },
+      {
+        "rank": 31,
+        "factor_scope_seconds": 391.602412123,
+        "factor_scope_nvtx_minus_csv_seconds": 6.1739699503959855e-06,
+        "gpu_kernel_union_seconds": 46.99255438,
+        "gpu_activity_union_seconds": 52.734315701,
+        "factor_cpu_samples": 109540,
+        "factor_cpu_categories": {
+          "ButterflyPACK host work outside the above": 0.3758718276428702,
+          "CUDA/library host work": 0.32044002190980464,
+          "Host BLAS/LAPACK (caller incomplete)": 0.1640861785649078,
+          "MPI/transport outside ScaLAPACK": 0.04862150812488589,
+          "MPI/transport (caller incomplete)": 0.04563629724301625,
+          "STRUMPACK/other host work or unresolved": 0.03538433448968414,
+          "ScaLAPACK/PBLAS/BLACS outside MPI": 0.008179660398028117,
+          "MPI/transport under ScaLAPACK or BLACS": 0.0017801716268029944
+        },
+        "factor_cpu_unresolved_leaf_fraction": 0.39119043271864157,
+        "factor_cpu_entry_frame_fraction": 0.07034873105714808,
+        "factor_host_wy_leaf_fraction": 0.07794412999817418,
+        "memory_copies_all_solver": [
+          {
+            "direction": "Device-to-Device",
+            "calls": 26311,
+            "bytes": 14845650728,
+            "seconds": 0.075929931
+          },
+          {
+            "direction": "Device-to-Host",
+            "calls": 171254,
+            "bytes": 46442818152,
+            "seconds": 3.679359254
+          },
+          {
+            "direction": "Host-to-Device",
+            "calls": 651525,
+            "bytes": 14277548568,
+            "seconds": 1.957392864
+          }
+        ],
+        "cuda_runtime_api_all_solver": [
+          {
+            "name": "cudaMemcpyAsync_v3020",
+            "calls": 814195,
+            "host_seconds": 60.87765203900557
+          },
+          {
+            "name": "cudaLaunchKernel_v7000",
+            "calls": 2700094,
+            "host_seconds": 11.819969209001632
+          },
+          {
+            "name": "cudaStreamSynchronize_v3020",
+            "calls": 161084,
+            "host_seconds": 6.123363087999928
+          },
+          {
+            "name": "cudaEventSynchronize_v3020",
+            "calls": 56099,
+            "host_seconds": 4.679595830000099
+          },
+          {
+            "name": "cudaMemcpy_v3020",
+            "calls": 21871,
+            "host_seconds": 1.5957043629999963
+          },
+          {
+            "name": "cudaFree_v3020",
+            "calls": 6577,
+            "host_seconds": 1.286187801000001
+          }
+        ],
+        "top_kernels_all_solver": [
+          {
+            "name": "dsyevj_batched_parallel_small_sm_kernel",
+            "calls": 155658,
+            "seconds": 21.029999465
+          },
+          {
+            "name": "gesvj_update_vectors_template_batched_kernel",
+            "calls": 311316,
+            "seconds": 3.758776322
+          },
+          {
+            "name": "geqr2_smem_domino_fast",
+            "calls": 4160,
+            "seconds": 2.782572625
+          },
+          {
+            "name": "qrcp_pivots_kernel",
+            "calls": 13954,
+            "seconds": 2.215805876
+          },
+          {
+            "name": "gemm_template_vbatched_tn_kernel",
+            "calls": 32516,
+            "seconds": 1.962101428
+          }
+        ],
+        "top_factor_leaf_functions": [
+          {
+            "name": "__d_bpack_constr_MOD_d_bpack_all2all_inters_optimized",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 12156,
+            "fraction": 0.11097316048931898
+          },
+          {
+            "name": "dgemm_kernel",
+            "module": "/global/cfs/cdirs/m2957/lib/lib/PrgEnv-gnu/OpenBLAS_sequential/build/install/lib/libopenblas.so.0.3",
+            "samples": 10678,
+            "fraction": 0.09748037246667884
+          },
+          {
+            "name": "bpack::gpu::HodlrConstruct<double>::host_wy(int, int, double const*, double const*, double*)",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 8538,
+            "fraction": 0.07794412999817418
+          },
+          {
+            "name": "__d_bpack_gpu_MOD_d_hodlr_gpu_fill_rows",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 4136,
+            "fraction": 0.03775789665875479
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_block_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 3915,
+            "fraction": 0.035740368815044735
+          },
+          {
+            "name": "0x7f4ac4c6a480",
+            "module": "/usr/local/cuda-13.2/compat/libcuda.so.595.91.07",
+            "samples": 3666,
+            "fraction": 0.033467226583896295
+          },
+          {
+            "name": "__memcpy_avx_unaligned_erms",
+            "module": "/lib64/libc.so.6",
+            "samples": 3441,
+            "fraction": 0.03141318239912361
+          },
+          {
+            "name": "__d_bplus_utilities_MOD_d_lr_all2all_extraction",
+            "module": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/qr_svd_profile_snapshot_v2/lib/libbutterflypack.so.5.0.0",
+            "samples": 3160,
+            "fraction": 0.028847909439474163
+          }
+        ],
+        "diagnostics": [
+          {
+            "severity": 2,
+            "text": "Unable to collect CPU kernel IP/backtrace samples. perf event paranoid level is 2. \nChange the paranoid level to 1 to enable CPU kernel sample collection.\nTry\nsudo sh -c 'echo 1 >/proc/sys/kernel/perf_event_paranoid'\n to change the paranoid level to 1."
+          },
+          {
+            "severity": 2,
+            "text": "Not all NVTX events might have been collected."
+          },
+          {
+            "severity": 1,
+            "text": "Number of incomplete CUPTI events dropped: 4. Incomplete events appear when GPU timestamp information have not been retrieved at the time the profiling session was stopped."
+          }
+        ]
+      }
+    ],
+    "host_panel_wall_seconds": {
+      "host_prepare_seconds": {
+        "mean": 145.7175690625,
+        "max": 215.41493999999994,
+        "sum": 4662.96221
+      },
+      "metadata_seconds": {
+        "mean": 2.782818003125,
+        "max": 3.6451185000000006,
+        "sum": 89.0501761
+      },
+      "upload_seconds": {
+        "mean": 0.3363544875,
+        "max": 0.55634514,
+        "sum": 10.7633436
+      }
+    },
+    "host_panel_upload_bytes_sum": 78129384472,
+    "host_panel_staging_peak_bytes_max": 67026240,
+    "resident_image_peak_bytes_max": 2856853608,
+    "quality": {
+      "status": "COLLECTION_CAVEATS",
+      "checks": "All 32 rank CSV factor envelopes partition correctly. Four CPU/CUDA reports are present with nonzero evidence; each solver.factor NVTX duration agrees with its CSV envelope within 0.02 s.",
+      "limitations": [
+        "Nsight warns that not all NVTX events might have been collected. Present top-level factor envelopes align, but complete fine-grained NVTX collection is not established.",
+        "Each selected process reports four incomplete CUPTI events dropped at profiling stop; no claim of lossless CUDA event collection.",
+        "Kernel-space CPU stacks are unavailable at perf_event_paranoid=2. User process-tree sampling succeeded.",
+        "Most CPU backtraces do not reach main. Observed ScaLAPACK frames provide a lower bound; BLAS and MPI samples with incomplete callers may include additional ScaLAPACK work.",
+        "Kernel and copy intervals cover selected processes only, with two ranks sharing each GPU. These are not whole-device utilization percentages.",
+        "Rank-time shares are sums over local work, including waiting; they are not critical-path wall-time shares.",
+        "Host panel preparation includes child extraction, communication and synchronization; it is not pure CPU arithmetic.",
+        "Memory-copy device durations and CUDA API host durations overlap other activity; do not add them to a wall-time partition.",
+        "Resident image and panel staging counters exclude numeric factors, temporary buffers and heap reservations."
+      ]
+    },
+    "next_targets": [
+      {
+        "priority": 1,
+        "target": "Reduce host-panel assembly and distributed child extraction",
+        "evidence": "prepare.host_panels is 37.17% of factor rank-time. BPACK extraction/all-to-all and STRUMPACK extraction callbacks are visible in CPU stacks.",
+        "implementation": "Design device-resident child factors/contributions and batched distributed extraction first. A device evaluator must add original sparse entries and all child Schur contributions, preserve collective ordering, and publish buffers with explicit stream/lifetime ownership."
+      },
+      {
+        "priority": 2,
+        "target": "Move the zero-tau host WY recompression fallback onto the GPU",
+        "evidence": "host_wy is a recurring leaf CPU hotspot and explicitly copies Gram/tau/RHS arrays to the host, executes nested loops and uploads the result.",
+        "implementation": "Implement a numerically compatible batched device recurrence/application; reuse real/complex, zero-column and rank-deficient recompression tests and captured exact-factor replays."
+      },
+      {
+        "priority": 3,
+        "target": "Batch small panel metadata transfers and reduce synchronization",
+        "evidence": "Selected ranks issue hundreds of thousands of cudaMemcpyAsync calls and millions of kernel launches; CUDA API host costs are substantially larger than copy-engine durations.",
+        "implementation": "Use persistent pinned metadata/workspaces and coalesce transfers after measuring request sizes; retain MPI-collective and CUDA stream dependencies."
+      },
+      {
+        "priority": 4,
+        "target": "Measure remaining host Schur compression after the larger construction costs are reduced",
+        "evidence": "Schur.compress.randomized accounts for about 4% of factor rank-time; pdgesvd/PBLAS/BLACS appear in its CPU samples.",
+        "implementation": "Do not prioritize a broad ScaLAPACK replacement or solve-only tuning from this profile. Solve is only 1.26% of the quiet default GPU total."
+      }
+    ]
+  }
+}

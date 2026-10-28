@@ -1,7 +1,12 @@
 150-cubed matched CPU control and Nsight profile
 =================================================
 
-The CPU control passed, but the quiet GPU repeat and both profiled GPU attempts failed numerical accuracy. There is no new valid matched GPU speed ratio. These failures take priority over further feature optimization; the cause has not been established.
+This record preserves the failed pre-fix study: the CPU control passed,
+but the quiet GPU repeat and both profiled GPU attempts failed numerical
+accuracy. Their timings do not establish a valid GPU speed ratio.
+Subsequent investigation reproduced a native polar-SVD failure; the
+QR-based SVD fix and new passing matched runs are documented in
+HODLR_GPU_QR_SVD_PROFILE.rst. The original failures below remain unchanged.
 
 Matched quiet run
 -----------------
