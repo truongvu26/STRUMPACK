@@ -1,5 +1,5 @@
 {
-  "status": "VALIDATION_PASS_150_TIMING_RUNNING",
+  "status": "PASS",
   "branches": {
     "strumpack": "perf/hodlr-gpu-efficiency",
     "butterflypack": "perf/hodlr-device-wy"
@@ -214,7 +214,7 @@
   },
   "benchmark_gate": "Native component and captured-factor validation passed; the150-cubed benchmark was released while corrected sparse launches ran. All comparison solves must pass individually.",
   "threading_experiment": {
-    "status": "RUNNING",
+    "status": "PASS",
     "job": 60467724,
     "grid": 100,
     "ranks": 4,
@@ -245,6 +245,113 @@
       "job": 60466866,
       "status": "CANCELLED_BEFORE_START",
       "reason": "Equivalent interactive profiling allocation became immediately available."
+    },
+    "result_summary": "profile_results/60467724/blas_threads_summary.json",
+    "result": {
+      "status": "PASS",
+      "threads": {
+        "1": {
+          "trials": 2,
+          "median_factor_seconds": 182.878,
+          "median_solve_seconds": 1.960865,
+          "median_factor_plus_solve_seconds": 184.838865,
+          "factor_speedup_vs_one_thread": 1.0,
+          "total_speedup_vs_one_thread": 1.0
+        },
+        "4": {
+          "trials": 1,
+          "median_factor_seconds": 180.177,
+          "median_solve_seconds": 2.42196,
+          "median_factor_plus_solve_seconds": 182.59896,
+          "factor_speedup_vs_one_thread": 1.0149908145878774,
+          "total_speedup_vs_one_thread": 1.012266800424274
+        },
+        "8": {
+          "trials": 1,
+          "median_factor_seconds": 175.913,
+          "median_solve_seconds": 2.45786,
+          "median_factor_plus_solve_seconds": 178.37086000000002,
+          "factor_speedup_vs_one_thread": 1.039593435391358,
+          "total_speedup_vs_one_thread": 1.0362615563999633
+        },
+        "16": {
+          "trials": 1,
+          "median_factor_seconds": 176.04,
+          "median_solve_seconds": 2.50337,
+          "median_factor_plus_solve_seconds": 178.54336999999998,
+          "factor_speedup_vs_one_thread": 1.0388434446716655,
+          "total_speedup_vs_one_thread": 1.035260312382364
+        }
+      },
+      "cases": [
+        {
+          "label": "00-t1",
+          "blas_threads": 1,
+          "status": "PASS",
+          "factor_seconds": 183.125,
+          "solve_seconds": 2.10946,
+          "factor_plus_solve_seconds": 185.23446,
+          "relative_error": 3.07238e-10,
+          "scaled_residual": 2.87732e-08,
+          "refinement_iterations": 7.0,
+          "maximum_hodlr_rank": 610
+        },
+        {
+          "label": "01-t4",
+          "blas_threads": 4,
+          "status": "PASS",
+          "factor_seconds": 180.177,
+          "solve_seconds": 2.42196,
+          "factor_plus_solve_seconds": 182.59896,
+          "relative_error": 2.38433e-10,
+          "scaled_residual": 3.8803e-09,
+          "refinement_iterations": 7.0,
+          "maximum_hodlr_rank": 609
+        },
+        {
+          "label": "02-t8",
+          "blas_threads": 8,
+          "status": "PASS",
+          "factor_seconds": 175.913,
+          "solve_seconds": 2.45786,
+          "factor_plus_solve_seconds": 178.37086000000002,
+          "relative_error": 1.92366e-10,
+          "scaled_residual": 1.3749e-08,
+          "refinement_iterations": 7.0,
+          "maximum_hodlr_rank": 602
+        },
+        {
+          "label": "03-t16",
+          "blas_threads": 16,
+          "status": "PASS",
+          "factor_seconds": 176.04,
+          "solve_seconds": 2.50337,
+          "factor_plus_solve_seconds": 178.54336999999998,
+          "relative_error": 4.67062e-10,
+          "scaled_residual": 1.48487e-08,
+          "refinement_iterations": 7.0,
+          "maximum_hodlr_rank": 612
+        },
+        {
+          "label": "04-t1",
+          "blas_threads": 1,
+          "status": "PASS",
+          "factor_seconds": 182.631,
+          "solve_seconds": 1.81227,
+          "factor_plus_solve_seconds": 184.44327,
+          "relative_error": 1.5999e-10,
+          "scaled_residual": 9.4603e-09,
+          "refinement_iterations": 6.0,
+          "maximum_hodlr_rank": 609
+        }
+      ],
+      "verification": "All rank probes verified pthread worker counts, OpenMP1, a single selected BLAS library, stable GPU/CPU placement and16disjointphysicalcoresperrank. Detailed runtime probes remain in the retained per-case report files.",
+      "notes": [
+        "Same quiet executable, native ButterflyPACK library, pthread BLAS library, topology and solver options; only BLAS worker count changes.",
+        "OMP remains1. Runtime/affinity reports are probe subprocesses immediately before solver exec, not measurements inside the solver.",
+        "One trial for each non-baseline thread count is preliminary; random compression can vary ranks and refinement iterations.",
+        "The optional final one-thread repeat may be skipped for budget; no primary case may be skipped."
+      ]
     }
   },
   "supplied_screenshot": {
@@ -316,5 +423,161 @@
       "reason": "Same stdin inheritance issue; remainingthreadcasesneverstarted."
     }
   ],
-  "driver_correction": "Both file-driven benchmark loops now launch srun with --input=none. A mock srun that drains stdin reproduces the one-case failure and retains all four cases after the correction. Full comparisons restart on fresh allocations; partial runs are not mixed into their medians."
+  "driver_correction": "Both file-driven benchmark loops now launch srun with --input=none. A mock srun that drains stdin reproduces the one-case failure and retains all four cases after the correction. Full comparisons restart on fresh allocations; partial runs are not mixed into their medians.",
+  "paired_150_result": {
+    "job": 60467720,
+    "status": "PASS",
+    "variants": {
+      "before": {
+        "trials": 2,
+        "median_factor_seconds": 380.00149999999996,
+        "median_solve_seconds": 4.254525,
+        "median_factor_plus_solve_seconds": 384.256025
+      },
+      "after": {
+        "trials": 2,
+        "median_factor_seconds": 347.048,
+        "median_solve_seconds": 3.990845,
+        "median_factor_plus_solve_seconds": 351.03884500000004
+      }
+    },
+    "factor_speedup": 1.0949537239805445,
+    "factor_plus_solve_speedup": 1.0946253683121592,
+    "cases": [
+      {
+        "label": "00-before",
+        "variant": "before",
+        "factor_seconds": 378.681,
+        "solve_seconds": 4.85165,
+        "factor_plus_solve_seconds": 383.53265,
+        "relative_error": 3.48127e-10,
+        "scaled_residual": 2.61615e-08,
+        "refinement_iterations": 9.0,
+        "maximum_hodlr_rank": 986
+      },
+      {
+        "label": "01-after",
+        "variant": "after",
+        "factor_seconds": 346.975,
+        "solve_seconds": 3.72379,
+        "factor_plus_solve_seconds": 350.69879000000003,
+        "relative_error": 1.63378e-10,
+        "scaled_residual": 3.68841e-08,
+        "refinement_iterations": 7.0,
+        "maximum_hodlr_rank": 987
+      },
+      {
+        "label": "02-after",
+        "variant": "after",
+        "factor_seconds": 347.121,
+        "solve_seconds": 4.2579,
+        "factor_plus_solve_seconds": 351.3789,
+        "relative_error": 3.96875e-11,
+        "scaled_residual": 1.68037e-08,
+        "refinement_iterations": 8.0,
+        "maximum_hodlr_rank": 983
+      },
+      {
+        "label": "03-before",
+        "variant": "before",
+        "factor_seconds": 381.322,
+        "solve_seconds": 3.6574,
+        "factor_plus_solve_seconds": 384.9794,
+        "relative_error": 1.41631e-10,
+        "scaled_residual": 5.08033e-08,
+        "refinement_iterations": 7.0,
+        "maximum_hodlr_rank": 984
+      }
+    ]
+  },
+  "cancelled_duplicate_layout_job": {
+    "job": 60468716,
+    "status": "CANCELLED_DURING_SETUP_OR_FACTOR",
+    "reason": "Queuedlayout60464839becameavailableonsamephysicalnodesastheABBAcomparison; retainedthatcaseandstoppedduplicate."
+  },
+  "image_cap_experiment": {
+    "job": 60468854,
+    "status": "PASS",
+    "grid": 100,
+    "ranks": 4,
+    "gpus": 4,
+    "omp_threads": 1,
+    "blas_threads": 8,
+    "caps_bytes": [
+      268435456,
+      1073741824,
+      268435456
+    ],
+    "notes": [
+      "Same existing native/library/executable as threadtest; only supportedpreparedimagecapvaries.",
+      "No newimage-lifetimeAPIorGPUfrontalassemblyfeatureimplemented.",
+      "CompletefrontalcallbacksincludeoriginalsparseentriesandchildSchurcontributions."
+    ],
+    "factor_speedup": 1.0691577891138069,
+    "default_median_factor_seconds": 177.941,
+    "one_gib_factor_seconds": 166.431,
+    "cases": [
+      {
+        "label": "00-default",
+        "image_cap_bytes": 268435456,
+        "status": "PASS",
+        "factor_seconds": 178.398,
+        "solve_seconds": 2.10953,
+        "factor_plus_solve_seconds": 180.50753,
+        "relative_error": 2.07226e-10,
+        "scaled_residual": 8.82742e-08,
+        "refinement_iterations": 6.0,
+        "maximum_hodlr_rank": 606
+      },
+      {
+        "label": "01-one_gib",
+        "image_cap_bytes": 1073741824,
+        "status": "PASS",
+        "factor_seconds": 166.431,
+        "solve_seconds": 2.44593,
+        "factor_plus_solve_seconds": 168.87693000000002,
+        "relative_error": 1.4435e-10,
+        "scaled_residual": 1.52924e-08,
+        "refinement_iterations": 7.0,
+        "maximum_hodlr_rank": 602
+      },
+      {
+        "label": "02-default",
+        "image_cap_bytes": 268435456,
+        "status": "PASS",
+        "factor_seconds": 177.484,
+        "solve_seconds": 2.45747,
+        "factor_plus_solve_seconds": 179.94147,
+        "relative_error": 1.77243e-10,
+        "scaled_residual": 1.77153e-08,
+        "refinement_iterations": 7.0,
+        "maximum_hodlr_rank": 604
+      }
+    ],
+    "default_median_total_seconds": 180.2245,
+    "one_gib_total_seconds": 168.87693000000002,
+    "total_speedup": 1.0671943171870781
+  },
+  "layout_16_rank_result": {
+    "job": 60464839,
+    "ranks": 16,
+    "gpus": 16,
+    "status": "PASS",
+    "factor_seconds": 440.91,
+    "solve_seconds": 2.56395,
+    "factor_plus_solve_seconds": 443.47395,
+    "relative_error": 1.27961e-09,
+    "scaled_residual": 5.01743e-08,
+    "refinement_iterations": 9.0,
+    "hodlr_fronts": 1980.0,
+    "maximum_hodlr_rank": 979,
+    "factor_time_ratio_vs_32_ranks": 1.2704582651391163,
+    "same_physical_gpu_set_as_abba": true
+  },
+  "screenshot_comparison": {
+    "grid100_gpu_time_ratio": 11.72049295774648,
+    "grid150_gpu_time_ratio": 5.179820895522388,
+    "grid150_cpu_time_ratio": 2.289811475409836,
+    "limitations": "Comparison of available factor timings; missing screenshot settings prevent an identical-configuration attribution. Our100bestuses4ranks/4GPUs/8pthreadBLASworkers/OMP1/1GiBcap; our150new uses32ranks/16GPUs/sequentialBLAS/OMP1/256MiBcap. No200case rerun in this study."
+  }
 }

@@ -1,6 +1,10 @@
 GPU HODLR profiling after the SVD accuracy fix
 =============================================
 
+The completed efficiency follow-up is in HODLR_GPU_DEVICE_WY.rst and its
+JSON record. The device WY change gives a 1.095x matched 150-cubed speedup;
+the measurements below preserve the earlier QR-SVD profiling baseline.
+
 The 150-cubed Poisson comparison uses 3,375,000 unknowns, three RHS,
 32 MPI ranks on four A100 40-GB nodes (16 GPUs reserved), and one OpenMP
 thread per rank. Quiet CPU and GPU runs use the identical Release executable

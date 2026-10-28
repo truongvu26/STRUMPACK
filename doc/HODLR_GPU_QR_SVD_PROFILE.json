@@ -1091,5 +1091,12 @@
         "implementation": "Do not prioritize a broad ScaLAPACK replacement or solve-only tuning from this profile. Solve is only 1.26% of the quiet default GPU total."
       }
     ]
+  },
+  "efficiency_follow_up": {
+    "record": "HODLR_GPU_DEVICE_WY.json",
+    "status": "PASS",
+    "native_revision": "ab40497",
+    "matched_150_job": 60467720,
+    "total_speedup": 1.0946253683121592
   }
 }

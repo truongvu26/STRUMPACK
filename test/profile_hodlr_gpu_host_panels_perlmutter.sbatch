@@ -22,17 +22,32 @@ case "$HODLR_RANKS_PER_GPU" in
   *) echo 'HODLR_RANKS_PER_GPU must be 1 or 2' >&2; exit 1 ;;
 esac
 [[ "$HODLR_PROFILE_RANKS" =~ ^[1-9][0-9]*$ ]] || { echo 'HODLR_PANEL_RANKS must be a positive integer' >&2; exit 1; }
+image_cap=${HODLR_PANEL_IMAGE_CAP:-268435456}
+[[ "$image_cap" =~ ^[0-9]+$ ]] || { echo 'HODLR_PANEL_IMAGE_CAP must be a nonnegative integer' >&2; exit 1; }
+run_label=${HODLR_PANEL_RUN_LABEL:-}
+[[ -z "$run_label" || "$run_label" =~ ^[A-Za-z0-9_-]+$ ]] || {
+  echo 'HODLR_PANEL_RUN_LABEL must contain only letters, digits, underscore or hyphen' >&2; exit 1;
+}
+cpus_per_task=${SLURM_CPUS_PER_TASK:-8}
+[[ "$cpus_per_task" =~ ^[1-9][0-9]*$ ]] || { echo 'SLURM_CPUS_PER_TASK must be a positive integer' >&2; exit 1; }
 grid=${HODLR_PANEL_GRID:-150}; pernode=$((HODLR_PROFILE_RANKS/SLURM_JOB_NUM_NODES))
 (( HODLR_PROFILE_RANKS % SLURM_JOB_NUM_NODES == 0 && pernode > 0 && pernode % HODLR_RANKS_PER_GPU == 0 )) || {
   echo 'MPI ranks must divide evenly over nodes and complete each GPU sharing group' >&2; exit 1;
 }
+gpus_per_node=$((pernode/HODLR_RANKS_PER_GPU))
 cd "$SLURM_SUBMIT_DIR"
 started=$(date +%s)
-out="$PWD/profile_results/$SLURM_JOB_ID"; mkdir -p "$out"
+out="$PWD/profile_results/$SLURM_JOB_ID"
+if [[ -n "$run_label" ]]; then
+  mkdir -p "$out"; out="$out/$run_label"
+  mkdir "$out" # A repeated label must not overwrite a previous invocation.
+else
+  mkdir -p "$out"
+fi
 cp "$HODLR_PROFILE_SNAPSHOT/manifest.txt" "$out/manifest.txt"
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
 scontrol show job "$SLURM_JOB_ID" > "$out/slurm_job.txt"
-srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c1 --gpu-bind=none bash -c 'hostname; nvidia-smi --query-gpu=name,uuid,memory.total,driver_version --format=csv' > "$out/devices.txt"
+srun -n "$SLURM_JOB_NUM_NODES" --ntasks-per-node=1 -c1 --gpus-per-node="$gpus_per_node" --input=none --gpu-bind=none bash -c 'hostname; nvidia-smi --query-gpu=name,uuid,memory.total,driver_version --format=csv' > "$out/devices.txt"
 read -r -a cases <<< "${HODLR_PANEL_CASES:-baseline panels}"
 if [[ " ${cases[*]} " == *' traced '* ]]; then
   export HODLR_NSYS_TRACE_RANKS="${HODLR_NSYS_TRACE_RANKS:-0,$((HODLR_PROFILE_RANKS-1))}"
@@ -43,9 +58,9 @@ printf '%s\n' "${cases[@]}" > "$out/cases.txt"
 printf '%s\n' "$grid" "$HODLR_PROFILE_RANKS" > "$out/layout.txt"; printf '0.85\n' > "$out/heap_fraction.txt"
 printf '%s\n' "$HODLR_RANKS_PER_GPU" > "$out/rank_per_gpu.txt"
 printf '%s\n' "$OPENBLAS_NUM_THREADS" > "$out/blas_threads.txt"
-printf 'GPU host panels with 67108864 byte per-rank staging; original small-image cap 268435456\n' > "$out/panel_settings.txt"
+printf 'GPU host panels with 67108864 byte per-rank staging; small-image cap %s\n' "$image_cap" > "$out/panel_settings.txt"
 for variant in "${cases[@]}"; do
-  binary=baseline; extra=(); mode=1; rect=1; cap=268435456; trace=0
+  binary=baseline; extra=(); mode=1; rect=1; cap=$image_cap; trace=0
   case "$variant" in
     baseline|panels|diagnostic|traced) ;;
     cpu) binary=panels; mode=0; rect=0; cap=0 ;;
@@ -67,7 +82,7 @@ for variant in "${cases[@]}"; do
   (( limit>0 )) || { echo 'No time remains'; exit 1; }; (( limit<1650 )) || limit=1650
   status=0
   /usr/bin/time -v -o "$out/$variant.time" timeout --kill-after=30s "${limit}s" \
-    srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c8 --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
+    srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c "$cpus_per_task" --gpus-per-node="$gpus_per_node" --input=none --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
     --output="$out/$variant.rank%t.log" --error="$out/$variant.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" "$variant" "$trace" "${args[@]}" || status=$?
   printf '%s\n' "$status" > "$out/$variant.exit_code"
