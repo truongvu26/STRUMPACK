@@ -75,7 +75,7 @@ result=dict(rank=int(path.stem.replace('rank','')),kernel_count=len(kernels),nvt
     cuda_runtime_api=[dict(name=k,**v) for k,v in sorted(all_api.items(),key=lambda kv:kv[1]['host_seconds'],reverse=True)[:30]],
     runtime_by_phase=[dict(section=k[0],phase=k[1],name=k[2],**v) for k,v in sorted(api.items(),key=lambda kv:kv[1]['host_seconds'],reverse=True)[:100]],
     memory_copies=[dict(direction=k,**v) for k,v in copy_totals.items()],top_kernels=[dict(name=k,**v) for k,v in sorted(top.items(),key=lambda kv:kv[1]['seconds'],reverse=True)[:20]],
-    notes=['Per-process trace, not whole-device occupancy; another rank shares this GPU.',
+    notes=['Per-process trace, not whole-device occupancy; GPU work from other processes is not measured.',
            'GPU activity attributed by correlated host API launch inside the deepest diagnostic NVTX range.',
            'Kernel/copy duration sums may overlap; union is calculated separately.',
            'MPI tracing is disabled; CPU stage scopes include MPI waiting and host staging.'])

@@ -90,7 +90,7 @@ if 'diagnostic' in quiet:
       '- Collective host panels: compare host callback time with request metadata and fences. High callback cost points to child extraction and repeated Schur applications; high metadata cost points to collective scheduling and repeated index movement. Upload payload is not peak device memory.',
       '- Schur compression outside the GPU operator: target the host randomized-compression control and transfers at its outer boundary. Device Schur intermediate vectors already remain resident.',
       '- Device construction or factorization: inspect kernel sizes, synchronization and allocation costs in the CUDA summaries before changing numerical algorithms.',
-      '- Solve overhead: inspect small-RHS transfers, repeated calls during refinement and two-rank GPU contention. Factorization and solve need separate decisions.', '',
+      '- Solve overhead: inspect small-RHS transfers, repeated calls during refinement and GPU sharing where present. Factorization and solve need separate decisions.', '',
       'Rank work can include MPI waits and GPU contention. A large local phase alone does not establish global speedup potential.']
     solve=[p for p in c['phases'] if p['section']=='solver.solve']
     solve_total=sum(p['exclusive_rank_seconds']['mean'] for p in solve)
@@ -102,7 +102,8 @@ if 'diagnostic' in quiet:
         lines.append(f"| {p['phase']} | {p['calls']} | {seconds:.3f} | {100*seconds/solve_total:.1f}% |")
 for c in data['cases']:
     if 'cuda' not in c: continue
-    lines += ['', '## Selected-rank CUDA activity', '', 'Only the selected processes are traced; each shares a GPU with an untraced peer.', '',
+    lines += ['', '## Selected-rank CUDA activity', '',
+      f"Only selected processes are traced. The layout uses {data.get('ranks_per_gpu',2)} MPI rank(s) per GPU; activity from other processes is not included.", '',
       '| Rank | Kernel count | GPU active union (s) | Sum kernel duration (s) | NVTX events |', '|---|---:|---:|---:|---:|']
     for x in c['cuda']: lines.append(f"| {x['rank']} | {x['kernel_count']} | {x['gpu_active_union_seconds']:.3f} | {x['kernel_duration_sum_seconds']:.3f} | {x.get('nvtx_events',0)} |")
 for c in data['cases']:

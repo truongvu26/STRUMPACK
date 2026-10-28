@@ -1,10 +1,15 @@
 #!/bin/bash
-# Two MPI ranks per GPU; optionally trace only rank zero and the final rank.
+# One or two MPI ranks per GPU; optionally trace selected ranks.
 set -euo pipefail
 out=$1; variant=$2; trace=$3; shift 3
 IFS=, read -r -a visible <<< "${CUDA_VISIBLE_DEVICES:-${SLURM_JOB_GPUS:?}}"
-index=$((SLURM_LOCALID / 2))
-(( index < ${#visible[@]} )) || exit 1
+ranks_per_gpu=${HODLR_RANKS_PER_GPU:-2}
+case "$ranks_per_gpu" in
+  1|2) ;;
+  *) echo 'HODLR_RANKS_PER_GPU must be 1 or 2' >&2; exit 1 ;;
+esac
+index=$((SLURM_LOCALID / ranks_per_gpu))
+(( index < ${#visible[@]} )) || { echo 'MPI local rank exceeds the visible GPU layout' >&2; exit 1; }
 export CUDA_VISIBLE_DEVICES="${visible[$index]}"
 # The executable has DT_RPATH; preload the immutable SONAME to override it.
 export LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0${LD_PRELOAD:+:$LD_PRELOAD}"

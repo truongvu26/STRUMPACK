@@ -94,7 +94,7 @@ result=dict(rank=int(path.stem.replace('rank','')),sections=sections,scope_wall_
       'ScaLAPACK attribution is inclusive of a libscalapack stack frame; MPI/transport below it is separated.',
       'When a stack does not reach a known program entry, an unobserved ScaLAPACK caller is not ruled out.',
       'BLACS and PBLAS share libscalapack and are included in its category.',
-      'Sampled call stacks and scheduled-CPU intervals cover selected processes; untraced peers share their GPUs.',
+      'Sampled call stacks and scheduled-CPU intervals cover selected processes; GPU sharing is recorded in the job layout.',
       'Inclusive function counts overlap. Host work can overlap CUDA activity and must not be added to GPU durations.'])
 out.write_text(json.dumps(result,indent=2)+'\n'); db.close()
 print('CPU summary',result['rank'],sampled['solver.factor'],'factor backtraces')

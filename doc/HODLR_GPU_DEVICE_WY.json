@@ -1,0 +1,36 @@
+{
+  "status": "VALIDATION_QUEUED",
+  "branches": {
+    "strumpack": "perf/hodlr-gpu-efficiency",
+    "butterflypack": "perf/hodlr-device-wy"
+  },
+  "baseline_native_revision": "88e859d",
+  "snapshot": "profile_results/device_wy_snapshot_v1",
+  "executable_sha256": "b44f0de180b1b7a67b18b320b02939bfb311ecfaaffabe6761b4ae6d9c9fb29a",
+  "before_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
+  "after_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+  "validation_job": 60465148,
+  "paired_150_job": 60464807,
+  "layout_16_rank_job": 60464839,
+  "construction_tolerance": 1e-05,
+  "rhs": 3,
+  "omp_threads": 1,
+  "svd": "qr",
+  "residual_certification": false,
+  "notes": [
+    "Numerical implementation changes only compact WY application, not entry callbacks, SVD selection or tolerances.",
+    "The paired test uses before/after/after/before order on one allocation; speedup is not claimed before all cases pass.",
+    "The 16-rank case still uses16 GPUs, one rank perGPU; the32-rank pair uses2 ranks perGPU.",
+    "Local logs, snapshots, build directories and job output are excluded from commits."
+  ],
+  "superseded_validation_job": {
+    "job": 60464585,
+    "status": "CANCELLED_BEFORE_START",
+    "reason": "Moved numerical checks to a two-GPU shared allocation to reduce queue demand."
+  },
+  "validation_sparse_layout": {
+    "ranks": 4,
+    "gpus": 2
+  },
+  "native_revision": "ab40497"
+}

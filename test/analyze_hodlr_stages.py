@@ -5,7 +5,11 @@ from collections import Counter,defaultdict
 from pathlib import Path
 p=argparse.ArgumentParser(); p.add_argument('directory',type=Path); p.add_argument('--require-complete',action='store_true'); a=p.parse_args(); root=a.directory
 n,ranks=map(int,(root/'layout.txt').read_text().split()); expected=(root/'cases.txt').read_text().split()
-result=dict(status='RUNNING',job=root.name,grid=n,unknowns=n**3,ranks=ranks,rhs=3,cases=[],notes=[
+sharing_file=root/'rank_per_gpu.txt'
+ranks_per_gpu=int(sharing_file.read_text()) if sharing_file.exists() else 2
+if ranks_per_gpu not in (1,2) or ranks%ranks_per_gpu:
+    raise ValueError('Expected one or two MPI ranks per GPU, with complete sharing groups')
+result=dict(status='RUNNING',job=root.name,grid=n,unknowns=n**3,ranks=ranks,ranks_per_gpu=ranks_per_gpu,rhs=3,cases=[],notes=[
  'Quiet GPU/CPU cases supply baseline wall times. Diagnostic and traced cases add overhead.',
  'Phase totals sum local rank work, not global elapsed time. Nested inclusive times overlap.',
  'Exclusive values subtract instrumented child scopes only; uninstrumented work remains in the parent.',
@@ -89,7 +93,9 @@ for variant in expected:
         case['factor_plus_solve_seconds']=case['factor_seconds']+case['solve_seconds']
         if not (0<=case['relative_error']<1e-8 and 0<=case['scaled_residual']<1e-6 and case['hodlr_fronts']>1): raise ValueError('Numerical check failed')
         bindings=Counter(x for log in logs for x in re.findall(r'# stage binding .* uuid=(\S+)',log.read_text()))
-        if sum(bindings.values())!=ranks or len(bindings)!=ranks//2 or set(bindings.values())!={2}: raise ValueError('Two ranks per GPU binding failed')
+        if (sum(bindings.values())!=ranks or len(bindings)!=ranks//ranks_per_gpu
+            or set(bindings.values())!={ranks_per_gpu}):
+            raise ValueError('Expected '+str(ranks_per_gpu)+' ranks per GPU binding failed')
         case['gpu_uuid_rank_counts']=dict(bindings)
         if variant!='cpu' and (root/'cusolver_audit_enabled').exists():
             audit=[json.loads((root/f'{variant}.cusolver.rank{rank}.json').read_text()) for rank in range(ranks)]
