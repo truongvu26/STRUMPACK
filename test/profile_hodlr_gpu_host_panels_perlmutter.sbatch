@@ -49,12 +49,13 @@ for variant in "${cases[@]}"; do
     --hodlr_leaf_size 128 --hodlr_rel_tol 1e-5 --hodlr_butterfly_levels 0
     --sp_Krylov_solver refinement --sp_rel_tol 1e-10 --hodlr_use_gpu "$mode" --hodlr_gpu_rectangular "$rect"
     --hodlr_gpu_front_max_bytes "$cap" "${extra[@]}")
+  [[ -z ${HODLR_PANEL_MAXIT:-} ]] || args+=(--sp_maxit "$HODLR_PANEL_MAXIT")
   printf '%q ' "${args[@]}" > "$out/$variant.command"; printf '\n' >> "$out/$variant.command"
   remaining=$((${HODLR_PANEL_ALLOCATION_SECONDS:-1800}-$(date +%s)+started)); limit=$((remaining-90))
   (( limit>0 )) || { echo 'No time remains'; exit 1; }; (( limit<1650 )) || limit=1650
   status=0
   /usr/bin/time -v -o "$out/$variant.time" timeout --kill-after=30s "${limit}s" \
-    srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c8 --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=30 \
+    srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c8 --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
     --output="$out/$variant.rank%t.log" --error="$out/$variant.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" "$variant" "$trace" "${args[@]}" || status=$?
   printf '%s\n' "$status" > "$out/$variant.exit_code"
