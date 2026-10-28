@@ -34,6 +34,7 @@
 #include "ButterflyMatrix.hpp"
 #include "StageProfile.hpp"
 #include "GPUHostPanels.hpp"
+#include "ConstructionCheck.hpp"
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
 #include "GPUFrontEvaluator.hpp"
 #endif
@@ -436,6 +437,11 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_evaluation();
 #endif
+      verify_construction<scalar_t>(*c_,rows_,cols_,"BF",
+        [&](auto& p,scalar_t* data){p.evaluate(HODLR_block_evaluation<scalar_t>,data,&AC);},
+        [&](auto& p,scalar_t* data){LRBF_extract_elements<scalar_t>
+          (lr_bf_,options_,msh_,stats_,ptree_,p.ni,p.nr,p.nc,p.local_count,
+           p.rows.data(),p.cols.data(),data,p.ms.data(),p.ns.data(),p.owners.data(),p.np,p.maps);});
       backend_stats_.construction_seconds+=MPI_Wtime()-started;
     }
 
@@ -458,6 +464,11 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_evaluation();
 #endif
+      verify_construction<scalar_t>(*c_,rows_,cols_,"BF",
+        [&](auto& p,scalar_t* data){p.evaluate(HODLR_block_evaluation_seq<scalar_t>,data,f);},
+        [&](auto& p,scalar_t* data){LRBF_extract_elements<scalar_t>
+          (lr_bf_,options_,msh_,stats_,ptree_,p.ni,p.nr,p.nc,p.local_count,
+           p.rows.data(),p.cols.data(),data,p.ms.data(),p.ns.data(),p.owners.data(),p.np,p.maps);});
       backend_stats_.construction_seconds+=MPI_Wtime()-started;
     }
 

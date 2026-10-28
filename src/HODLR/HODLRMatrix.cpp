@@ -34,6 +34,7 @@
 #include "HODLRMatrix.hpp"
 #include "StageProfile.hpp"
 #include "GPUHostPanels.hpp"
+#include "ConstructionCheck.hpp"
 #include "HODLRWrapper.hpp"
 #include <stdexcept>
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
@@ -651,6 +652,11 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_front_evaluation();
 #endif
+      verify_construction<scalar_t>(*c_,rows_,rows_,"HODLR",
+        [&](auto& p,scalar_t* data){p.evaluate(HODLR_block_evaluation<scalar_t>,data,&AC);},
+        [&](auto& p,scalar_t* data){HODLR_extract_elements<scalar_t>
+          (ho_bf_,options_,msh_,stats_,ptree_,p.ni,p.nr,p.nc,p.local_count,
+           p.rows.data(),p.cols.data(),data,p.ms.data(),p.ns.data(),p.owners.data(),p.np,p.maps);});
       const double elapsed = MPI_Wtime()-started;
       backend_stats_.construction_seconds += elapsed;
       report_backend("construction", elapsed);
@@ -676,6 +682,11 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       finish_gpu_front_evaluation();
 #endif
+      verify_construction<scalar_t>(*c_,rows_,rows_,"HODLR",
+        [&](auto& p,scalar_t* data){p.evaluate(HODLR_block_evaluation_seq<scalar_t>,data,f);},
+        [&](auto& p,scalar_t* data){HODLR_extract_elements<scalar_t>
+          (ho_bf_,options_,msh_,stats_,ptree_,p.ni,p.nr,p.nc,p.local_count,
+           p.rows.data(),p.cols.data(),data,p.ms.data(),p.ns.data(),p.owners.data(),p.np,p.maps);});
       const double elapsed = MPI_Wtime()-started;
       backend_stats_.construction_seconds += elapsed;
       report_backend("construction", elapsed);
