@@ -52,6 +52,20 @@ if 'diagnostic' in quiet:
                     key=lambda p:p['exclusive_rank_seconds']['mean'],reverse=True):
         q=p['exclusive_rank_seconds']
         lines.append(f"| {p['phase']} | {p['calls']} | {q['mean']:.3f} | {q['max']:.3f} |")
+    if 'host_panels' in c:
+        panels=c['host_panels']
+        lines += ['', '## Collective host-panel costs', '',
+          f"Uploaded value payload across all ranks: {panels['upload_bytes_sum']/2**30:.3f} GiB. "
+          f"Maximum local host-value staging: {panels['staging_peak_bytes_max']/2**20:.3f} MiB "
+          f"against a {panels['staging_budget_bytes_per_rank']/2**20:.3f} MiB per-rank limit.", '',
+          'Native counters sum construction sessions on each rank. These times are already included in the phase budget above; do not add them again. Metadata time includes index downloads, synchronization and MPI waits. Upload time includes the staging-release stream fence. The staging cap excludes request metadata, native factors and workspaces.', '',
+          '| Native activity | Mean rank wall (s) | Maximum rank wall (s) |',
+          '|---|---:|---:|']
+        for name,label in [('host_prepare_seconds','Host frontal-entry callbacks'),
+                           ('metadata_seconds','Request indexing and metadata exchange'),
+                           ('upload_seconds','Value upload and staging fence')]:
+            q=panels['wall_seconds'][name]
+            lines.append(f"| {label} | {q['mean']:.3f} | {q['max']:.3f} |")
     lines += ['', '## Slowest construction fronts', '',
       'Each front appears once per block/backend; maximum and mean are over participating ranks. Different fronts may execute concurrently.', '',
       '| Phase | Front | Shape | Front ranks | Slowest rank | Maximum (s) | Mean (s) |',
@@ -63,6 +77,7 @@ if 'diagnostic' in quiet:
       'Use the largest measured component together with the slowest front calls and CUDA traces:', '',
       '- Large host-callback construction calls: replace full replicated images with bounded tiled device evaluation, retaining sparse entries and child Schur contributions. Raising the cap alone increases memory pressure.',
       '- Entry-image preparation: reduce host child materialization, replication and repeated packing; define distributed child ownership and stream dependencies before changing evaluation.',
+      '- Collective host panels: compare host callback time with request metadata and fences. High callback cost points to child extraction and repeated Schur applications; high metadata cost points to collective scheduling and repeated index movement. Upload payload is not peak device memory.',
       '- Schur compression outside the GPU operator: target the host randomized-compression control and transfers at its outer boundary. Device Schur intermediate vectors already remain resident.',
       '- Device construction or factorization: inspect kernel sizes, synchronization and allocation costs in the CUDA summaries before changing numerical algorithms.',
       '- Solve overhead: inspect small-RHS transfers, repeated calls during refinement and two-rank GPU contention. Factorization and solve need separate decisions.', '',

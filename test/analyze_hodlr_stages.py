@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate each solver case and aggregate local, nested phase measurements."""
-import argparse,csv,json,math,re,statistics,subprocess,sys
+import argparse,csv,json,math,re,shlex,statistics,subprocess,sys
 from collections import Counter,defaultdict
 from pathlib import Path
 p=argparse.ArgumentParser(); p.add_argument('directory',type=Path); p.add_argument('--require-complete',action='store_true'); a=p.parse_args(); root=a.directory
@@ -27,6 +27,42 @@ def number(text,pattern):
     v=float(matches[0].replace(',',''))
     if not math.isfinite(v): raise ValueError('Nonfinite '+pattern)
     return v
+def panel_statistics(logs,budget):
+    """All-front-rank counters, available only when stage profiling is enabled."""
+    records=[]
+    integer=('rows','cols','procs','front_rank','calls_local','windows_local',
+             'upload_bytes_local','staging_peak_bytes_local')
+    timers=('host_prepare_seconds_local','metadata_seconds_local','upload_seconds_local')
+    for rank,log in enumerate(logs):
+        for line in log.read_text().splitlines():
+            if not line.startswith('# GPU host panels '): continue
+            values=dict(word.split('=',1) for word in line.split()[4:])
+            rec=dict(rank=rank,kind=values['kind'])
+            rec.update((key,int(values[key])) for key in integer)
+            rec.update((key,float(values[key])) for key in timers)
+            if (rec['kind'] not in ('HODLR','BF') or any(rec[k]<0 for k in integer)
+                or any(not math.isfinite(rec[k]) or rec[k]<0 for k in timers)
+                or rec['procs']<1 or rec['front_rank']>=rec['procs']
+                or rec['staging_peak_bytes_local']>budget):
+                raise ValueError('Invalid host-panel counters or staging budget exceeded')
+            records.append(rec)
+    if not records or not sum(x['upload_bytes_local'] for x in records):
+        raise ValueError('Missing all-rank host-panel upload statistics')
+    totals=[]
+    for rank in range(len(logs)):
+        local=[x for x in records if x['rank']==rank]
+        totals.append(dict(rank=rank,constructions=len(local),
+            **{k:sum(x[k] for x in local) for k in ('calls_local','windows_local','upload_bytes_local')+timers},
+            staging_peak_bytes_local=max((x['staging_peak_bytes_local'] for x in local),default=0)))
+    seconds={key[:-6]:dict(
+        mean=statistics.mean(x[key] for x in totals),max=max(x[key] for x in totals),
+        sum=sum(x[key] for x in totals)) for key in timers}
+    return dict(coverage='all front ranks; stage profiling enabled',
+        construction_rank_calls=len(records),
+        upload_bytes_sum=sum(x['upload_bytes_local'] for x in totals),
+        staging_peak_bytes_max=max(x['staging_peak_bytes_local'] for x in totals),
+        staging_budget_bytes_per_rank=budget,rank_totals=totals,wall_seconds=seconds,
+        records=records)
 for variant in expected:
     status=root/(variant+'.exit_code')
     if not status.exists(): continue
@@ -95,6 +131,11 @@ for variant in expected:
             case['construction_fronts']=sorted(unique,key=lambda row:row['max_seconds'],reverse=True)
             case['peak_resident_image_bytes_by_rank']=peaks
             case['rank_accounting']=accounting
+            command=root/(variant+'.command')
+            args=shlex.split(command.read_text()) if command.exists() else []
+            if '--hodlr_gpu_host_panels' in args and args[args.index('--hodlr_gpu_host_panels')+1]=='1':
+                budget=int(args[args.index('--hodlr_gpu_panel_max_bytes')+1]) if '--hodlr_gpu_panel_max_bytes' in args else 67108864
+                case['host_panels']=panel_statistics(logs,budget)
         if variant=='traced':
             report_status=root/'traced.report_exit_code'
             if report_status.exists() and int(report_status.read_text()): raise ValueError('CUDA report conversion failed')
