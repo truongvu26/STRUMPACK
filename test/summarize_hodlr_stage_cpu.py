@@ -70,6 +70,7 @@ for section,total in sorted(sampled.items()):
         entry_frame_samples=entry_counts[section],entry_frame_fraction=entry_counts[section]/total,
         categories=[dict(category=k,samples=v,fraction=v/total) for k,v in categories.most_common()],
         top_leaf_functions=[dict(name=k[0],module=k[1],samples=v,fraction=v/total) for k,v in leaf[section].most_common(30)],
+        top_scalapack_functions=[dict(name=k[0],module=k[1],samples=v,fraction=v/total) for k,v in inclusive[section].most_common() if 'libscalapack' in k[1].lower()][:20],
         top_inclusive_functions=[dict(name=k[0],module=k[1],samples=v,fraction=v/total) for k,v in inclusive[section].most_common(40)]))
 scheduled=defaultdict(float)
 if 'SCHED_EVENTS' in tables:
