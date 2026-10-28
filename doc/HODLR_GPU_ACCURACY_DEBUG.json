@@ -1,0 +1,67 @@
+{
+  "status": "AWAITING_FAILED_FRONT_CAPTURE",
+  "native_recompression": {
+    "status": "PASS",
+    "job": 60419636,
+    "cases": [
+      {
+        "rank": 0,
+        "cases": 56,
+        "maximum_error": 1.02500370134e-05,
+        "all_within_bound": true
+      },
+      {
+        "rank": 1,
+        "cases": 56,
+        "maximum_error": 1.02500370134e-05,
+        "all_within_bound": true
+      }
+    ],
+    "butterflypack_revision": "cdba24db077380a14c276b9e396535f0993947ac",
+    "basis_ranks": [
+      32,
+      64,
+      255,
+      256,
+      511,
+      512,
+      640
+    ],
+    "tolerances": [
+      1e-05,
+      1e-10
+    ],
+    "scalar_types": [
+      "double",
+      "complex double"
+    ],
+    "modes": [
+      "mixed batches",
+      "individual blocks"
+    ],
+    "coverage": "Independent host BLAS products, zero Householder coefficients, ill-conditioned factors, QR/SVD thresholds, two processes sharing one A100. This does not validate BACA sampling or frontal child extraction.",
+    "manifest": "BPACK cdba24db077380a14c276b9e396535f0993947ac\n70aac1e791c177e13ec967661bc5a7d574f977006db8cae9a58831dec164aa68  test\n16642dd4a20937f0d7213e1121553d8f0d8dc243440397430837b636a5c8111c  lib/libbutterflypack.so.5.0.0\n"
+  },
+  "construction_probe": {
+    "revision": "ee3e7e72",
+    "job": 60419839,
+    "status": "DISCREPANCY_DETECTED",
+    "case": "40-cubed GPU full-image path, 4 MPI ranks and 2 GPUs",
+    "first_observation": {
+      "mpi_rank": 3,
+      "block": "F22",
+      "rows": 1064,
+      "cols": 1064,
+      "relative_sample_error": 0.125119,
+      "bound": 0.001
+    },
+    "interpretation": "Not yet distinguished among prepared-image assembly, native compression and batched extraction; no numerical fix claimed."
+  },
+  "capture": {
+    "job": 60419999,
+    "snapshot": "accuracy_capture_snapshot_v2",
+    "strumpack_revision": "e3e130a6",
+    "native_library_sha256": "1728db2f70dd8da2e7a526629eeb22a51ace245e786299158f17a184d6dbdc49",
+    "plan": "CPU control, up to five small GPU trials, stop and capture callback reference, compressed output and prepared image at the first discrepancy."
+  }
+}
