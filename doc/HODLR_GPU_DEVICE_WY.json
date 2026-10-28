@@ -1,5 +1,5 @@
 {
-  "status": "VALIDATION_PASS_150_TIMING_QUEUED",
+  "status": "VALIDATION_PASS_150_TIMING_RUNNING",
   "branches": {
     "strumpack": "perf/hodlr-gpu-efficiency",
     "butterflypack": "perf/hodlr-device-wy"
@@ -10,7 +10,7 @@
   "before_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
   "after_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
   "validation_job": 60466018,
-  "paired_150_job": 60464807,
+  "paired_150_job": 60467720,
   "layout_16_rank_job": 60464839,
   "construction_tolerance": 1e-05,
   "rhs": 3,
@@ -214,8 +214,8 @@
   },
   "benchmark_gate": "Native component and captured-factor validation passed; the150-cubed benchmark was released while corrected sparse launches ran. All comparison solves must pass individually.",
   "threading_experiment": {
-    "status": "QUEUED",
-    "job": 60466866,
+    "status": "RUNNING",
+    "job": 60467724,
     "grid": 100,
     "ranks": 4,
     "gpus": 4,
@@ -240,7 +240,12 @@
       "Same native WY library and quiet executable throughout this threading test.",
       "This experiment changes BLAS arithmetic workers; solver frontal traversal remains OpenMP1.",
       "The sequential OpenBLAS used by the WY old/new pair is unchanged."
-    ]
+    ],
+    "superseded_job": {
+      "job": 60466866,
+      "status": "CANCELLED_BEFORE_START",
+      "reason": "Equivalent interactive profiling allocation became immediately available."
+    }
   },
   "supplied_screenshot": {
     "source": "User attachment; Ours rows not independently reproduced",
@@ -279,6 +284,37 @@
       }
     ],
     "verified_pr_source": "https://github.com/pghysels/STRUMPACK/pull/158",
-    "limitations": "GPU model/count, full command/settings, and timing boundaries for Ours rows are unknown; optional user clarification requested."
-  }
+    "limitations": "GPU model/count, full command/settings, and timing boundaries for Ours rows are unknown; optional user clarification requested.",
+    "configuration_status": "User confirmed command lines and missing hardware/timing details are unavailable."
+  },
+  "superseded_paired_150_job": {
+    "job": 60464807,
+    "status": "CANCELLED_BEFORE_START",
+    "reason": "An authorized interactive profiling allocation became available immediately; same four-node16GPU resources and ABBA protocol retained."
+  },
+  "interrupted_driver_sequences": [
+    {
+      "job": 60467421,
+      "status": "FAILED_DRIVER_AFTER_FIRST_PASS",
+      "first_case": {
+        "factor_seconds": 381.018,
+        "solve_seconds": 4.23921,
+        "relative_error": 5.3473e-11,
+        "scaled_residual": 1.42865e-08
+      },
+      "reason": "srun consumed case-list stdin; remainingcasesneverstarted."
+    },
+    {
+      "job": 60467460,
+      "status": "FAILED_DRIVER_AFTER_FIRST_PASS",
+      "first_case": {
+        "factor_seconds": 184.315,
+        "solve_seconds": 2.11749,
+        "relative_error": 4.06097e-10,
+        "scaled_residual": 1.15948e-08
+      },
+      "reason": "Same stdin inheritance issue; remainingthreadcasesneverstarted."
+    }
+  ],
+  "driver_correction": "Both file-driven benchmark loops now launch srun with --input=none. A mock srun that drains stdin reproduces the one-case failure and retains all four cases after the correction. Full comparisons restart on fresh allocations; partial runs are not mixed into their medians."
 }

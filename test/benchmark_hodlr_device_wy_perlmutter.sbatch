@@ -85,7 +85,7 @@ while read -r label variant; do
   status=0
   /usr/bin/time -v -o "$dir/panels.time" timeout --kill-after=15s "${limit}s" \
     srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c "${SLURM_CPUS_PER_TASK:-8}" \
-    --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
+    --input=none --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
     --output="$dir/panels.rank%t.log" --error="$dir/panels.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$dir" panels 0 "${args[@]}" || status=$?
   printf '%s\n' "$status" > "$dir/panels.exit_code"
