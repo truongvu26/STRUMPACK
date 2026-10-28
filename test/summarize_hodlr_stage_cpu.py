@@ -32,28 +32,31 @@ for tid,samples in events.items():
         section=next((label for start,end,label in roots[tid] if start<=instant<=end),'outside')
         owners[sample]=(section,active[0][3] if active else 'unattributed')
 
-def category(frames):
+def category(frames,entry_seen):
     modules=' '.join(module.lower() for _,module in frames)
     symbols=' '.join(name for name,_ in frames)
     scalapack='libscalapack' in modules
     mpi=any(x in modules for x in ('libmpi','libfabric','libcxi','libxpmem')) or bool(re.search(r'\bP?MPI_',symbols))
     if scalapack and mpi: return 'MPI/transport under ScaLAPACK or BLACS'
-    if mpi: return 'MPI/transport outside ScaLAPACK'
+    if mpi: return 'MPI/transport outside ScaLAPACK' if entry_seen else 'MPI/transport (caller incomplete)'
     if scalapack: return 'ScaLAPACK/PBLAS/BLACS outside MPI'
     if any(x in modules for x in ('libcuda','libcublas','libcusolver','libnvrtc')): return 'CUDA/library host work'
-    if 'libopenblas' in modules or 'liblapack' in modules: return 'Host BLAS/LAPACK outside ScaLAPACK'
+    if 'libopenblas' in modules or 'liblapack' in modules:
+        return 'Host BLAS/LAPACK outside ScaLAPACK' if entry_seen else 'Host BLAS/LAPACK (caller incomplete)'
     if 'libbutterflypack' in modules: return 'ButterflyPACK host work outside the above'
     return 'STRUMPACK/other host work or unresolved'
 
 counts=defaultdict(Counter); leaf=defaultdict(Counter); inclusive=defaultdict(Counter)
-unresolved=Counter(); sampled=Counter()
+unresolved=Counter(); sampled=Counter(); entry_counts=Counter()
 query='SELECT * FROM SAMPLING_CALLCHAINS ORDER BY id,stackDepth'
 for sample,rows in itertools.groupby(db.execute(query),key=lambda r:r['id']):
     if sample not in owners: continue
     rows=list(rows)
     frames=[(strings.get(r['symbol'],'unknown'),strings.get(r['module'],'unknown')) for r in rows]
-    section,phase=owners[sample]; key=(section,phase); kind=category(frames)
+    entry_seen=any(name=='main' or name.startswith('__libc_start_main') or name=='_start' for name,_ in frames)
+    section,phase=owners[sample]; key=(section,phase); kind=category(frames,entry_seen)
     counts[key][kind]+=1; sampled[section]+=1
+    if entry_seen: entry_counts[section]+=1
     if rows[0]['unresolved']: unresolved[section]+=1
     name,module=frames[0]; leaf[section][(name,module)]+=1
     for name,module in set(frames): inclusive[section][(name,module)]+=1
@@ -64,6 +67,7 @@ for section,total in sorted(sampled.items()):
     for (scope,phase),values in counts.items():
         if scope==section: categories.update(values)
     sections.append(dict(section=section,running_samples=total,unresolved_leaf_samples=unresolved[section],
+        entry_frame_samples=entry_counts[section],entry_frame_fraction=entry_counts[section]/total,
         categories=[dict(category=k,samples=v,fraction=v/total) for k,v in categories.most_common()],
         top_leaf_functions=[dict(name=k[0],module=k[1],samples=v,fraction=v/total) for k,v in leaf[section].most_common(30)],
         top_inclusive_functions=[dict(name=k[0],module=k[1],samples=v,fraction=v/total) for k,v in inclusive[section].most_common(40)]))
@@ -83,6 +87,7 @@ result=dict(rank=int(path.stem.replace('rank','')),sections=sections,
     phases=[dict(section=k[0],phase=k[1],running_samples=sum(v.values()),categories=dict(v)) for k,v in counts.items()],
     notes=['Running-CPU sample fractions are not fractions of solver wall time.',
       'ScaLAPACK attribution is inclusive of a libscalapack stack frame; MPI/transport below it is separated.',
+      'When a stack does not reach a known program entry, an unobserved ScaLAPACK caller is not ruled out.',
       'BLACS and PBLAS share libscalapack and are included in its category.',
       'Sampled call stacks and scheduled-CPU intervals cover selected processes; untraced peers share their GPUs.',
       'Inclusive function counts overlap. Host work can overlap CUDA activity and must not be added to GPU durations.'])
