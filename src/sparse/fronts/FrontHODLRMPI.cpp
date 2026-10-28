@@ -305,13 +305,22 @@ namespace strumpack {
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     const auto cap=opts.HODLR_options().gpu_front_max_bytes();
     auto eligible=[&](std::size_t m,std::size_t n,const char* block) {
-      bool fits=cap>64 && m && n && m<=std::size_t(std::numeric_limits<int>::max())/n;
+      // LP64 ScaLAPACK redistribution uses a signed int byte count.
+      // all_gather() requires a receive buffer for the entire image.
+      const auto redistribution_byte_limit=
+        std::size_t(std::numeric_limits<int>::max());
+      const bool redistribution_fits=!n ||
+        m<=redistribution_byte_limit/sizeof(scalar_t)/n;
+      bool fits=cap>64 && m && n && redistribution_fits;
       fits=fits && m<=((cap-64)/sizeof(scalar_t))/n &&
         (m+1)*sizeof(std::int64_t)<=cap-64-m*n*sizeof(scalar_t);
       if (cap && !fits && Comm().is_root())
         std::cout << "# GPU front evaluator block=" << block
-          << " construction=" << (opts.HODLR_options().gpu_host_panels()?"gpu_host_panels":"host") << " reason=prepared_image_exceeds_byte_cap rows=" << m
-          << " cols=" << n << " cap=" << cap << std::endl;
+          << " construction=" << (opts.HODLR_options().gpu_host_panels()?"gpu_host_panels":"host")
+          << " reason=" << (redistribution_fits ? "prepared_image_exceeds_byte_cap" :
+                            "prepared_image_exceeds_redistribution_byte_limit")
+          << " rows=" << m << " cols=" << n << " cap=" << cap
+          << " redistribution_byte_limit=" << redistribution_byte_limit << std::endl;
       return cap && fits;
     };
     auto global_ids=[&](std::size_t n,bool update) {
