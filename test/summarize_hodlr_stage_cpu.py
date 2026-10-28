@@ -84,6 +84,7 @@ if 'SCHED_EVENTS' in tables:
                 scheduled[label]+=max(0,min(end,instant)-max(start,begin))/1e9
 result=dict(rank=int(path.stem.replace('rank','')),sections=sections,
     main_thread_scheduled_cpu_seconds=dict(scheduled),
+    diagnostics=[dict(row) for row in db.execute('SELECT severity,text FROM DIAGNOSTIC_EVENT')] if 'DIAGNOSTIC_EVENT' in tables else [],
     phases=[dict(section=k[0],phase=k[1],running_samples=sum(v.values()),categories=dict(v)) for k,v in counts.items()],
     notes=['Running-CPU sample fractions are not fractions of solver wall time.',
       'ScaLAPACK attribution is inclusive of a libscalapack stack frame; MPI/transport below it is separated.',
