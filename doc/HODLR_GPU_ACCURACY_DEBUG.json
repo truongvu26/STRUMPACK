@@ -362,7 +362,7 @@
   },
   "norm_budget_revision": {
     "job": 60422977,
-    "status": "SPARSE40_PASS_100_RUNNING",
+    "status": "SPARSE40_PASS_100_TARGET_LAYOUT_PENDING",
     "native_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78",
     "pre_svd_relative_frobenius_bound": "sqrt(min(m,n))*tol_comp",
     "final_relative_frobenius_bound": "2*sqrt(min(m,n))*tol_comp (unchanged)",
@@ -376,16 +376,39 @@
       "independent_svd_and_recompression_job": 60422460,
       "captured_inputs_job": 60422461,
       "rationale": "Only the Fortran pre-recompression norm budget changed; native QR/SVD code is unchanged. Captured-front and sparse replays are rerun."
-    }
+    },
+    "poisson_100_four_ranks": {
+      "status": "TIMEOUT",
+      "job": 60422977,
+      "ranks": 4,
+      "gpus": 2,
+      "step_seconds": 360,
+      "accuracy_failures_reported": false,
+      "interpretation": "Incomplete; not a numerical PASS. Proceeding with the intended 32-rank/16-GPU layout."
+    },
+    "target_layout_validation_job": 60423305,
+    "native_revision": "88e859d",
+    "strumpack_test_revision": "11f32b35"
   },
   "updated_150_profiling": {
-    "status": "CPU_BASELINE_RUNNING_GPU_PENDING_SMALL_SPARSE_CHECK",
+    "status": "CPU_RUNNING_GPU_VALIDATION_DEPENDENT",
     "cpu_job": 60423044,
     "grid": 150,
     "mpi_ranks": 32,
     "gpus": 16,
     "nrhs": 3,
     "omp_threads": 1,
-    "snapshot": "profile_results/qr_svd_profile_snapshot_v1"
+    "snapshot": "profile_results/qr_svd_profile_snapshot_v1",
+    "gpu_quiet_job": 60423201,
+    "gpu_nsys_job": 60423202,
+    "gpu_validation_dependency": 60423305,
+    "traced_ranks": [
+      0,
+      11,
+      15,
+      31
+    ],
+    "gpu_snapshot": "profile_results/qr_svd_profile_snapshot_v2",
+    "gpu_native_library_sha256": "dffb5d1e706e7d5851d39d4a34c0c53eecd3aead9617c2f94305d77b9c016c78"
   }
 }

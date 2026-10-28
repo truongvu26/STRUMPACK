@@ -47,10 +47,12 @@ for input in "$HODLR_REPLAY_INPUT" --localized-outlier; do
     ' bash "$input"
 done
 fi
-export HODLR_PROFILE_RANKS=4 STRUMPACK_HODLR_VERIFY_CONSTRUCTION=1e-3
+export HODLR_PROFILE_RANKS=${HODLR_BACA_RANKS:-4} STRUMPACK_HODLR_VERIFY_CONSTRUCTION=1e-3
+pernode=$((HODLR_PROFILE_RANKS/SLURM_JOB_NUM_NODES))
+(( pernode*SLURM_JOB_NUM_NODES == HODLR_PROFILE_RANKS )) || exit 1
 for grid in ${HODLR_BACA_SPARSE_GRIDS:-40 100}; do
   export STRUMPACK_HODLR_CHECK_DUMP="$out/g$grid"
-  timeout --kill-after=15s 360s srun -n4 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+  timeout --kill-after=15s "${HODLR_BACA_SPARSE_TIMEOUT:-360}s" srun -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
     --output="$out/g$grid.rank%t.log" --error="$out/g$grid.rank%t.log" \
     bash test/run_hodlr_stage_rank.sh "$out" "g$grid" 0 "$HODLR_PROFILE_SNAPSHOT/poisson" "$grid" 3 \
     --sp_compression HODLR --sp_compression_min_sep_size 1000 --sp_compression_min_front_size 1000 \
