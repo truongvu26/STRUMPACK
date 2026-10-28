@@ -11,7 +11,7 @@ with p.open('rb') as f:
         raise ValueError('Not a STRUMPACK construction capture')
     m,n,size,flags=map(int,header[1:])
     dtype=np.dtype(('<c' if flags&1 else '<f')+str(size))
-    if m<=0 or n<=0 or m*n*size>64*1024**2: raise ValueError('Invalid capture dimensions')
+    if m<=0 or n<=0 or m*n*size>256*1024**2: raise ValueError('Invalid capture dimensions')
     matrices={}
     for name in ['reference','compressed']+(['prepared'] if flags&2 else []):
         a=np.fromfile(f,dtype=dtype,count=m*n)

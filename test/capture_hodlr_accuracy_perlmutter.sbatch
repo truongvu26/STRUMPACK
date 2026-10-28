@@ -20,18 +20,19 @@ cd "$SLURM_SUBMIT_DIR"
 out="$PWD/profile_results/$SLURM_JOB_ID";mkdir -p "$out"
 cp "$HODLR_PROFILE_SNAPSHOT/manifest.txt" "$out/manifest.txt"
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
-for variant in cpu gpu1 gpu2 gpu3 gpu4 gpu5; do
- mode=1;cap=268435456;rect=1
- [[ $variant != cpu ]] || { mode=0;cap=0;rect=0; }
+read -r -a cases <<< "${HODLR_ACCURACY_CASES:-cpu gpu1 gpu2 gpu3 gpu4 gpu5}"
+for variant in "${cases[@]}"; do
+ mode=1;cap=268435456;rect=1;panels=${HODLR_ACCURACY_HOST_PANELS:-0}
+ [[ $variant != cpu ]] || { mode=0;cap=0;rect=0;panels=0; }
  export STRUMPACK_HODLR_CHECK_DUMP="$out/$variant"
  status=0
- timeout --kill-after=30s 240s srun -n4 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
+ timeout --kill-after=30s "${HODLR_ACCURACY_TIMEOUT:-240}s" srun -n4 -c8 --gpu-bind=none --cpu-bind=cores --wait=0 --kill-on-bad-exit=1 \
   --output="$out/$variant.rank%t.log" --error="$out/$variant.rank%t.log" \
-  bash test/run_hodlr_stage_rank.sh "$out" "$variant" 0 "$HODLR_PROFILE_SNAPSHOT/poisson" 40 3 \
+  bash test/run_hodlr_stage_rank.sh "$out" "$variant" 0 "$HODLR_PROFILE_SNAPSHOT/poisson" "${HODLR_ACCURACY_GRID:-40}" 3 \
   --sp_compression HODLR --sp_compression_min_sep_size 1000 --sp_compression_min_front_size 1000 \
   --hodlr_leaf_size 128 --hodlr_rel_tol 1e-5 --hodlr_butterfly_levels 0 \
   --sp_Krylov_solver refinement --sp_rel_tol 1e-10 --sp_maxit 30 --hodlr_use_gpu "$mode" \
-  --hodlr_gpu_rectangular "$rect" --hodlr_gpu_front_max_bytes "$cap" --hodlr_gpu_host_panels 0 || status=$?
+  --hodlr_gpu_rectangular "$rect" --hodlr_gpu_front_max_bytes "$cap" --hodlr_gpu_host_panels "$panels" || status=$?
  printf '%s\n' "$status" > "$out/$variant.exit_code"
  # Stop at the first discrepancy. A completed reproducer is not a numerical PASS.
  if ((status));then exit "$status";fi

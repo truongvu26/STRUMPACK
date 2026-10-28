@@ -48,7 +48,10 @@ void verify_construction(const Comm& comm,int m,int n,const char* kind,
   std::vector<T> expected(std::size_t(count)*n,T(0.));
   std::vector<T> actual(std::max<std::int64_t>(p.local_count,1),T(0.));
   auto ref_query=p,actual_query=p;
-  reference(ref_query,expected.data());extract(actual_query,actual.data());
+  reference(ref_query,expected.data());
+  if(comm.is_root() && (ref_query.rows!=p.rows || ref_query.cols!=p.cols || ref_query.ms!=p.ms || ref_query.ns!=p.ns))
+    std::cout<<"# construction_check reference_modified_query kind="<<kind<<" rows="<<m<<" cols="<<n<<std::endl;
+  extract(actual_query,actual.data());
   double diff=0,norm=0;
   if(comm.is_root())for(std::size_t i=0;i<expected.size();++i) {
     const double a=std::abs(expected[i]),d=std::abs(expected[i]-actual[i]);
@@ -60,7 +63,7 @@ void verify_construction(const Comm& comm,int m,int n,const char* kind,
     <<" procs="<<comm.size()<<" relative_sample_error="<<error<<" bound="<<bound<<std::endl;
   if(!std::isfinite(error)||error>bound) {
     const char* dump=std::getenv("STRUMPACK_HODLR_CHECK_DUMP");
-    if(dump && *dump && std::uint64_t(m)*n*sizeof(T)<=64u*1024u*1024u) {
+    if(dump && *dump && std::uint64_t(m)*n*sizeof(T)<=256u*1024u*1024u) {
       ConstructionProbe full;full.ni=1;full.nr=m;full.nc=n;
       full.rows.resize(m);full.cols.resize(n);full.ms={m};full.ns={n};full.owners={0};
       std::iota(full.rows.begin(),full.rows.end(),1);std::iota(full.cols.begin(),full.cols.end(),1);
