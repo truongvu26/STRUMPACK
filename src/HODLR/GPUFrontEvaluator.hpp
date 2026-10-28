@@ -35,6 +35,9 @@ public:
   virtual std::size_t upload_bytes() const = 0;
   virtual std::size_t scratch_peak_bytes() const = 0;
   virtual std::size_t resident_bytes() const = 0;
+  // Diagnostic host reference of the prepared image; indices are one-based
+  // application ids, matching the extraction callback ABI, output column-major.
+  virtual void copy_host_block(int m,const int* rows,int n,const int* cols,void* out) const = 0;
   // The ABI entry point is exposed for stream/stride contract regression tests.
   virtual void evaluate_blocks(const bpack_gpu_block_batch& batch) noexcept = 0;
 };

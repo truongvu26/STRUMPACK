@@ -81,6 +81,17 @@ public:
   std::size_t upload_bytes() const override { return uploads_; }
   std::size_t scratch_peak_bytes() const override { return peak_; }
   std::size_t resident_bytes() const override { return resident_bytes_; }
+  void copy_host_block(int m,const int* rows,int n,const int* cols,void* out) const override {
+    auto* values=static_cast<T*>(out);
+    for(int j=0;j<n;++j)for(int i=0;i<m;++i) {
+      const int r=rows[i]-1,c=cols[j]-1;
+      if(r<0 || r>=data_.rows || c<0 || c>=data_.cols)
+        throw std::out_of_range("Diagnostic GPU image query outside application ordering");
+      T value=data_.contribution[r+std::size_t(c)*data_.rows];
+      for(auto k=data_.ptr[r];k<data_.ptr[r+1];++k)if(data_.col[k]==c)value+=data_.sparse[k];
+      values[i+std::size_t(j)*m]=value;
+    }
+  }
   void register_matrix(void** matrix) override {
 #if defined(STRUMPACK_USE_HODLR_GPU_RECTANGULAR)
     upload_image(matrix,false);
