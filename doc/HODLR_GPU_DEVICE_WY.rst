@@ -1,6 +1,9 @@
 GPU HODLR efficiency follow-up
 ==============================
 
+The subsequent parameter and layout search is recorded in
+:doc:`HODLR_GPU_TUNING`.
+
 Status: PASS. All completed experiments below passed sparse numerical
 validation and exited 0:0. Earlier launcher/driver failures and partial
 results remain explicitly recorded in HODLR_GPU_DEVICE_WY.json and are
