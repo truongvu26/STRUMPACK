@@ -47,11 +47,13 @@ for tid,points in threads.items():
             x=all_api[name];x['calls']+=1;x['host_seconds']+=seconds
 stats=defaultdict(lambda:dict(kernels=0,kernel_sum_seconds=0.,copy_sum_seconds=0.,copy_bytes=0,htod_bytes=0,dtoh_bytes=0))
 kernels=rows('CUPTI_ACTIVITY_KIND_KERNEL');copies=rows('CUPTI_ACTIVITY_KIND_MEMCPY');memsets=rows('CUPTI_ACTIVITY_KIND_MEMSET')
-intervals=[];top=defaultdict(lambda:dict(calls=0,seconds=0.));copy_totals=defaultdict(lambda:dict(calls=0,bytes=0,seconds=0.))
+intervals=[];section_kernels=defaultdict(list);section_activity=defaultdict(list)
+top=defaultdict(lambda:dict(calls=0,seconds=0.));copy_totals=defaultdict(lambda:dict(calls=0,bytes=0,seconds=0.))
 copy_names=dict(db.execute('SELECT id,label FROM ENUM_CUDA_MEMCPY_OPER')) if 'ENUM_CUDA_MEMCPY_OPER' in tables else {}
 for r in kernels:
     key=correlation.get(r.get('correlationId'),('outside','unattributed'));x=stats[key];x['kernels']+=1;x['kernel_sum_seconds']+=(r['end']-r['start'])/1e9
     intervals.append((r['start'],r['end']));name=strings.get(r.get('shortName',r.get('demangledName')),'unknown')
+    section_kernels[key[0]].append((r['start'],r['end']));section_activity[key[0]].append((r['start'],r['end']))
     top[name]['calls']+=1;top[name]['seconds']+=(r['end']-r['start'])/1e9
 for r in copies:
     key=correlation.get(r.get('correlationId'),('outside','unattributed'));x=stats[key];seconds=(r['end']-r['start'])/1e9
@@ -60,9 +62,15 @@ for r in copies:
     if 'DtoH' in direction or 'Device-to-Host' in direction: x['dtoh_bytes']+=r['bytes']
     y=copy_totals[direction];y['calls']+=1;y['bytes']+=r['bytes'];y['seconds']+=seconds
     intervals.append((r['start'],r['end']))
+    section_activity[key[0]].append((r['start'],r['end']))
+for r in memsets:
+    key=correlation.get(r.get('correlationId'),('outside','unattributed'))
+    section_activity[key[0]].append((r['start'],r['end']))
 intervals.extend((r['start'],r['end']) for r in memsets)
 result=dict(rank=int(path.stem.replace('rank','')),kernel_count=len(kernels),nvtx_range_count=sum(map(len,nvtx.values())),gpu_active_union_seconds=union(intervals),
     kernel_sum_seconds=sum(x['kernel_sum_seconds'] for x in stats.values()),
+    section_activity={section:dict(gpu_kernel_union_seconds=union(section_kernels[section]),
+        gpu_activity_union_seconds=union(spans)) for section,spans in section_activity.items()},
     phases=[dict(section=k[0],phase=k[1],**v) for k,v in sorted(stats.items(),key=lambda kv:kv[1]['kernel_sum_seconds'],reverse=True)],
     cuda_runtime_api=[dict(name=k,**v) for k,v in sorted(all_api.items(),key=lambda kv:kv[1]['host_seconds'],reverse=True)[:30]],
     runtime_by_phase=[dict(section=k[0],phase=k[1],name=k[2],**v) for k,v in sorted(api.items(),key=lambda kv:kv[1]['host_seconds'],reverse=True)[:100]],

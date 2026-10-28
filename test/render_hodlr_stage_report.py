@@ -18,6 +18,8 @@ if 'gpu' in quiet and 'cpu' in quiet:
     lines += ['',f"Quiet CPU/GPU factor-plus-solve ratio: {quiet['cpu']['factor_plus_solve_seconds']/quiet['gpu']['factor_plus_solve_seconds']:.3f}. One trial per backend; this is preliminary."]
 if 'baseline' in quiet and 'panels' in quiet:
     lines += ['',f"Current GPU/panel GPU factor-plus-solve ratio: {quiet['baseline']['factor_plus_solve_seconds']/quiet['panels']['factor_plus_solve_seconds']:.3f}. One paired trial, not a repeated benchmark."]
+if 'cpu' in quiet and 'panels' in quiet:
+    lines += ['',f"Matched CPU/panel GPU factor-plus-solve ratio: {quiet['cpu']['factor_plus_solve_seconds']/quiet['panels']['factor_plus_solve_seconds']:.3f}. Same executable, native library, allocation and tolerances; one trial per backend."]
 if 'diagnostic' in quiet:
     c=quiet['diagnostic']; phases=[p for p in c['phases'] if p['section']=='solver.factor']; budget=defaultdict(float)
     def group(phase):
@@ -100,7 +102,7 @@ if 'diagnostic' in quiet:
         lines.append(f"| {p['phase']} | {p['calls']} | {seconds:.3f} | {100*seconds/solve_total:.1f}% |")
 for c in data['cases']:
     if 'cuda' not in c: continue
-    lines += ['', '## Selected-rank CUDA activity', '', 'Only ranks zero and the last rank are traced; each shares a GPU with an untraced peer.', '',
+    lines += ['', '## Selected-rank CUDA activity', '', 'Only the selected processes are traced; each shares a GPU with an untraced peer.', '',
       '| Rank | Kernel count | GPU active union (s) | Sum kernel duration (s) | NVTX events |', '|---|---:|---:|---:|---:|']
     for x in c['cuda']: lines.append(f"| {x['rank']} | {x['kernel_count']} | {x['gpu_active_union_seconds']:.3f} | {x['kernel_duration_sum_seconds']:.3f} | {x.get('nvtx_events',0)} |")
 for c in data['cases']:
@@ -119,5 +121,30 @@ for c in data['cases']:
           '| API | Calls | Host duration sum (s) |', '|---|---:|---:|']
         for q in a['cuda_runtime_api'][:8]:
             lines.append(f"| {q['name']} | {q['calls']} | {q['host_seconds']:.3f} |")
+for c in data['cases']:
+    if 'cpu_sampling' not in c: continue
+    cuda={x['rank']:x for x in c.get('cuda',[])}
+    lines += ['', '## CPU call stacks versus CUDA activity', '',
+      'CPU categories are fractions of running-CPU backtraces inside solver.factor, not fractions of solver wall time. ScaLAPACK includes PBLAS and BLACS. MPI/transport below ScaLAPACK is separated. CPU work can overlap GPU work; durations must not be added.', '',
+      '| Rank | Factor wall (s) | Main-thread scheduled CPU (s) | CUDA kernel union (s) | CUDA activity union (s) | Factor CPU backtraces |',
+      '|---|---:|---:|---:|---:|---:|']
+    for x in c['cpu_sampling']:
+        section=next(q for q in x['sections'] if q['section']=='solver.factor')
+        activity=cuda[x['rank']]['launch_scope_attribution']['section_activity'].get('solver.factor',{})
+        wall=c['rank_accounting'][x['rank']]['factor_envelope_seconds']
+        lines.append(f"| {x['rank']} | {wall:.3f} | {x['main_thread_scheduled_cpu_seconds'].get('solver.factor',0):.3f} | {activity.get('gpu_kernel_union_seconds',0):.3f} | {activity.get('gpu_activity_union_seconds',0):.3f} | {section['running_samples']} |")
+    lines += ['', '| Rank | CPU stack category | Running samples | Fraction |', '|---|---|---:|---:|']
+    for x in c['cpu_sampling']:
+        section=next(q for q in x['sections'] if q['section']=='solver.factor')
+        for q in section['categories']:
+            lines.append(f"| {x['rank']} | {q['category']} | {q['samples']} | {100*q['fraction']:.1f}% |")
+    for x in c['cpu_sampling']:
+        section=next(q for q in x['sections'] if q['section']=='solver.factor')
+        lines += ['', f"### Rank {x['rank']}: inclusive factor CPU functions", '',
+          'Inclusive stacks overlap; the same sample can appear in multiple functions.', '',
+          '| Function | Module | Samples | Fraction |', '|---|---|---:|---:|']
+        for q in section['top_inclusive_functions'][:20]:
+            name=q['name'].replace('|','\\|'); module=Path(q['module']).name
+            lines.append(f"| {name} | {module} | {q['samples']} | {100*q['fraction']:.1f}% |")
 lines += ['', '## Measurement limits', '']+['- '+x for x in data['notes']]
 (root/'stage_report.md').write_text('\n'.join(lines)+'\n')
