@@ -96,11 +96,48 @@ Job 60411461 stopped at configuration validation because direct fixtures
 initially retained verbose diagnostics. It is preserved as a failed setup
 attempt, and was corrected before the successful run.
 
-The 150-cubed paired timing job is 60412989 and the stage-profile job is
-60412991. Results are pending. The paired run uses the current frozen GPU
-executable and the new Release executable on the same allocation, linked
-to the same frozen ButterflyPACK library. The diagnostic executable adds
-scopes and task timers and is not a quiet performance sample.
+The intermediate 100-cubed check, job 60414054, passed on four ranks sharing
+two A100 40 GB GPUs. It exercised 528 HODLR fronts and three RHS, with
+factorization 250.040 seconds, solve 4.48121 seconds, relative error
+1.76318e-10 and scaled residual 2.86074e-8. All-rank panel counters and
+staging checks passed. This diagnostic case is not a paired speed comparison.
+
+The 150-cubed stage-profile job 60412991 passed with factorization
+421.617 seconds, solve 5.92057 seconds, relative error 5.64166e-10 and
+scaled residual 4.05087e-8. All 32 ranks passed numerical, binding and
+exclusive-scope accounting checks. All 94 large F22 blocks, 22 blocks of
+each rectangular orientation and three large F11 blocks used panels;
+the remaining blocks retained full-image GPU evaluation. No measured
+HODLR construction scope used the host-compression fallback.
+
+Paired timing job 60412989 passed. It used the current frozen GPU executable
+and the new Release executable on the same allocation, linked to the same
+frozen ButterflyPACK library. Both cases used four nodes, 32 ranks and 16
+A100 40 GB GPUs, two ranks per GPU, three RHS, and the same tolerances.
+
+.. list-table:: Quiet 150-cubed timing, seconds
+   :header-rows: 1
+
+   * - Backend
+     - Factor
+     - Solve
+     - Factor plus solve
+   * - Current GPU image/host fallback
+     - 690.838
+     - 4.78237
+     - 695.62037
+   * - GPU image/panels
+     - 423.214
+     - 5.29268
+     - 428.50668
+
+Factor-plus-solve time decreased 38.4%, a 1.623x ratio. This is one paired
+trial, not a repeated benchmark. Baseline relative error was 6.15349e-10
+and residual 4.12792e-8; panels gave 2.28022e-10 and 1.72091e-8. The panel
+case needed ten refinement iterations versus nine for the baseline, and
+its solve time increased. Both passed the same accuracy checks. The
+diagnostic executable adds scopes and task timers and is not a quiet
+performance sample.
 
 ``backend_statistics()`` exposes panel calls, windows, upload bytes, peak
 host staging and preparation/metadata/upload wall times. During stage
@@ -108,6 +145,43 @@ profiling these native counters are also printed on every front rank.
 ``prepare.host_panels`` scopes separate callback work from the enclosing
 ``*.construct.gpu_panels`` scopes. Native device-entry timing excludes host
 preparation; transfer counters are reported separately.
+
+The diagnostic profile partitions mean local factor wall time as follows.
+These are exclusive rank wall times, including waits, not isolated GPU
+execution times or a global critical path:
+
+* Host panel callbacks: 151.714 seconds, 36.0%.
+* Other full-image preparation: 27.736 seconds, 6.6%.
+* GPU BACA panel construction outside host callbacks: 44.351 seconds, 10.5%.
+* Full-image device-evaluator compression: 51.601 seconds, 12.2%.
+* Traversal, dense fronts, setup and remaining work: 128.584 seconds, 30.5%.
+* Host randomized Schur compression outside the device operator:
+  15.462 seconds, 3.7%.
+* Native GPU factorization and compound device Schur applications together:
+  2.188 seconds, 0.5%.
+
+Native counters recorded 73.899 GiB of uploaded panel values over all ranks,
+including repeated requested values. This excludes child-extraction MPI
+traffic. Maximum local host-value staging was 63.921 MiB against the 64 MiB
+cap. Metadata processing, index download, synchronization and exchange took
+3.210 mean rank seconds; uploads and staging-release fences took 0.330.
+These native timers overlap the phase budget and must not be added again.
+Maximum logical retained full-image payload was 2.661 GiB per rank; this
+does not measure native factors, workspaces or pool reservations.
+
+The next targets are host child/current-Schur entry extraction and subtree
+balance. Inclusive task timers report 91.28 mean rank seconds in
+``get_submatrix_2d`` and 67.70 in ``extract_Schur``; their nested values are
+not an additional exclusive budget. Before parent front 1254450, local
+gaps from the last completed compression scope range from 0.904 to
+157.386 seconds. These include hierarchy setup and subtree-arrival waits,
+not solely MPI time. The report computes gaps from local time differences
+without assuming synchronized clocks across nodes.
+
+GPU LU tuning, panel metadata exchange and upload bandwidth have much
+smaller measured budgets. Device-side child extraction needs a separate
+ownership and stream-lifetime implementation; the current counters provide
+its correctness reference and a measured reason to pursue it.
 
 Device-side child contribution extraction remains the next extension.
 It requires explicit device leases and rank ownership for child factor

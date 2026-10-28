@@ -5,11 +5,18 @@ The first hybrid milestone is implemented through bounded BACA panel
 rendezvous; see HODLR_GPU_HOST_PANELS.rst. Whole-piece device preparation
 and device-side child assembly below remain a design, not an enabled
 implementation.
-The measured 150-cubed profile attributes 34.2% of mean rank factor time to
+The earlier 150-cubed profile attributes 34.2% of mean rank factor time to
 host F22 construction and 22.4% to host F12/F21 construction. Only 94 F22
 and 22 fronts of each rectangular orientation account for those costs.
 The initial target is those large blocks, rather than the already small
 GPU factorization and compound Schur operator budgets.
+
+The implemented host-panel milestone subsequently passed 150-cubed job
+60412989 and reduced paired factor-plus-solve time from 695.620 to 428.507
+seconds. Profile job 60412991 now attributes 36.0% of the mean rank factor
+envelope to host panel callbacks. The remaining device-child design below
+targets that preparation cost. Whole-piece scheduling remains an alternative
+design; it is not a prerequisite already implemented by the panel protocol.
 
 Why the current callback is insufficient
 ---------------------------------------
