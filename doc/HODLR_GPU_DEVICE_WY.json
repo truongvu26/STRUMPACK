@@ -212,5 +212,73 @@
     "status": "CANCELLED_BEFORE_START",
     "reason": "100-cubed validation took224 seconds per new-library factorization; a full four-trial comparison needs more than the requested15minutes. Prioritize the matched150-cubed pair rather than duplicating the expensive benchmark."
   },
-  "benchmark_gate": "Native component and captured-factor validation passed; the150-cubed benchmark was released while corrected sparse launches ran. All comparison solves must pass individually."
+  "benchmark_gate": "Native component and captured-factor validation passed; the150-cubed benchmark was released while corrected sparse launches ran. All comparison solves must pass individually.",
+  "threading_experiment": {
+    "status": "QUEUED",
+    "job": 60466866,
+    "grid": 100,
+    "ranks": 4,
+    "gpus": 4,
+    "nodes": 1,
+    "omp_threads": 1,
+    "blas_threads": [
+      1,
+      4,
+      8,
+      16,
+      1
+    ],
+    "cpus_per_task": 16,
+    "slurm_hint": "nomultithread; actual physical affinity checked",
+    "blas_version": "0.3.30",
+    "blas_kind": "pthread",
+    "blas_library_sha256": "25181e6b2e566ee1e0ea4e0d0b6981b606e9527cc225289bf4e737c9cf25c8e3",
+    "cpu_component_checks": 54,
+    "cpu_component_max_relative_error": 3.429731261747261e-15,
+    "snapshot": "profile_results/openblas_pthreads_snapshot_v1",
+    "notes": [
+      "Same native WY library and quiet executable throughout this threading test.",
+      "This experiment changes BLAS arithmetic workers; solver frontal traversal remains OpenMP1.",
+      "The sequential OpenBLAS used by the WY old/new pair is unchanged."
+    ]
+  },
+  "supplied_screenshot": {
+    "source": "User attachment; Ours rows not independently reproduced",
+    "rows": [
+      {
+        "label": "PR158",
+        "grid": 60,
+        "ranks": 4,
+        "threads": 1,
+        "cpu_factor_seconds": 39.2,
+        "gpu_factor_seconds": 43.8
+      },
+      {
+        "label": "Ours",
+        "grid": 100,
+        "ranks": 4,
+        "threads": 16,
+        "cpu_factor_seconds": 45.2,
+        "gpu_factor_seconds": 14.2
+      },
+      {
+        "label": "Ours",
+        "grid": 150,
+        "ranks": 4,
+        "threads": 16,
+        "cpu_factor_seconds": 366,
+        "gpu_factor_seconds": 67
+      },
+      {
+        "label": "Ours",
+        "grid": 200,
+        "ranks": 8,
+        "threads": 16,
+        "cpu_factor_seconds": 1205,
+        "gpu_factor_seconds": 119
+      }
+    ],
+    "verified_pr_source": "https://github.com/pghysels/STRUMPACK/pull/158",
+    "limitations": "GPU model/count, full command/settings, and timing boundaries for Ours rows are unknown; optional user clarification requested."
+  }
 }

@@ -21,7 +21,19 @@ fi
 export CUDA_VISIBLE_DEVICES="$uuid"
 printf '# stage binding rank=%s local_rank=%s node=%s uuid=%s\n' "$SLURM_PROCID" "$SLURM_LOCALID" "$(hostname)" "$uuid"
 # The executable has DT_RPATH; preload the immutable SONAME to override it.
-export LD_PRELOAD="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0${LD_PRELOAD:+:$LD_PRELOAD}"
+native_preload="$HODLR_PROFILE_SNAPSHOT/lib/libbutterflypack.so.5.0.0"
+if [[ -n "${HODLR_BLAS_LIBRARY:-}" ]]; then
+  [[ "$HODLR_BLAS_LIBRARY" == /* && -f "$HODLR_BLAS_LIBRARY" ]] || {
+    echo 'HODLR_BLAS_LIBRARY must name an absolute frozen library file' >&2; exit 1;
+  }
+  native_preload="$HODLR_BLAS_LIBRARY:$native_preload"
+fi
+export LD_PRELOAD="$native_preload${LD_PRELOAD:+:$LD_PRELOAD}"
+if [[ -n "${HODLR_BLAS_LIBRARY:-}" ]]; then
+  python3 "$(dirname "${BASH_SOURCE[0]}")/probe_hodlr_blas_runtime.py" \
+    --library "$HODLR_BLAS_LIBRARY" --executable "$1" --threads "${OPENBLAS_NUM_THREADS:-1}" \
+    --output "$out/$variant.blas.rank${SLURM_PROCID}.json"
+fi
 if [[ -n "${HODLR_CUSOLVER_AUDIT_LIBRARY:-}" ]]; then
   export HODLR_CUSOLVER_AUDIT="$out/$variant.cusolver"
   export LD_PRELOAD="$LD_PRELOAD:$HODLR_CUSOLVER_AUDIT_LIBRARY"

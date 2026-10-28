@@ -13,7 +13,8 @@
 set -euo pipefail
 module load PrgEnv-gnu cudatoolkit/13.2 craype-accel-nvidia80
 module unload cray-libsci darshan
-export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MPICH_GPU_SUPPORT_ENABLED=0 BPACK_GPU_AWARE_MPI=0 BPACK_CHECK=''
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS="${HODLR_OPENBLAS_THREADS:-1}" MPICH_GPU_SUPPORT_ENABLED=0 BPACK_GPU_AWARE_MPI=0 BPACK_CHECK=''
+[[ "$OPENBLAS_NUM_THREADS" =~ ^[1-9][0-9]*$ ]] || { echo 'HODLR_OPENBLAS_THREADS must be a positive integer' >&2;exit 1; }
 export BPACK_GPU_HEAP_FRACTION=0.85 HODLR_PROFILE_RANKS="${HODLR_PANEL_RANKS:-32}"
 export HODLR_RANKS_PER_GPU="${HODLR_RANKS_PER_GPU:-2}"
 case "$HODLR_RANKS_PER_GPU" in
@@ -41,6 +42,7 @@ fi
 printf '%s\n' "${cases[@]}" > "$out/cases.txt"
 printf '%s\n' "$grid" "$HODLR_PROFILE_RANKS" > "$out/layout.txt"; printf '0.85\n' > "$out/heap_fraction.txt"
 printf '%s\n' "$HODLR_RANKS_PER_GPU" > "$out/rank_per_gpu.txt"
+printf '%s\n' "$OPENBLAS_NUM_THREADS" > "$out/blas_threads.txt"
 printf 'GPU host panels with 67108864 byte per-rank staging; original small-image cap 268435456\n' > "$out/panel_settings.txt"
 for variant in "${cases[@]}"; do
   binary=baseline; extra=(); mode=1; rect=1; cap=268435456; trace=0
