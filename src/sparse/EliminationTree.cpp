@@ -161,6 +161,21 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   EliminationTree<scalar_t,integer_t>::initialize_compression_backend
   (const SPOptions<scalar_t>& opts) const {
+    if (opts.HODLR_options().compact_extraction()) {
+      switch (opts.compression()) {
+      case CompressionType::HODLR:
+      case CompressionType::BLR_HODLR:
+      case CompressionType::ZFP_BLR_HODLR: break;
+      default:
+        throw std::invalid_argument("Compact HODLR extraction requires HODLR compression");
+      }
+#if defined(STRUMPACK_USE_BPACK)
+      if (opts.HODLR_options().compression_algorithm() != HODLR::CompressionAlgorithm::ELEMENT_EXTRACTION)
+        throw std::invalid_argument("Compact HODLR extraction requires element extraction");
+#else
+      throw std::invalid_argument("Compact HODLR extraction requires ButterflyPACK support");
+#endif
+    }
     if (opts.HODLR_options().gpu_dense_schur()) {
       if (!opts.HODLR_options().use_gpu())
         throw std::invalid_argument("GPU dense Schur update requires HODLR GPU mode 1 or 2");

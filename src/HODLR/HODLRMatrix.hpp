@@ -562,6 +562,25 @@ namespace strumpack {
                             std::vector<DenseM_t>& B);
 
       /**
+       * Collectively extract each query on one rank of this matrix's
+       * communicator. All ranks must supply identical I, J and owners,
+       * including ranks which own no output. Indices have the same meaning
+       * as extract_elements; no additional permutation is applied here.
+       *
+       * B is resized to the number of queries. On owners[q], B[q] has shape
+       * I[q].size() by J[q].size(); on other ranks it is 0 by 0. Empty
+       * intersections remain in the collective request. An empty outer
+       * query list clears B without entering ButterflyPACK.
+       *
+       * Owners are ranks in this matrix's communicator, not in a parent
+       * frontal communicator. Invalid metadata or dimensions/message counts
+       * exceeding the native integer range are rejected before extraction.
+       */
+      void extract_elements_owned(const VecVec_t& I, const VecVec_t& J,
+                                  const std::vector<int>& owners,
+                                  std::vector<DenseM_t>& B);
+
+      /**
        * Extract a submatrix defined by index sets I (rows) and J
        * (columns), and put the result in matrix B (only on the
        * root!).

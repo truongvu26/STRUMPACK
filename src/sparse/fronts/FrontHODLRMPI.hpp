@@ -110,6 +110,9 @@ namespace strumpack {
 
     void extract_CB_sub_matrix_2d(const VecVec_t& I, const VecVec_t& J,
                                   std::vector<DistM_t>& B) const override;
+    bool get_submatrix_2d_owned
+      (const VecVec_t& I, const VecVec_t& J, const std::vector<int>& owners,
+       std::vector<DenseM_t>& B, bool active) const override;
 
     void partition(const Opts_t& opts, const SpMat_t& A, integer_t* sorder,
                    bool is_root=true, int task_depth=0) override;

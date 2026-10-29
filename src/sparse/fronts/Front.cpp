@@ -561,6 +561,20 @@ namespace strumpack {
     TIMER_TIME(TaskType::GET_SUBMATRIX, 2, t_getsub);
     extract_CB_sub_matrix_blocks(I, J, Bseq, 0);
   }
+
+  template<typename scalar_t,typename integer_t> bool
+  Front<scalar_t,integer_t>::get_submatrix_2d_owned
+  (const std::vector<std::vector<std::size_t>>& I,
+   const std::vector<std::vector<std::size_t>>& J,
+   const std::vector<int>&,
+   std::vector<DenseM_t>& Bseq, bool active) const {
+    if (isMPI()) return false;
+    if (active) {
+      std::vector<DistM_t> unused;
+      get_submatrix_2d(I, J, unused, Bseq);
+    }
+    return true;
+  }
 #endif
 
   template<typename scalar_t,typename integer_t> void

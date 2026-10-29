@@ -284,3 +284,7 @@ An output owner outside a child's communicator cannot be inserted into that
 child's process map. Preparation must translate child-local ranks explicitly
 and coordinate parent transport on the parent communicator with its required
 members. No full child matrix replication is required or proposed.
+
+The next implementation step and its measured results are recorded in
+HODLR_GPU_COMPACT_EXTRACTION.rst. It uses existing native 1-by-1 output maps
+and compact parent routing before requiring a new ButterflyPACK API.

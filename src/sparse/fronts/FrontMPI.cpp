@@ -31,6 +31,9 @@
 #include "FrontBLRMPI.hpp"
 #include "ExtendAdd.hpp"
 #include "HODLR/StageProfile.hpp"
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
 
 namespace strumpack {
 
@@ -142,6 +145,161 @@ namespace strumpack {
   }
 
   template<typename scalar_t,typename integer_t> void
+  FrontMPI<scalar_t,integer_t>::extract_2d_compact
+  (const SpMat_t& A, const VecVec_t& I, const VecVec_t& J,
+   std::vector<DistMW_t>& B, const std::vector<int>& parent_owners,
+   bool skip_sparse) const {
+    HODLR_STAGE_SCOPE_IF(p_compact,this->dim_sep()>=1000,"front.extract.compact",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+    const auto queries=I.size(); const int rank=Comm().rank(),procs=P();
+    if (J.size()!=queries || B.size()!=queries || parent_owners.size()!=queries)
+      throw std::invalid_argument("Compact extraction query metadata size mismatch");
+    const auto limit=std::min(std::size_t(std::numeric_limits<int>::max()),
+                             std::numeric_limits<std::size_t>::max()/sizeof(scalar_t));
+    auto add_count=[limit](std::size_t& sum,std::size_t count) {
+      if (count>limit-sum) throw std::overflow_error("Compact extraction batch exceeds native/MPI count limit");
+      sum+=count;
+    };
+    auto product=[limit](std::size_t m,std::size_t n) {
+      if (m>limit || n>limit || (m && n>limit/m))
+        throw std::overflow_error("Compact extraction block exceeds native/MPI count limit");
+      return m*n;
+    };
+    // Every count checked here is replicated query metadata. Fail before any
+    // child/parent collective rather than choosing different rank-local paths.
+    std::size_t metadata=0,full_entries=0;
+    if (queries>limit/3) throw std::overflow_error("Too many compact extraction queries");
+    add_count(metadata,3*queries);
+    std::vector<std::size_t> destination_counts(procs,0);
+    for (std::size_t q=0;q<queries;++q) {
+      if (parent_owners[q]<0 || parent_owners[q]>=procs)
+        throw std::invalid_argument("Compact extraction owner outside parent communicator");
+      add_count(metadata,I[q].size()); add_count(metadata,J[q].size());
+      const auto count=product(I[q].size(),J[q].size());
+      add_count(full_entries,count);
+      if (!skip_sparse) add_count(destination_counts[parent_owners[q]],count);
+      if (lchild_) add_count(destination_counts[parent_owners[q]],count);
+      if (rchild_) add_count(destination_counts[parent_owners[q]],count);
+    }
+    struct Child {
+      const F_t* front=nullptr; int master=0,procs=1; bool active=false,owned=false;
+      VecVec_t rows,cols,out_rows,out_cols;
+      std::vector<int> owners;
+      std::vector<DistM_t> distributed;
+      std::vector<DenseM_t> sequential;
+    };
+    auto prepare=[&](const F_t* front) {
+      Child child; child.front=front;
+      if (!front) return child;
+      HODLR_STAGE_SCOPE_IF(p_map,this->dim_sep()>=1000,"front.extract.compact.map",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      child.master=master(front); child.procs=front->P(); child.active=visit(front);
+      if (child.procs<=0) throw std::invalid_argument("Invalid compact extraction child process count");
+      child.rows.resize(queries); child.cols.resize(queries);
+      child.out_rows.resize(queries); child.out_cols.resize(queries); child.owners.resize(queries);
+      std::size_t child_entries=0;
+      for (std::size_t q=0;q<queries;++q) {
+        // A parent owner may be far outside a small right child's subgroup.
+        // Use floor-mod, not one addition followed by a signed remainder.
+        const auto diff=static_cast<long long>(parent_owners[q])-child.master;
+        child.owners[q]=int((diff%child.procs+child.procs)%child.procs);
+        // Only child participants need native queries, and only the final
+        // output owner needs the scatter map. Other parent ranks must not
+        // repeat these potentially long index searches for a remote child.
+        if (!child.active && rank!=parent_owners[q]) continue;
+        std::vector<std::size_t> local_rows,local_cols;
+        front->find_upd_indices(I[q],local_rows,child.out_rows[q]);
+        front->find_upd_indices(J[q],local_cols,child.out_cols[q]);
+        for (auto p:child.out_rows[q]) child.rows[q].push_back(I[q][p]);
+        for (auto p:child.out_cols[q]) child.cols[q].push_back(J[q][p]);
+        const auto count=product(child.rows[q].size(),child.cols[q].size());
+        add_count(child_entries,count);
+      }
+      return child;
+    };
+    auto left=prepare(lchild_.get()),right=prepare(rchild_.get());
+    std::size_t transfer_bound=0;
+    // Individual messages have int counts (checked above). The MPI wrapper
+    // uses Isend/Irecv with size_t offsets, so the total only needs to fit
+    // addressable scalar storage rather than a single int displacement.
+    const auto max_elements=std::numeric_limits<std::size_t>::max()/sizeof(scalar_t);
+    for (auto count:destination_counts) {
+      if (count>max_elements-transfer_bound)
+        throw std::overflow_error("Compact extraction payload exceeds addressable storage");
+      transfer_bound+=count;
+    }
+    auto extract=[&](Child& child,const char* label) {
+      if (!child.front) return;
+      HODLR_STAGE_SCOPE_IF(p_child,this->dim_sep()>=1000,label,this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      child.owned=child.front->get_submatrix_2d_owned
+        (child.rows,child.cols,child.owners,child.sequential,child.active);
+      if (!child.owned && child.active)
+        child.front->get_submatrix_2d(child.rows,child.cols,child.distributed,child.sequential);
+    };
+    extract(left,"front.extract.compact.child_left");
+    extract(right,"front.extract.compact.child_right");
+    std::vector<std::vector<scalar_t>> sbuf(procs);
+    auto append=[&](int owner,const scalar_t* data,int rows,int cols,int ld) {
+      if (!rows || !cols) return;
+      auto& out=sbuf[owner];
+      for (int c=0;c<cols;++c)
+        out.insert(out.end(),data+std::size_t(c)*ld,data+std::size_t(c)*ld+rows);
+    };
+    auto pack=[&](const Child& child,std::size_t q) {
+      if (!child.front || !child.active) return;
+      HODLR_STAGE_SCOPE_IF(p_pack,this->dim_sep()>=1000,child.owned?"front.extract.compact.pack_owned":"front.extract.compact.pack_grid",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      if (child.owned) {
+        if (rank!=child.master+child.owners[q]) return;
+        const auto& data=child.sequential[q];
+        assert(data.rows()==child.rows[q].size() && data.cols()==child.cols[q].size());
+        append(parent_owners[q],data.data(),data.rows(),data.cols(),data.ld());
+      } else {
+        const auto& data=child.distributed[q];
+        if (data.active())
+          append(parent_owners[q],data.data(),data.lrows(),data.lcols(),data.ld());
+      }
+    };
+    // Match the legacy per-query sparse/left/right stream order. Each source
+    // rank appends only compact child values, never a zero-filled full query.
+    for (std::size_t q=0;q<queries;++q) {
+      if (!skip_sparse) {
+        HODLR_STAGE_SCOPE_IF(p_sparse,this->dim_sep()>=1000,"front.extract.compact.sparse",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+        DistM_t tmp(grid(),I[q].size(),J[q].size());
+        A.extract_separator_2d(this->sep_end_,I[q],J[q],tmp);
+        if (tmp.active())
+          append(parent_owners[q],tmp.data(),tmp.lrows(),tmp.lcols(),tmp.ld());
+      }
+      pack(left,q); pack(right,q);
+    }
+    std::vector<scalar_t,NoInit<scalar_t>> rbuf;
+    std::vector<scalar_t*> pbuf;
+    {
+      HODLR_STAGE_SCOPE_IF(p_exchange,this->dim_sep()>=1000,"front.extract.compact.exchange",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),([&](){std::size_t n=0;for(const auto& v:sbuf)n+=v.size()*sizeof(scalar_t);return n;})());
+      Comm().all_to_all_v(sbuf,rbuf,pbuf);
+    }
+    auto add=[&](const Child& child,std::size_t q) {
+      if (!child.front) return;
+      const auto& rows=child.out_rows[q]; const auto& cols=child.out_cols[q];
+      const auto* g=child.front->grid();
+      const int pr=g?g->nprows():1,pc=g?g->npcols():1;
+      for (std::size_t c=0;c<cols.size();++c)
+        for (std::size_t r=0;r<rows.size();++r) {
+          const int source=child.owned?child.master+child.owners[q]:
+            child.master+int((r/DistM_t::default_MB)%pr+((c/DistM_t::default_NB)%pc)*pr);
+          B[q](rows[r],cols[c])+=*pbuf[source]++;
+        }
+    };
+    {
+      HODLR_STAGE_SCOPE_IF(p_unpack,this->dim_sep()>=1000,"front.extract.compact.unpack",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t q=0;q<queries;++q) {
+        if (rank!=parent_owners[q]) continue;
+        assert(B[q].active() && B[q].nprows()==1 && B[q].npcols()==1);
+        B[q].zero();
+        if (!skip_sparse) subgrid_add_from_buffers(grid(),0,B[q],pbuf);
+        add(left,q); add(right,q);
+      }
+    }
+  }
+
+  template<typename scalar_t,typename integer_t> void
   FrontMPI<scalar_t,integer_t>::get_submatrix_2d
   (const VecVec_t& I, const VecVec_t& J,
    std::vector<DistM_t>& Bdist, std::vector<DenseM_t>&) const {
@@ -191,6 +349,7 @@ namespace strumpack {
 
   template<typename scalar_t,typename integer_t> int
   FrontMPI<scalar_t,integer_t>::master(const F_t* ch) const {
+    if (!ch) return 0;
     return (ch == lchild_.get()) ? 0 : P() - ch->P();
   }
 

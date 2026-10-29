@@ -27,6 +27,7 @@
  *
  */
 #include <algorithm>
+#include <limits>
 
 #include "misc/Tools.hpp"
 #include "misc/TaskTimer.hpp"
@@ -858,6 +859,84 @@ namespace strumpack {
           for (int i=0; i<n; i++)
             Bdata[i+j*Bld] = *ptr++;
       }
+    }
+
+    template<typename scalar_t> void
+    HODLRMatrix<scalar_t>::extract_elements_owned
+    (const VecVec_t& I, const VecVec_t& J, const std::vector<int>& owners,
+     std::vector<DenseM_t>& B) {
+      if (I.size()!=J.size() || I.size()!=owners.size())
+        throw std::invalid_argument("Owned HODLR extraction requires matching query and owner lists");
+      if (I.empty()) { B.clear(); return; }
+      if (!c_ || c_->is_null())
+        throw std::invalid_argument("Owned HODLR extraction requires a matrix communicator");
+      const auto limit=std::size_t(std::numeric_limits<int>::max());
+      const auto count=I.size();
+      const auto processes=c_->size();
+      if (count>limit/3 || std::size_t(processes)>limit/3)
+        throw std::overflow_error("Owned HODLR extraction metadata exceeds the native integer range");
+      std::size_t total_rows=0,total_cols=0,total_entries=0;
+      std::vector<std::size_t> owned_entries(processes,0);
+      for (std::size_t q=0; q<count; ++q) {
+        if (owners[q]<0 || owners[q]>=processes)
+          throw std::invalid_argument("Owned HODLR extraction owner is outside the matrix communicator");
+        const auto m=I[q].size(),n=J[q].size();
+        if (m>limit-total_rows || n>limit-total_cols || (m && n>limit/m))
+          throw std::overflow_error("Owned HODLR extraction dimensions exceed the native integer range");
+        total_rows+=m; total_cols+=n;
+        const auto entries=m*n;
+        // The native 1x1 route packs an intersection header, row/column
+        // positions and values into integer-count messages. Six scalar
+        // slots per requested entry conservatively cover even 1x1 tiles.
+        // Check all owners on every rank, not just this rank's output.
+        if (entries>limit/6-total_entries)
+          throw std::overflow_error("Owned HODLR extraction messages exceed the native integer range");
+        total_entries+=entries;
+        owned_entries[owners[q]]+=entries;
+        for (auto i:I[q])
+          if (i>=std::size_t(rows_))
+            throw std::invalid_argument("Owned HODLR extraction row index is outside the matrix");
+        for (auto j:J[q])
+          if (j>=std::size_t(cols_))
+            throw std::invalid_argument("Owned HODLR extraction column index is outside the matrix");
+      }
+      if (total_rows>limit-total_cols || total_rows+total_cols>limit-3*count)
+        throw std::overflow_error("Owned HODLR extraction metadata exceeds the native integer range");
+      const auto rank=c_->rank();
+      const int intersections=static_cast<int>(count);
+      std::unique_ptr<int[]> work(new int[total_rows+total_cols+3*count]);
+      auto* allrows=work.get();
+      auto* allcols=allrows+total_rows;
+      auto* rowidx=allcols+total_cols;
+      auto* colidx=rowidx+count;
+      auto* pgidx=colidx+count;
+      std::vector<int> pmaps(3*processes,1);
+      for (int p=0; p<processes; ++p) pmaps[2*processes+p]=p;
+      for (std::size_t q=0,r=0,c=0; q<count; ++q) {
+        rowidx[q]=static_cast<int>(I[q].size());
+        colidx[q]=static_cast<int>(J[q].size());
+        pgidx[q]=owners[q];
+        for (auto i:I[q]) allrows[r++]=static_cast<int>(i)+1;
+        for (auto j:J[q]) allcols[c++]=static_cast<int>(j)+1;
+      }
+      B.clear(); B.resize(count);
+      for (std::size_t q=0; q<count; ++q)
+        if (owners[q]==rank) B[q]=DenseM_t(I[q].size(),J[q].size());
+      // A nonnull dummy buffer also supports ranks with zero local output.
+      std::unique_ptr<scalar_t[]> values
+        (new scalar_t[std::max(std::size_t(1),owned_entries[rank])]);
+      HODLR_extract_elements<scalar_t>
+        (ho_bf_,options_,msh_,stats_,ptree_,intersections,
+         static_cast<int>(total_rows),static_cast<int>(total_cols),
+         static_cast<std::int64_t>(owned_entries[rank]),allrows,allcols,
+         values.get(),rowidx,colidx,pgidx,processes,pmaps.data());
+      auto* data=values.get();
+      for (std::size_t q=0; q<count; ++q)
+        if (owners[q]==rank) {
+          const auto entries=I[q].size()*J[q].size();
+          if (entries) std::copy_n(data,entries,B[q].data());
+          data+=entries;
+        }
     }
 
     template<typename scalar_t> void HODLRMatrix<scalar_t>::extract_elements

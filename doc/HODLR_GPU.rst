@@ -122,3 +122,8 @@ An opt-in GPU Schur update for large exact local fronts is documented in
 HODLR_GPU_DENSE_SCHUR.rst. It keeps CPU pivoting/LU/TRSM and host child
 contributions, and replaces only the final Schur GEMM with bounded cuBLAS
 panels. STRUMPACK's separate dense CUDA backend remains disabled.
+
+The further opt-in ``--hodlr_compact_extraction 1`` route removes expanded
+child query matrices and their intermediate exchange, using the existing
+native owner-map ABI. HODLR_GPU_COMPACT_EXTRACTION.rst records its mapping
+contract, regression tests and matched 200-cubed performance comparison.

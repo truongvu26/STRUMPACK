@@ -361,6 +361,10 @@ namespace strumpack {
         gpu_dense_schur_=enable;
       }
       bool gpu_dense_schur() const { return gpu_dense_schur_; }
+      // Route compact child intersections to owner-local extraction panels.
+      // This uses the existing CPU/native extraction ABI, also in GPU mode.
+      void set_compact_extraction(bool enable) { compact_extraction_=enable; }
+      bool compact_extraction() const { return compact_extraction_; }
       void set_gpu_panel_max_bytes(std::size_t bytes) {
         if (bytes<16 || bytes>std::size_t(std::numeric_limits<int>::max()))
           throw std::invalid_argument("GPU panel budget must be 16..INT_MAX bytes");
@@ -408,6 +412,7 @@ namespace strumpack {
       bool gpu_rectangular_ = false;
       bool gpu_host_panels_=false;
       bool gpu_dense_schur_=false;
+      bool compact_extraction_=false;
       std::size_t gpu_panel_max_bytes_=64u<<20;
       std::size_t gpu_front_max_bytes_ = 0;
 

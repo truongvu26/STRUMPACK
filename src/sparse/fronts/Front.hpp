@@ -431,6 +431,16 @@ namespace strumpack {
                      std::vector<DistM_t>& Bdist,
                      std::vector<DenseM_t>& Bseq) const;
 
+    // Queries already contain only global indices in this child's update set.
+    // Called on parent ranks, including inactive child skeletons. True means
+    // Bseq is stored only on each designated child-local owner; inactive ranks
+    // must not enter child collectives. False requests the legacy grid result.
+    virtual bool get_submatrix_2d_owned
+    (const std::vector<std::vector<std::size_t>>& I,
+     const std::vector<std::vector<std::size_t>>& J,
+     const std::vector<int>& child_local_owners,
+     std::vector<DenseM_t>& Bseq, bool active) const;
+
     virtual BLACSGrid* grid() { return nullptr; }
     virtual const BLACSGrid* grid() const { return nullptr; }
 #endif

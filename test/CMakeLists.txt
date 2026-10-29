@@ -31,6 +31,13 @@ if(STRUMPACK_USE_MPI)
   set_tests_properties(PropMap_extract_mpi PROPERTIES
     ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
   if(STRUMPACK_USE_BPACK)
+    add_executable(test_HODLR_compact_extraction_mpi test_HODLR_compact_extraction_mpi.cpp)
+    target_link_libraries(test_HODLR_compact_extraction_mpi PRIVATE strumpack)
+    add_test(NAME HODLR_compact_extraction_mpi
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
+      ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_HODLR_compact_extraction_mpi> ${MPIEXEC_POSTFLAGS})
+    set_tests_properties(HODLR_compact_extraction_mpi PROPERTIES
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
     add_executable(test_HODLR_gpu_interface_mpi test_HODLR_gpu_interface_mpi.cpp)
     target_link_libraries(test_HODLR_gpu_interface_mpi strumpack)
     add_test(NAME HODLR_gpu_interface_cpu

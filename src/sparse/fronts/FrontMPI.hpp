@@ -85,6 +85,12 @@ namespace strumpack {
 
     void extract_2d(const SpMat_t& A, const VecVec_t& I, const VecVec_t& J,
                     std::vector<DistMW_t>& B, bool skip_sparse=false) const;
+    // Final destinations are single-process panels, with trusted owners in
+    // this parent communicator. Child queries stay compact until that owner.
+    void extract_2d_compact
+    (const SpMat_t& A, const VecVec_t& I, const VecVec_t& J,
+     std::vector<DistMW_t>& B, const std::vector<int>& parent_owners,
+     bool skip_sparse=false) const;
     void get_submatrix_2d(const VecVec_t& I, const VecVec_t& J,
                           std::vector<DistM_t>& Bdist,
                           std::vector<DenseM_t>& Bseq) const override;

@@ -170,6 +170,41 @@ namespace strumpack {
         (S, pbuf.data()+this->master(rchild_), this);
   }
 
+  template<typename scalar_t,typename integer_t> bool
+  FrontHODLRMPI<scalar_t,integer_t>::get_submatrix_2d_owned
+  (const VecVec_t& I, const VecVec_t& J, const std::vector<int>& owners,
+   std::vector<DenseM_t>& B, bool active) const {
+    // Inactive child skeletons report the same result layout without entering
+    // any child collective. Only members selected by the parent participate.
+    if (!active) return true;
+    B.clear(); B.resize(I.size());
+    if (!dim_upd()) return true;
+    HODLR_STAGE_NATIVE_EXTRACTION_IF(p_stats,dim_sep()>=1000&&!I.empty(),"child.F22",*F22_,sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),I.size());
+    HODLR_STAGE_SCOPE_IF(p_child,dim_sep()>=1000,"front.child.extract.owned",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+    if (I.size()!=J.size() || I.size()!=owners.size())
+      throw std::invalid_argument("Compact child extraction query counts differ");
+    VecVec_t localI(I.size()),localJ(J.size());
+    {
+      HODLR_STAGE_SCOPE_IF(p_map,dim_sep()>=1000,"front.child.map",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t b=0;b<I.size();++b) {
+        std::vector<std::size_t> outI,outJ;
+        this->find_upd_indices(I[b],localI[b],outI);
+        this->find_upd_indices(J[b],localJ[b],outJ);
+        if (localI[b].size()!=I[b].size() || localJ[b].size()!=J[b].size())
+          throw std::invalid_argument("Compact child queries must lie in the child update set");
+#if defined(STRUMPACK_PERMUTE_CB)
+        if (CB_perm_.size()==std::size_t(dim_upd())) {
+          for (auto& i:localI[b]) i=CB_perm_[i];
+          for (auto& j:localJ[b]) j=CB_perm_[j];
+        }
+#endif
+      }
+    }
+    HODLR_STAGE_SCOPE_IF(p_native,dim_sep()>=1000,"front.child.native_extract.owned",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+    F22_->extract_elements_owned(localI,localJ,owners,B);
+    return true;
+  }
+
   template<typename scalar_t,typename integer_t> void
   FrontHODLRMPI<scalar_t,integer_t>::extract_CB_sub_matrix_2d
   (const VecVec_t& I, const VecVec_t& J, std::vector<DistM_t>& B) const {
@@ -315,6 +350,31 @@ namespace strumpack {
   (const SpMat_t& A, const Opts_t& opts) {
     HODLR_STAGE_SCOPE(front_profile,"front.compress",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
     bool prepared11=false,prepared12=false,prepared21=false,prepared22=false;
+    auto extract=[&](const VecVec_t& I,const VecVec_t& J,
+                     std::vector<DistMW_t>& B,HODLR::ExtractionMeta& e,
+                     bool skip_sparse=false) {
+      if (opts.HODLR_options().compact_extraction()) {
+        if (e.Ninter<0 || std::size_t(e.Ninter)!=I.size() || e.Npmap<0 ||
+            (!I.empty() && (!e.pgids || !e.pmaps)))
+          throw std::invalid_argument("Invalid compact extraction owner metadata");
+        std::vector<int> owners(I.size());
+        bool owner_local=true;
+        for (std::size_t b=0;b<I.size();++b) {
+          const int map=e.pgids[b];
+          if (map<0 || map>=e.Npmap)
+            throw std::invalid_argument("Compact extraction process map is out of range");
+          owner_local=owner_local && e.pmaps[map]==1 && e.pmaps[e.Npmap+map]==1;
+          owners[b]=e.pmaps[2*std::size_t(e.Npmap)+map];
+          if (owners[b]<0 || owners[b]>=Comm().size())
+            throw std::invalid_argument("Compact extraction owner is outside the front communicator");
+        }
+        if (owner_local) {
+          this->extract_2d_compact(A,I,J,B,owners,skip_sparse);
+          return;
+        }
+      }
+      this->extract_2d(A,I,J,B,skip_sparse);
+    };
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
     const auto cap=opts.HODLR_options().gpu_front_max_bytes();
     auto eligible=[&](std::size_t m,std::size_t n,const char* block) {
@@ -380,10 +440,10 @@ namespace strumpack {
     F11_.set_sampling_parameter(1.2);
     auto extract_F11 =
       [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,
-          HODLR::ExtractionMeta&) {
+          HODLR::ExtractionMeta& e) {
         for (auto& Ik : I) for (auto& i : Ik) i += sep_begin_;
         for (auto& Jk : J) for (auto& j : Jk) j += sep_begin_;
-        this->extract_2d(A, I, J, B);
+        extract(I,J,B,e);
       };
     { HODLR_STAGE_SCOPE(p_f11,prepared11?"F11.construct.gpu":(F11_.gpu_panel_construction()?"F11.construct.gpu_panels":"F11.construct.host"),sep_begin_,dim_sep(),dim_sep(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::HSS_COMPRESS, 0, t_f11_compress);
@@ -397,25 +457,25 @@ namespace strumpack {
       // F21_.set_sampling_parameter(2.0);
       auto extract_F12 =
         [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,
-            HODLR::ExtractionMeta&) {
+            HODLR::ExtractionMeta& e) {
           for (auto& Ik : I) for (auto& i : Ik) i += sep_begin_;
 #if defined(STRUMPACK_PERMUTE_CB)
           for (auto& Jk : J) for (auto& j : Jk) j = this->upd_[CB_iperm_[j]];
 #else
           for (auto& Jk : J) for (auto& j : Jk) j = this->upd_[j];
 #endif
-          this->extract_2d(A, I, J, B);
+          extract(I,J,B,e);
         };
       auto extract_F21 =
         [&](VecVec_t& I, VecVec_t& J, std::vector<DistMW_t>& B,
-            HODLR::ExtractionMeta&) {
+            HODLR::ExtractionMeta& e) {
 #if defined(STRUMPACK_PERMUTE_CB)
           for (auto& Ik : I) for (auto& i : Ik) i = this->upd_[CB_iperm_[i]];
 #else
           for (auto& Ik : I) for (auto& i : Ik) i = this->upd_[i];
 #endif
           for (auto& Jk : J) for (auto& j : Jk) j += sep_begin_;
-          this->extract_2d(A, I, J, B);
+          extract(I,J,B,e);
         };
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
       if (F12_.gpu_backend() && eligible(dim_sep(),dim_upd(),"F12"))
@@ -490,7 +550,7 @@ namespace strumpack {
           for (auto& Ik : I) for (auto& i : Ik) i = this->upd_[i];
           for (auto& Jk : J) for (auto& j : Jk) j = this->upd_[j];
 #endif
-          this->extract_2d(A, I, J, B, true);
+          extract(I,J,B,e,true);
           TIMER_TIME(TaskType::HSS_EXTRACT_SCHUR, 3, t_ex_schur);
           HODLR_STAGE_NATIVE_EXTRACTION_IF(p_schur_stats,dim_sep()>=1000&&!I.empty(),"current.Schur",Schur,sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),I.size());
           HODLR_STAGE_SCOPE_IF(p_current_schur,dim_sep()>=1000,"Schur.extract.current",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
