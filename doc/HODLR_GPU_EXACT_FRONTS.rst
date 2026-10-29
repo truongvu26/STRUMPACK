@@ -225,6 +225,9 @@ single-trial tuning screens are kept separate from three-trial confirmations.
 Jobs 60481820, 60481667 and 60481669 supply the 100-, 150- and 200-cubed
 confirmation cohorts respectively. All 18 trials pass the same final
 accuracy limits (relative error below 1e-8 and scaled residual below 1e-6).
+The driver's reported solution error is a rank-zero-local Frobenius ratio;
+the componentwise scaled residual is a global maximum. Refinement uses a
+global Frobenius residual over all three RHS.
 No trials are discarded. Each column has its own median: the paired-total
 column takes the sum within each trial before taking its median, so it need
 not equal the sum of the two phase medians.
@@ -285,6 +288,11 @@ use the corresponding 4/4/8 GPU counts; its GPU model, command and timing
 boundaries were unavailable. A smaller factor number is a count-matched
 comparison with the reported number, not a hardware-controlled reproduction.
 The controlled exact-backend comparisons use the same executable and controls.
+
+The subsequent three-trial rerun with ``--hodlr_rel_tol 1e-3`` and
+``--sp_rel_tol 1e-6`` is recorded separately in
+``HODLR_GPU_EXACT_RELAXED_SOLVE.rst`` and its JSON, including the achieved
+accuracy and the requested solver stopping criterion.
 
 Execution counters and tests
 ----------------------------
