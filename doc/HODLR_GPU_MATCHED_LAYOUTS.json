@@ -1,0 +1,2630 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "status_scope": "24 required baseline trials; conditional controls are classified separately",
+  "baseline": {
+    "status": "PASS",
+    "source_head": "51ed30e6f47e411cfb8cd1760a9d0a2b07ad3488",
+    "snapshot": "profile_results/compact_extract_snapshot_v1",
+    "hashes": {
+      "executable_sha256": "ec93fbe4da78b7ffa6da1b7dd16c000cc3f8d8f03cc9ded9de984b6d74c9be81",
+      "native_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+      "blas_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+      "ieee_openblas_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+      "original_ofast_blas_sha256": "25181e6b2e566ee1e0ea4e0d0b6981b606e9527cc225289bf4e737c9cf25c8e3"
+    },
+    "sources": [
+      "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/tuning_summary.json",
+      "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/tuning_summary.json",
+      "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/tuning_summary.json",
+      "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/tuning_summary.json"
+    ],
+    "rows": [
+      {
+        "layout": "100_4gpu",
+        "grid": 100,
+        "ranks": 4,
+        "gpus": 4,
+        "nodes": 1,
+        "compression_tolerance": 0.01,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 14.2,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "100_4gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 13.6374,
+            "solve_seconds": 4.28526,
+            "factor_plus_solve_seconds": 17.92266,
+            "end_to_end_seconds": 37.17,
+            "relative_error": 1.00807e-10,
+            "scaled_residual": 3.83221e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          },
+          {
+            "label": "100_4gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 11.9568,
+            "solve_seconds": 4.31947,
+            "factor_plus_solve_seconds": 16.27627,
+            "end_to_end_seconds": 22.93,
+            "relative_error": 1.04243e-10,
+            "scaled_residual": 4.03695e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          },
+          {
+            "label": "100_4gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 12.1706,
+            "solve_seconds": 4.4341,
+            "factor_plus_solve_seconds": 16.6047,
+            "end_to_end_seconds": 22.6,
+            "relative_error": 9.82936e-11,
+            "scaled_residual": 3.7707e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478697",
+        "cases": [
+          {
+            "label": "100_4gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 13.6374,
+            "solve_seconds": 4.28526,
+            "factor_plus_solve_seconds": 17.92266,
+            "end_to_end_seconds": 37.17,
+            "relative_error": 1.00807e-10,
+            "scaled_residual": 3.83221e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "100_4gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 11.9568,
+            "solve_seconds": 4.31947,
+            "factor_plus_solve_seconds": 16.27627,
+            "end_to_end_seconds": 22.93,
+            "relative_error": 1.04243e-10,
+            "scaled_residual": 4.03695e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "100_4gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 12.1706,
+            "solve_seconds": 4.4341,
+            "factor_plus_solve_seconds": 16.6047,
+            "end_to_end_seconds": 22.6,
+            "relative_error": 9.82936e-11,
+            "scaled_residual": 3.7707e-11,
+            "refinement_iterations": 10.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 512,
+          "tol": 0.01,
+          "min_sep": 3500,
+          "min_front": 100000,
+          "lr_leaf": 5,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 12.1706,
+          "min": 11.9568,
+          "max": 13.6374
+        },
+        "solve_seconds": {
+          "median": 4.31947,
+          "min": 4.28526,
+          "max": 4.4341
+        },
+        "factor_plus_solve_seconds": {
+          "median": 16.6047,
+          "min": 16.27627,
+          "max": 17.92266
+        },
+        "end_to_end_seconds": {
+          "median": 22.93,
+          "min": 22.6,
+          "max": 37.17
+        },
+        "max_relative_error": 1.04243e-10,
+        "max_scaled_residual": 4.03695e-11,
+        "verified_actual_gpu_count": 4,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": true,
+          "reduction_percent": 14.29154929577464
+        }
+      },
+      {
+        "layout": "100_4gpu",
+        "grid": 100,
+        "ranks": 4,
+        "gpus": 4,
+        "nodes": 1,
+        "compression_tolerance": 1e-05,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 14.2,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "100_4gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 14.2654,
+            "solve_seconds": 0.969355,
+            "factor_plus_solve_seconds": 15.234755,
+            "end_to_end_seconds": 21.59,
+            "relative_error": 1.7817e-11,
+            "scaled_residual": 3.98418e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          },
+          {
+            "label": "100_4gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 14.1099,
+            "solve_seconds": 0.939218,
+            "factor_plus_solve_seconds": 15.049118,
+            "end_to_end_seconds": 21.73,
+            "relative_error": 1.79305e-11,
+            "scaled_residual": 3.99031e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          },
+          {
+            "label": "100_4gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 14.0982,
+            "solve_seconds": 0.954511,
+            "factor_plus_solve_seconds": 15.052711,
+            "end_to_end_seconds": 20.25,
+            "relative_error": 1.78762e-11,
+            "scaled_residual": 4.01379e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478697"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478697",
+        "cases": [
+          {
+            "label": "100_4gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 14.2654,
+            "solve_seconds": 0.969355,
+            "factor_plus_solve_seconds": 15.234755,
+            "end_to_end_seconds": 21.59,
+            "relative_error": 1.7817e-11,
+            "scaled_residual": 3.98418e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "100_4gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 14.1099,
+            "solve_seconds": 0.939218,
+            "factor_plus_solve_seconds": 15.049118,
+            "end_to_end_seconds": 21.73,
+            "relative_error": 1.79305e-11,
+            "scaled_residual": 3.99031e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "100_4gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 14.0982,
+            "solve_seconds": 0.954511,
+            "factor_plus_solve_seconds": 15.052711,
+            "end_to_end_seconds": 20.25,
+            "relative_error": 1.78762e-11,
+            "scaled_residual": 4.01379e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 3.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478697-screenshot_ieee_100_4gpu_all/100_4gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 512,
+          "tol": 1e-05,
+          "min_sep": 3500,
+          "min_front": 100000,
+          "lr_leaf": 5,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 14.1099,
+          "min": 14.0982,
+          "max": 14.2654
+        },
+        "solve_seconds": {
+          "median": 0.954511,
+          "min": 0.939218,
+          "max": 0.969355
+        },
+        "factor_plus_solve_seconds": {
+          "median": 15.052711,
+          "min": 15.049118,
+          "max": 15.234755
+        },
+        "end_to_end_seconds": {
+          "median": 21.59,
+          "min": 20.25,
+          "max": 21.73
+        },
+        "max_relative_error": 1.79305e-11,
+        "max_scaled_residual": 4.01379e-11,
+        "verified_actual_gpu_count": 4,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": true,
+          "reduction_percent": 0.6345070422535185
+        }
+      },
+      {
+        "layout": "150_4gpu",
+        "grid": 150,
+        "ranks": 4,
+        "gpus": 4,
+        "nodes": 1,
+        "compression_tolerance": 0.01,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 67.0,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "150_4gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 67.4276,
+            "solve_seconds": 25.0008,
+            "factor_plus_solve_seconds": 92.4284,
+            "end_to_end_seconds": 104.09,
+            "relative_error": 2.72393e-10,
+            "scaled_residual": 3.40503e-10,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          },
+          {
+            "label": "150_4gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 65.6169,
+            "solve_seconds": 27.5005,
+            "factor_plus_solve_seconds": 93.1174,
+            "end_to_end_seconds": 102.97,
+            "relative_error": 3.0279e-10,
+            "scaled_residual": 1.61991e-10,
+            "refinement_iterations": 17.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          },
+          {
+            "label": "150_4gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 64.8045,
+            "solve_seconds": 26.4292,
+            "factor_plus_solve_seconds": 91.2337,
+            "end_to_end_seconds": 100.36,
+            "relative_error": 3.06209e-10,
+            "scaled_residual": 2.29939e-10,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478521",
+        "cases": [
+          {
+            "label": "150_4gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 67.4276,
+            "solve_seconds": 25.0008,
+            "factor_plus_solve_seconds": 92.4284,
+            "end_to_end_seconds": 104.09,
+            "relative_error": 2.72393e-10,
+            "scaled_residual": 3.40503e-10,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_4gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 65.6169,
+            "solve_seconds": 27.5005,
+            "factor_plus_solve_seconds": 93.1174,
+            "end_to_end_seconds": 102.97,
+            "relative_error": 3.0279e-10,
+            "scaled_residual": 1.61991e-10,
+            "refinement_iterations": 17.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_4gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 64.8045,
+            "solve_seconds": 26.4292,
+            "factor_plus_solve_seconds": 91.2337,
+            "end_to_end_seconds": 100.36,
+            "relative_error": 3.06209e-10,
+            "scaled_residual": 2.29939e-10,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 0.01,
+          "min_sep": 20000,
+          "min_front": 26000,
+          "lr_leaf": 4,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 65.6169,
+          "min": 64.8045,
+          "max": 67.4276
+        },
+        "solve_seconds": {
+          "median": 26.4292,
+          "min": 25.0008,
+          "max": 27.5005
+        },
+        "factor_plus_solve_seconds": {
+          "median": 92.4284,
+          "min": 91.2337,
+          "max": 93.1174
+        },
+        "end_to_end_seconds": {
+          "median": 102.97,
+          "min": 100.36,
+          "max": 104.09
+        },
+        "max_relative_error": 3.06209e-10,
+        "max_scaled_residual": 3.40503e-10,
+        "verified_actual_gpu_count": 4,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": true,
+          "reduction_percent": 2.0643283582089538
+        }
+      },
+      {
+        "layout": "150_4gpu",
+        "grid": 150,
+        "ranks": 4,
+        "gpus": 4,
+        "nodes": 1,
+        "compression_tolerance": 1e-05,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 67.0,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "150_4gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 82.6674,
+            "solve_seconds": 3.44724,
+            "factor_plus_solve_seconds": 86.11464,
+            "end_to_end_seconds": 95.72999999999999,
+            "relative_error": 1.57396e-11,
+            "scaled_residual": 4.16017e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          },
+          {
+            "label": "150_4gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 82.5238,
+            "solve_seconds": 3.59324,
+            "factor_plus_solve_seconds": 86.11703999999999,
+            "end_to_end_seconds": 94.36,
+            "relative_error": 1.81236e-11,
+            "scaled_residual": 4.35887e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          },
+          {
+            "label": "150_4gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 82.333,
+            "solve_seconds": 3.60448,
+            "factor_plus_solve_seconds": 85.93748,
+            "end_to_end_seconds": 94.22,
+            "relative_error": 1.70406e-11,
+            "scaled_residual": 4.29698e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478521"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478521",
+        "cases": [
+          {
+            "label": "150_4gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 82.6674,
+            "solve_seconds": 3.44724,
+            "factor_plus_solve_seconds": 86.11464,
+            "end_to_end_seconds": 95.72999999999999,
+            "relative_error": 1.57396e-11,
+            "scaled_residual": 4.16017e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_4gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 82.5238,
+            "solve_seconds": 3.59324,
+            "factor_plus_solve_seconds": 86.11703999999999,
+            "end_to_end_seconds": 94.36,
+            "relative_error": 1.81236e-11,
+            "scaled_residual": 4.35887e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_4gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 82.333,
+            "solve_seconds": 3.60448,
+            "factor_plus_solve_seconds": 85.93748,
+            "end_to_end_seconds": 94.22,
+            "relative_error": 1.70406e-11,
+            "scaled_residual": 4.29698e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478521-screenshot_ieee_150_4gpu_all/150_4gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 1e-05,
+          "min_sep": 20000,
+          "min_front": 26000,
+          "lr_leaf": 4,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 82.5238,
+          "min": 82.333,
+          "max": 82.6674
+        },
+        "solve_seconds": {
+          "median": 3.59324,
+          "min": 3.44724,
+          "max": 3.60448
+        },
+        "factor_plus_solve_seconds": {
+          "median": 86.11464,
+          "min": 85.93748,
+          "max": 86.11703999999999
+        },
+        "end_to_end_seconds": {
+          "median": 94.36,
+          "min": 94.22,
+          "max": 95.72999999999999
+        },
+        "max_relative_error": 1.81236e-11,
+        "max_scaled_residual": 4.35887e-11,
+        "verified_actual_gpu_count": 4,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": false,
+          "reduction_percent": -23.169850746268647
+        }
+      },
+      {
+        "layout": "200_8gpu",
+        "grid": 200,
+        "ranks": 8,
+        "gpus": 8,
+        "nodes": 2,
+        "compression_tolerance": 0.01,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 119.0,
+        "screenshot_gpu_count": 8,
+        "all_observed_cases": [
+          {
+            "label": "200_8gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 132.017,
+            "solve_seconds": 76.5771,
+            "factor_plus_solve_seconds": 208.5941,
+            "end_to_end_seconds": 222.05,
+            "relative_error": 2.33948e-10,
+            "scaled_residual": 8.98422e-10,
+            "refinement_iterations": 38.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          },
+          {
+            "label": "200_8gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 134.874,
+            "solve_seconds": 78.0244,
+            "factor_plus_solve_seconds": 212.89839999999998,
+            "end_to_end_seconds": 223.73,
+            "relative_error": 2.67991e-10,
+            "scaled_residual": 4.82948e-10,
+            "refinement_iterations": 39.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          },
+          {
+            "label": "200_8gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 133.359,
+            "solve_seconds": 75.3913,
+            "factor_plus_solve_seconds": 208.7503,
+            "end_to_end_seconds": 217.92000000000002,
+            "relative_error": 2.24029e-10,
+            "scaled_residual": 8.68639e-10,
+            "refinement_iterations": 38.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478404",
+        "cases": [
+          {
+            "label": "200_8gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 132.017,
+            "solve_seconds": 76.5771,
+            "factor_plus_solve_seconds": 208.5941,
+            "end_to_end_seconds": 222.05,
+            "relative_error": 2.33948e-10,
+            "scaled_residual": 8.98422e-10,
+            "refinement_iterations": 38.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "200_8gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 134.874,
+            "solve_seconds": 78.0244,
+            "factor_plus_solve_seconds": 212.89839999999998,
+            "end_to_end_seconds": 223.73,
+            "relative_error": 2.67991e-10,
+            "scaled_residual": 4.82948e-10,
+            "refinement_iterations": 39.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "200_8gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 133.359,
+            "solve_seconds": 75.3913,
+            "factor_plus_solve_seconds": 208.7503,
+            "end_to_end_seconds": 217.92000000000002,
+            "relative_error": 2.24029e-10,
+            "scaled_residual": 8.68639e-10,
+            "refinement_iterations": 38.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 0.01,
+          "min_sep": 8000,
+          "min_front": 100000,
+          "lr_leaf": 5,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 133.359,
+          "min": 132.017,
+          "max": 134.874
+        },
+        "solve_seconds": {
+          "median": 76.5771,
+          "min": 75.3913,
+          "max": 78.0244
+        },
+        "factor_plus_solve_seconds": {
+          "median": 208.7503,
+          "min": 208.5941,
+          "max": 212.89839999999998
+        },
+        "end_to_end_seconds": {
+          "median": 222.05,
+          "min": 217.92000000000002,
+          "max": 223.73
+        },
+        "max_relative_error": 2.67991e-10,
+        "max_scaled_residual": 8.98422e-10,
+        "verified_actual_gpu_count": 8,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": false,
+          "reduction_percent": -12.066386554621857
+        }
+      },
+      {
+        "layout": "200_8gpu",
+        "grid": 200,
+        "ranks": 8,
+        "gpus": 8,
+        "nodes": 2,
+        "compression_tolerance": 1e-05,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 119.0,
+        "screenshot_gpu_count": 8,
+        "all_observed_cases": [
+          {
+            "label": "200_8gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 210.558,
+            "solve_seconds": 4.02783,
+            "factor_plus_solve_seconds": 214.58583,
+            "end_to_end_seconds": 225.26,
+            "relative_error": 7.57365e-11,
+            "scaled_residual": 8.43781e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          },
+          {
+            "label": "200_8gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 212.666,
+            "solve_seconds": 12.1464,
+            "factor_plus_solve_seconds": 224.8124,
+            "end_to_end_seconds": 234.32,
+            "relative_error": 8.13098e-14,
+            "scaled_residual": 1.5521e-10,
+            "refinement_iterations": 6.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          },
+          {
+            "label": "200_8gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 213.326,
+            "solve_seconds": 11.9564,
+            "factor_plus_solve_seconds": 225.2824,
+            "end_to_end_seconds": 234.42000000000002,
+            "relative_error": 8.31673e-14,
+            "scaled_residual": 1.47671e-10,
+            "refinement_iterations": 6.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478404"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478404",
+        "cases": [
+          {
+            "label": "200_8gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 210.558,
+            "solve_seconds": 4.02783,
+            "factor_plus_solve_seconds": 214.58583,
+            "end_to_end_seconds": 225.26,
+            "relative_error": 7.57365e-11,
+            "scaled_residual": 8.43781e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "200_8gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 212.666,
+            "solve_seconds": 12.1464,
+            "factor_plus_solve_seconds": 224.8124,
+            "end_to_end_seconds": 234.32,
+            "relative_error": 8.13098e-14,
+            "scaled_residual": 1.5521e-10,
+            "refinement_iterations": 6.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "200_8gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 213.326,
+            "solve_seconds": 11.9564,
+            "factor_plus_solve_seconds": 225.2824,
+            "end_to_end_seconds": 234.42000000000002,
+            "relative_error": 8.31673e-14,
+            "scaled_residual": 1.47671e-10,
+            "refinement_iterations": 6.0,
+            "hodlr_fronts": 15.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478404-screenshot_ieee_200_8gpu_all/200_8gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 1e-05,
+          "min_sep": 8000,
+          "min_front": 100000,
+          "lr_leaf": 5,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 212.666,
+          "min": 210.558,
+          "max": 213.326
+        },
+        "solve_seconds": {
+          "median": 11.9564,
+          "min": 4.02783,
+          "max": 12.1464
+        },
+        "factor_plus_solve_seconds": {
+          "median": 224.8124,
+          "min": 214.58583,
+          "max": 225.2824
+        },
+        "end_to_end_seconds": {
+          "median": 234.32,
+          "min": 225.26,
+          "max": 234.42000000000002
+        },
+        "max_relative_error": 7.57365e-11,
+        "max_scaled_residual": 1.5521e-10,
+        "verified_actual_gpu_count": 8,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "Reported factor and matching GPU count only; hardware, commands and factor scope in screenshot are unknown.",
+          "lower_measured_factor": false,
+          "reduction_percent": -78.7109243697479
+        }
+      },
+      {
+        "layout": "150_8gpu",
+        "grid": 150,
+        "ranks": 8,
+        "gpus": 8,
+        "nodes": 2,
+        "compression_tolerance": 0.01,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 67.0,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "150_8gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 41.5805,
+            "solve_seconds": 13.2526,
+            "factor_plus_solve_seconds": 54.8331,
+            "end_to_end_seconds": 69.52,
+            "relative_error": 1.87264e-10,
+            "scaled_residual": 6.67266e-11,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          },
+          {
+            "label": "150_8gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 39.9124,
+            "solve_seconds": 14.1383,
+            "factor_plus_solve_seconds": 54.0507,
+            "end_to_end_seconds": 63.07,
+            "relative_error": 1.80116e-10,
+            "scaled_residual": 2.63608e-10,
+            "refinement_iterations": 17.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          },
+          {
+            "label": "150_8gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 40.4901,
+            "solve_seconds": 14.8808,
+            "factor_plus_solve_seconds": 55.3709,
+            "end_to_end_seconds": 68.11,
+            "relative_error": 1.81995e-10,
+            "scaled_residual": 3.30838e-10,
+            "refinement_iterations": 18.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478749",
+        "cases": [
+          {
+            "label": "150_8gpu_0_loose",
+            "status": "PASS",
+            "factor_seconds": 41.5805,
+            "solve_seconds": 13.2526,
+            "factor_plus_solve_seconds": 54.8331,
+            "end_to_end_seconds": 69.52,
+            "relative_error": 1.87264e-10,
+            "scaled_residual": 6.67266e-11,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_0_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_8gpu_3_loose",
+            "status": "PASS",
+            "factor_seconds": 39.9124,
+            "solve_seconds": 14.1383,
+            "factor_plus_solve_seconds": 54.0507,
+            "end_to_end_seconds": 63.07,
+            "relative_error": 1.80116e-10,
+            "scaled_residual": 2.63608e-10,
+            "refinement_iterations": 17.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_3_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_8gpu_4_loose",
+            "status": "PASS",
+            "factor_seconds": 40.4901,
+            "solve_seconds": 14.8808,
+            "factor_plus_solve_seconds": 55.3709,
+            "end_to_end_seconds": 68.11,
+            "relative_error": 1.81995e-10,
+            "scaled_residual": 3.30838e-10,
+            "refinement_iterations": 18.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_4_loose",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 0.01,
+          "min_sep": 20000,
+          "min_front": 26000,
+          "lr_leaf": 4,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 40.4901,
+          "min": 39.9124,
+          "max": 41.5805
+        },
+        "solve_seconds": {
+          "median": 14.1383,
+          "min": 13.2526,
+          "max": 14.8808
+        },
+        "factor_plus_solve_seconds": {
+          "median": 54.8331,
+          "min": 54.0507,
+          "max": 55.3709
+        },
+        "end_to_end_seconds": {
+          "median": 68.11,
+          "min": 63.07,
+          "max": 69.52
+        },
+        "max_relative_error": 1.87264e-10,
+        "max_scaled_residual": 3.30838e-10,
+        "verified_actual_gpu_count": 8,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "No lower-factor claim",
+          "reason": "different GPU count"
+        }
+      },
+      {
+        "layout": "150_8gpu",
+        "grid": 150,
+        "ranks": 8,
+        "gpus": 8,
+        "nodes": 2,
+        "compression_tolerance": 1e-05,
+        "required_trials": 3,
+        "status": "PASS",
+        "screenshot_factor_seconds": 67.0,
+        "screenshot_gpu_count": 4,
+        "all_observed_cases": [
+          {
+            "label": "150_8gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 53.8266,
+            "solve_seconds": 1.6766,
+            "factor_plus_solve_seconds": 55.5032,
+            "end_to_end_seconds": 71.6,
+            "relative_error": 2.39162e-11,
+            "scaled_residual": 8.7954e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          },
+          {
+            "label": "150_8gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 54.1955,
+            "solve_seconds": 1.63292,
+            "factor_plus_solve_seconds": 55.82842,
+            "end_to_end_seconds": 64.11,
+            "relative_error": 2.30864e-11,
+            "scaled_residual": 8.67604e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          },
+          {
+            "label": "150_8gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 53.8268,
+            "solve_seconds": 1.66978,
+            "factor_plus_solve_seconds": 55.49658,
+            "end_to_end_seconds": 64.2,
+            "relative_error": 2.39381e-11,
+            "scaled_residual": 8.52891e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ],
+            "job": "60478749"
+          }
+        ],
+        "failed_case_count": 0,
+        "all_observed_validated_pass_count": 3,
+        "unfinished_or_skipped_case_count": 0,
+        "job": "60478749",
+        "cases": [
+          {
+            "label": "150_8gpu_1_tight",
+            "status": "PASS",
+            "factor_seconds": 53.8266,
+            "solve_seconds": 1.6766,
+            "factor_plus_solve_seconds": 55.5032,
+            "end_to_end_seconds": 71.6,
+            "relative_error": 2.39162e-11,
+            "scaled_residual": 8.7954e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_1_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_8gpu_2_tight",
+            "status": "PASS",
+            "factor_seconds": 54.1955,
+            "solve_seconds": 1.63292,
+            "factor_plus_solve_seconds": 55.82842,
+            "end_to_end_seconds": 64.11,
+            "relative_error": 2.30864e-11,
+            "scaled_residual": 8.67604e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_2_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          },
+          {
+            "label": "150_8gpu_5_tight",
+            "status": "PASS",
+            "factor_seconds": 53.8268,
+            "solve_seconds": 1.66978,
+            "factor_plus_solve_seconds": 55.49658,
+            "end_to_end_seconds": 64.2,
+            "relative_error": 2.39381e-11,
+            "scaled_residual": 8.52891e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "path": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/60478749-screenshot_ieee_150_8gpu_all/150_8gpu_5_tight",
+            "quality_errors": [],
+            "gpu_models": [
+              "NVIDIA A100-SXM4-40GB"
+            ]
+          }
+        ],
+        "pass_trials": 3,
+        "settings": {
+          "gpu_mode": 2,
+          "leaf": 1024,
+          "tol": 1e-05,
+          "min_sep": 20000,
+          "min_front": 26000,
+          "lr_leaf": 4,
+          "knn_hodlrbf": 0,
+          "knn_lrbf": 0,
+          "baca_batch": 64,
+          "image_cap": 0,
+          "panel_cap": 67108864,
+          "blas_threads": 16,
+          "heap_fraction": 0.85,
+          "maxit": 100,
+          "timeout_seconds": 1200,
+          "extra_args": [
+            "--sp_abs_tol",
+            "1e-12",
+            "--hodlr_gpu_dense_schur",
+            "1",
+            "--hodlr_compact_extraction",
+            "1"
+          ],
+          "gpu_rectangular": 1,
+          "gpu_host_panels": 1,
+          "solver_tol": 1e-12,
+          "baca_residual_guard": 0,
+          "blas_thread_timeout": 28
+        },
+        "other_cohorts_not_pooled": 0,
+        "factor_seconds": {
+          "median": 53.8268,
+          "min": 53.8266,
+          "max": 54.1955
+        },
+        "solve_seconds": {
+          "median": 1.66978,
+          "min": 1.63292,
+          "max": 1.6766
+        },
+        "factor_plus_solve_seconds": {
+          "median": 55.5032,
+          "min": 55.49658,
+          "max": 55.82842
+        },
+        "end_to_end_seconds": {
+          "median": 64.2,
+          "min": 64.11,
+          "max": 71.6
+        },
+        "max_relative_error": 2.39381e-11,
+        "max_scaled_residual": 8.7954e-11,
+        "verified_actual_gpu_count": 8,
+        "gpu_models": [
+          "NVIDIA A100-SXM4-40GB"
+        ],
+        "screenshot_comparison": {
+          "scope": "No lower-factor claim",
+          "reason": "different GPU count"
+        }
+      }
+    ],
+    "rejected_sources": [],
+    "all_failed_cases": [],
+    "notes": [
+      "Eight fixed rows: four layouts times two explicit compression tolerances; three validated trials per row.",
+      "Each factor+solve observation is paired within one run; its median is not the sum of separate medians.",
+      "Trials from different allocations/GPU/core placements are never pooled.",
+      "All observed failures remain visible even when they lack GPU/CPU placement metadata. Failed cases never enter timing statistics or screenshot comparison.",
+      "All rows use3RHS,16physical CPUcores/rank,16pthread BLASworkers,OMP1,timeout28,bothGPU flags1,solver relative/absolute tolerance1e-12.",
+      "Screenshot comparisons establish problem size and GPU count only. Unknown screenshot hardware, compression tolerance, commands and factor scope prevent a controlled speedup claim."
+    ]
+  },
+  "timing_rules": [
+    "Seconds; three-trial medians and ranges in baseline.",
+    "Sum factor and solve within each trial before computing total median.",
+    "Compare screenshot factor only when GPU count matches; screenshot hardware, command and timing boundary are unknown.",
+    "Do not pool allocations, executables, tolerances, or pilot cases into three-trial cohorts.",
+    "Compare solve iteration counts as well as raw solve time."
+  ],
+  "controls": {
+    "gpuaware_tcmalloc_pilot": {
+      "job": 60478857,
+      "status": "PASS",
+      "source_summary": "profile_results/60478857-gpuaware_tcmalloc_ieee_both_200/tuning_summary.json",
+      "source_summary_sha256": "66fb971f98ee3e8daca8cf528637d5827be2b1a46492d15c177c4b7ad13f4077",
+      "manifest": {
+        "executable_sha256": "ec93fbe4da78b7ffa6da1b7dd16c000cc3f8d8f03cc9ded9de984b6d74c9be81",
+        "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+        "blas_library_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+        "grid": 200,
+        "rhs": 3,
+        "ranks": 8,
+        "nodes": 2,
+        "cpus_per_rank": 16,
+        "omp_threads": 1,
+        "accuracy": {
+          "relative_error": 1e-08,
+          "scaled_residual": 1e-06
+        }
+      },
+      "cases": [
+        {
+          "label": "gpuaware_tcmalloc_0_loose_tol1e-02",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 0.01,
+            "min_sep": 8000,
+            "min_front": 100000,
+            "lr_leaf": 5,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 16,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 1200,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28
+          },
+          "factor_seconds": 125.327,
+          "solve_seconds": 75.975,
+          "factor_plus_solve_seconds": 201.302,
+          "end_to_end_seconds": 211.57999999999998,
+          "relative_error": 2.2021e-10,
+          "scaled_residual": 4.58412e-10,
+          "refinement_iterations": 39.0,
+          "hodlr_fronts": 15.0,
+          "source_directory": "profile_results/60478857-gpuaware_tcmalloc_ieee_both_200/gpuaware_tcmalloc_0_loose_tol1e-02",
+          "runtime_audit": {
+            "status": "PASS",
+            "ranks": 8,
+            "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+            "scope": "Actual target entry/exit malloc dladdr +MPI flags. Device-buffer smoke establishes correct CUDA-buffer MPI, not a claim of zero-copy network transport."
+          },
+          "runtime_audit_sha256": "09255c85f373fe2755a52e7882a3f96c20bc45b193659111e4015dd369512de8"
+        },
+        {
+          "label": "gpuaware_tcmalloc_1_tight_tol1e-05",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 1e-05,
+            "min_sep": 8000,
+            "min_front": 100000,
+            "lr_leaf": 5,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 16,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 1200,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28
+          },
+          "factor_seconds": 199.992,
+          "solve_seconds": 24.264,
+          "factor_plus_solve_seconds": 224.256,
+          "end_to_end_seconds": 236.22,
+          "relative_error": 2.0607e-12,
+          "scaled_residual": 8.81281e-10,
+          "refinement_iterations": 12.0,
+          "hodlr_fronts": 15.0,
+          "source_directory": "profile_results/60478857-gpuaware_tcmalloc_ieee_both_200/gpuaware_tcmalloc_1_tight_tol1e-05",
+          "runtime_audit": {
+            "status": "PASS",
+            "ranks": 8,
+            "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+            "scope": "Actual target entry/exit malloc dladdr +MPI flags. Device-buffer smoke establishes correct CUDA-buffer MPI, not a claim of zero-copy network transport."
+          },
+          "runtime_audit_sha256": "09255c85f373fe2755a52e7882a3f96c20bc45b193659111e4015dd369512de8"
+        }
+      ],
+      "tolerance_rows": [
+        {
+          "compression_tolerance": 0.01,
+          "trials": 1,
+          "factor_seconds": {
+            "median": 125.327,
+            "min": 125.327,
+            "max": 125.327
+          },
+          "solve_seconds": {
+            "median": 75.975,
+            "min": 75.975,
+            "max": 75.975
+          },
+          "factor_plus_solve_seconds": {
+            "median": 201.302,
+            "min": 201.302,
+            "max": 201.302
+          },
+          "refinement_iterations": [
+            39.0
+          ]
+        },
+        {
+          "compression_tolerance": 1e-05,
+          "trials": 1,
+          "factor_seconds": {
+            "median": 199.992,
+            "min": 199.992,
+            "max": 199.992
+          },
+          "solve_seconds": {
+            "median": 24.264,
+            "min": 24.264,
+            "max": 24.264
+          },
+          "factor_plus_solve_seconds": {
+            "median": 224.256,
+            "min": 224.256,
+            "max": 224.256
+          },
+          "refinement_iterations": [
+            12.0
+          ]
+        }
+      ]
+    },
+    "gpuaware_tcmalloc_three_trial_confirmation": {
+      "job": 60479285,
+      "status": "PASS",
+      "source_summary": "profile_results/60479285-gpuaware_tcmalloc_ieee_both_200/tuning_summary.json",
+      "source_summary_sha256": "1748d29e1969dcb013261114e18898c4c182ffa065dad98b45e19b4f39c9a645",
+      "manifest": {
+        "executable_sha256": "ec93fbe4da78b7ffa6da1b7dd16c000cc3f8d8f03cc9ded9de984b6d74c9be81",
+        "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+        "blas_library_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+        "grid": 200,
+        "rhs": 3,
+        "ranks": 8,
+        "nodes": 2,
+        "cpus_per_rank": 16,
+        "omp_threads": 1,
+        "accuracy": {
+          "relative_error": 1e-08,
+          "scaled_residual": 1e-06
+        }
+      },
+      "cases": [
+        {
+          "label": "gpuaware_tcmalloc_0_loose_tol1e-02",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 0.01,
+            "min_sep": 8000,
+            "min_front": 100000,
+            "lr_leaf": 5,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 16,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 1200,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28
+          },
+          "factor_seconds": 128.553,
+          "solve_seconds": 74.1108,
+          "factor_plus_solve_seconds": 202.66379999999998,
+          "end_to_end_seconds": 214.27,
+          "relative_error": 2.85713e-10,
+          "scaled_residual": 5.70442e-10,
+          "refinement_iterations": 38.0,
+          "hodlr_fronts": 15.0,
+          "source_directory": "profile_results/60479285-gpuaware_tcmalloc_ieee_both_200/gpuaware_tcmalloc_0_loose_tol1e-02",
+          "runtime_audit": {
+            "status": "PASS",
+            "ranks": 8,
+            "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+            "scope": "Actual target entry/exit malloc dladdr +MPI flags. Device-buffer smoke establishes correct CUDA-buffer MPI, not a claim of zero-copy network transport."
+          },
+          "runtime_audit_sha256": "8bbee628074f46de7d8496cd812f036b5a6735320b9c2f1126ffd983788ffb60"
+        },
+        {
+          "label": "gpuaware_tcmalloc_1_loose_tol1e-02",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 0.01,
+            "min_sep": 8000,
+            "min_front": 100000,
+            "lr_leaf": 5,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 16,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 1200,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28
+          },
+          "factor_seconds": 126.792,
+          "solve_seconds": 74.8359,
+          "factor_plus_solve_seconds": 201.6279,
+          "end_to_end_seconds": 213.9,
+          "relative_error": 2.50292e-10,
+          "scaled_residual": 5.33315e-10,
+          "refinement_iterations": 38.0,
+          "hodlr_fronts": 15.0,
+          "source_directory": "profile_results/60479285-gpuaware_tcmalloc_ieee_both_200/gpuaware_tcmalloc_1_loose_tol1e-02",
+          "runtime_audit": {
+            "status": "PASS",
+            "ranks": 8,
+            "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+            "scope": "Actual target entry/exit malloc dladdr +MPI flags. Device-buffer smoke establishes correct CUDA-buffer MPI, not a claim of zero-copy network transport."
+          },
+          "runtime_audit_sha256": "8bbee628074f46de7d8496cd812f036b5a6735320b9c2f1126ffd983788ffb60"
+        },
+        {
+          "label": "gpuaware_tcmalloc_2_loose_tol1e-02",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 0.01,
+            "min_sep": 8000,
+            "min_front": 100000,
+            "lr_leaf": 5,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 16,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 1200,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28
+          },
+          "factor_seconds": 128.857,
+          "solve_seconds": 75.6352,
+          "factor_plus_solve_seconds": 204.4922,
+          "end_to_end_seconds": 213.66,
+          "relative_error": 1.69036e-10,
+          "scaled_residual": 6.64768e-10,
+          "refinement_iterations": 38.0,
+          "hodlr_fronts": 15.0,
+          "source_directory": "profile_results/60479285-gpuaware_tcmalloc_ieee_both_200/gpuaware_tcmalloc_2_loose_tol1e-02",
+          "runtime_audit": {
+            "status": "PASS",
+            "ranks": 8,
+            "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+            "scope": "Actual target entry/exit malloc dladdr +MPI flags. Device-buffer smoke establishes correct CUDA-buffer MPI, not a claim of zero-copy network transport."
+          },
+          "runtime_audit_sha256": "8bbee628074f46de7d8496cd812f036b5a6735320b9c2f1126ffd983788ffb60"
+        }
+      ],
+      "tolerance_rows": [
+        {
+          "compression_tolerance": 0.01,
+          "trials": 3,
+          "factor_seconds": {
+            "median": 128.553,
+            "min": 126.792,
+            "max": 128.857
+          },
+          "solve_seconds": {
+            "median": 74.8359,
+            "min": 74.1108,
+            "max": 75.6352
+          },
+          "factor_plus_solve_seconds": {
+            "median": 202.66379999999998,
+            "min": 201.6279,
+            "max": 204.4922
+          },
+          "refinement_iterations": [
+            38.0,
+            38.0,
+            38.0
+          ]
+        }
+      ],
+      "factor_reduction_vs_baseline_percent": 3.6038062672935522,
+      "paired_reduction_vs_baseline_percent": 2.915684432549337
+    },
+    "gpuaware_tcmalloc_configuration": {
+      "MPICH_GPU_SUPPORT_ENABLED": 1,
+      "BPACK_GPU_AWARE_MPI": 1,
+      "allocator_sha256": "ef95b6a20cebd14fba276a440167a443840f82e3a2fe40427a2842df471f3eda",
+      "validation": "Actual target malloc origin/flags at entry and exit; real inter-node CUDA-buffer Bcast/Allreduce/Sendrecv numeric smoke.",
+      "scope": "Combined setting; the study does not isolate allocator from GPU-aware MPI or claim zero-copy transport."
+    },
+    "cuda_on_pilots": [
+      {
+        "job": 60479114,
+        "status": "PASS",
+        "source_summary": "profile_results/60479114-screenshot_cuda_on_150_4gpu_pilot/tuning_summary.json",
+        "source_summary_sha256": "9cef26e5969aaee38e40c4d272247f72d8e952eb9cc33998180b221fbfefce8e",
+        "manifest": {
+          "executable_sha256": "5c18310179044b79df057629dfad8ddaad522c55d2f219e81f846541b5ccf319",
+          "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+          "blas_library_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+          "grid": 150,
+          "rhs": 3,
+          "ranks": 4,
+          "nodes": 1,
+          "cpus_per_rank": 16,
+          "omp_threads": 1,
+          "accuracy": {
+            "relative_error": 1e-08,
+            "scaled_residual": 1e-06
+          }
+        },
+        "cases": [
+          {
+            "label": "150_4gpu_0_loose",
+            "status": "PASS",
+            "settings": {
+              "gpu_mode": 2,
+              "leaf": 1024,
+              "tol": 0.01,
+              "min_sep": 20000,
+              "min_front": 26000,
+              "lr_leaf": 4,
+              "knn_hodlrbf": 0,
+              "knn_lrbf": 0,
+              "baca_batch": 64,
+              "image_cap": 0,
+              "panel_cap": 67108864,
+              "blas_threads": 16,
+              "heap_fraction": 0.85,
+              "maxit": 100,
+              "timeout_seconds": 1200,
+              "extra_args": [
+                "--sp_abs_tol",
+                "1e-12",
+                "--hodlr_gpu_dense_schur",
+                "1",
+                "--hodlr_compact_extraction",
+                "1"
+              ],
+              "gpu_rectangular": 1,
+              "gpu_host_panels": 1,
+              "solver_tol": 1e-12,
+              "baca_residual_guard": 0,
+              "blas_thread_timeout": 28
+            },
+            "factor_seconds": 64.9651,
+            "solve_seconds": 25.6664,
+            "factor_plus_solve_seconds": 90.6315,
+            "end_to_end_seconds": 104.95,
+            "relative_error": 3.9725e-10,
+            "scaled_residual": 2.07185e-10,
+            "refinement_iterations": 16.0,
+            "hodlr_fronts": 7.0,
+            "source_directory": "profile_results/60479114-screenshot_cuda_on_150_4gpu_pilot/150_4gpu_0_loose"
+          },
+          {
+            "label": "150_4gpu_1_tight",
+            "status": "PASS",
+            "settings": {
+              "gpu_mode": 2,
+              "leaf": 1024,
+              "tol": 1e-05,
+              "min_sep": 20000,
+              "min_front": 26000,
+              "lr_leaf": 4,
+              "knn_hodlrbf": 0,
+              "knn_lrbf": 0,
+              "baca_batch": 64,
+              "image_cap": 0,
+              "panel_cap": 67108864,
+              "blas_threads": 16,
+              "heap_fraction": 0.85,
+              "maxit": 100,
+              "timeout_seconds": 1200,
+              "extra_args": [
+                "--sp_abs_tol",
+                "1e-12",
+                "--hodlr_gpu_dense_schur",
+                "1",
+                "--hodlr_compact_extraction",
+                "1"
+              ],
+              "gpu_rectangular": 1,
+              "gpu_host_panels": 1,
+              "solver_tol": 1e-12,
+              "baca_residual_guard": 0,
+              "blas_thread_timeout": 28
+            },
+            "factor_seconds": 80.9634,
+            "solve_seconds": 3.5171,
+            "factor_plus_solve_seconds": 84.48049999999999,
+            "end_to_end_seconds": 94.84,
+            "relative_error": 1.76649e-11,
+            "scaled_residual": 4.2611e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 7.0,
+            "source_directory": "profile_results/60479114-screenshot_cuda_on_150_4gpu_pilot/150_4gpu_1_tight"
+          }
+        ],
+        "tolerance_rows": [
+          {
+            "compression_tolerance": 0.01,
+            "trials": 1,
+            "factor_seconds": {
+              "median": 64.9651,
+              "min": 64.9651,
+              "max": 64.9651
+            },
+            "solve_seconds": {
+              "median": 25.6664,
+              "min": 25.6664,
+              "max": 25.6664
+            },
+            "factor_plus_solve_seconds": {
+              "median": 90.6315,
+              "min": 90.6315,
+              "max": 90.6315
+            },
+            "refinement_iterations": [
+              16.0
+            ]
+          },
+          {
+            "compression_tolerance": 1e-05,
+            "trials": 1,
+            "factor_seconds": {
+              "median": 80.9634,
+              "min": 80.9634,
+              "max": 80.9634
+            },
+            "solve_seconds": {
+              "median": 3.5171,
+              "min": 3.5171,
+              "max": 3.5171
+            },
+            "factor_plus_solve_seconds": {
+              "median": 84.48049999999999,
+              "min": 84.48049999999999,
+              "max": 84.48049999999999
+            },
+            "refinement_iterations": [
+              2.0
+            ]
+          }
+        ]
+      },
+      {
+        "job": 60479090,
+        "status": "PASS",
+        "source_summary": "profile_results/60479090-screenshot_cuda_on_200_8gpu_pilot/tuning_summary.json",
+        "source_summary_sha256": "f7eaddff349b4c5742962201e6233caea32432cb59d8e964c2b0fe1c6f1259ec",
+        "manifest": {
+          "executable_sha256": "5c18310179044b79df057629dfad8ddaad522c55d2f219e81f846541b5ccf319",
+          "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+          "blas_library_sha256": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+          "grid": 200,
+          "rhs": 3,
+          "ranks": 8,
+          "nodes": 2,
+          "cpus_per_rank": 16,
+          "omp_threads": 1,
+          "accuracy": {
+            "relative_error": 1e-08,
+            "scaled_residual": 1e-06
+          }
+        },
+        "cases": [
+          {
+            "label": "200_8gpu_0_loose",
+            "status": "PASS",
+            "settings": {
+              "gpu_mode": 2,
+              "leaf": 1024,
+              "tol": 0.01,
+              "min_sep": 8000,
+              "min_front": 100000,
+              "lr_leaf": 5,
+              "knn_hodlrbf": 0,
+              "knn_lrbf": 0,
+              "baca_batch": 64,
+              "image_cap": 0,
+              "panel_cap": 67108864,
+              "blas_threads": 16,
+              "heap_fraction": 0.85,
+              "maxit": 100,
+              "timeout_seconds": 1200,
+              "extra_args": [
+                "--sp_abs_tol",
+                "1e-12",
+                "--hodlr_gpu_dense_schur",
+                "1",
+                "--hodlr_compact_extraction",
+                "1"
+              ],
+              "gpu_rectangular": 1,
+              "gpu_host_panels": 1,
+              "solver_tol": 1e-12,
+              "baca_residual_guard": 0,
+              "blas_thread_timeout": 28
+            },
+            "factor_seconds": 129.709,
+            "solve_seconds": 72.8632,
+            "factor_plus_solve_seconds": 202.5722,
+            "end_to_end_seconds": 219.64,
+            "relative_error": 1.99068e-10,
+            "scaled_residual": 6.23628e-10,
+            "refinement_iterations": 36.0,
+            "hodlr_fronts": 15.0,
+            "source_directory": "profile_results/60479090-screenshot_cuda_on_200_8gpu_pilot/200_8gpu_0_loose"
+          },
+          {
+            "label": "200_8gpu_1_tight",
+            "status": "PASS",
+            "settings": {
+              "gpu_mode": 2,
+              "leaf": 1024,
+              "tol": 1e-05,
+              "min_sep": 8000,
+              "min_front": 100000,
+              "lr_leaf": 5,
+              "knn_hodlrbf": 0,
+              "knn_lrbf": 0,
+              "baca_batch": 64,
+              "image_cap": 0,
+              "panel_cap": 67108864,
+              "blas_threads": 16,
+              "heap_fraction": 0.85,
+              "maxit": 100,
+              "timeout_seconds": 1200,
+              "extra_args": [
+                "--sp_abs_tol",
+                "1e-12",
+                "--hodlr_gpu_dense_schur",
+                "1",
+                "--hodlr_compact_extraction",
+                "1"
+              ],
+              "gpu_rectangular": 1,
+              "gpu_host_panels": 1,
+              "solver_tol": 1e-12,
+              "baca_residual_guard": 0,
+              "blas_thread_timeout": 28
+            },
+            "factor_seconds": 209.705,
+            "solve_seconds": 4.05971,
+            "factor_plus_solve_seconds": 213.76471,
+            "end_to_end_seconds": 224.6,
+            "relative_error": 4.12896e-11,
+            "scaled_residual": 9.79644e-11,
+            "refinement_iterations": 2.0,
+            "hodlr_fronts": 15.0,
+            "source_directory": "profile_results/60479090-screenshot_cuda_on_200_8gpu_pilot/200_8gpu_1_tight"
+          }
+        ],
+        "tolerance_rows": [
+          {
+            "compression_tolerance": 0.01,
+            "trials": 1,
+            "factor_seconds": {
+              "median": 129.709,
+              "min": 129.709,
+              "max": 129.709
+            },
+            "solve_seconds": {
+              "median": 72.8632,
+              "min": 72.8632,
+              "max": 72.8632
+            },
+            "factor_plus_solve_seconds": {
+              "median": 202.5722,
+              "min": 202.5722,
+              "max": 202.5722
+            },
+            "refinement_iterations": [
+              36.0
+            ]
+          },
+          {
+            "compression_tolerance": 1e-05,
+            "trials": 1,
+            "factor_seconds": {
+              "median": 209.705,
+              "min": 209.705,
+              "max": 209.705
+            },
+            "solve_seconds": {
+              "median": 4.05971,
+              "min": 4.05971,
+              "max": 4.05971
+            },
+            "factor_plus_solve_seconds": {
+              "median": 213.76471,
+              "min": 213.76471,
+              "max": 213.76471
+            },
+            "refinement_iterations": [
+              2.0
+            ]
+          }
+        ]
+      }
+    ],
+    "cuda_on_build_provenance": {
+      "source_commit": "51ed30e6f47e411cfb8cd1760a9d0a2b07ad3488",
+      "source_archive_sha256": "a3e5874908145a3b462ee927616d431ef991db20b824e798aac19e0eb707c24e",
+      "source_archive_directory": "/global/u1/t/truongvu/strumpack-hodlr-validation-Yang/STRUMPACK-gpu-host-panels/profile_results/cuda_on_control_v1/source",
+      "configure_status": "PASS",
+      "build_status": "PASS",
+      "baseline_untouched": true,
+      "baseline_sha256": {
+        "build_host_panels_release/libstrumpack.a": "45a4db12cfdda46cc9f045dc4a43ae6fde8fff3a39d1ea741aeeba8b67ed7617",
+        "build_host_panels_release/examples/sparse/testPoisson3dMPIDist": "ec93fbe4da78b7ffa6da1b7dd16c000cc3f8d8f03cc9ded9de984b6d74c9be81",
+        "build_host_panels_release/CMakeCache.txt": "4d2a0cab8555352c3037932639d927ce65cd457a97cc0cf72ee1b13d08a47d25",
+        "build_host_panels_release/StrumpackConfig.h": "01e10ca1c15f9a019585a35d06bd157f160b47b54fbc9158ec57d5b936f1d8fb"
+      },
+      "executable_sha256": "5c18310179044b79df057629dfad8ddaad522c55d2f219e81f846541b5ccf319",
+      "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+      "blas_library_sha256": "25181e6b2e566ee1e0ea4e0d0b6981b606e9527cc225289bf4e737c9cf25c8e3",
+      "generated_config_difference": "STRUMPACK_USE_CUDA only",
+      "cuda_control_note": "HODLR factory still uses CPU exact fronts; no factory changes; MAGMA remains a transitive ButterflyPACK dependency only.",
+      "configure_command": "cmake -S profile_results/cuda_on_control_v1/source -B build_cuda_on_control -C profile_results/cuda_on_control_v1/initial_cache.cmake",
+      "build_command": "cmake --build build_cuda_on_control --target testPoisson3dMPIDist -j4",
+      "runtime_frozen_dependencies": "Use snapshot wrapper and HODLR_PROFILE_SNAPSHOT; set HODLR_BLAS_LIBRARY to snapshot lib/libopenblas.so.0.3 to override executable DT_RPATH.",
+      "source_provenance_sha256": "efe77721a4973faddac20f1c311ce5fec469192898f380f4fa72be06044fec03",
+      "scope": "Build-time facts; completed GPU runtime evidence is recorded in the control cases."
+    },
+    "cuda_on_interpretation": "Single trial per layout/tolerance. HODLR factory continues to select CPU exact fronts and existing GPU Schur helper; no new GPU dense-front LU/TRSM offload.",
+    "omp_pthread_attempt": {
+      "status": "INTERRUPTED_BLAS_THREADING",
+      "job": 60478954,
+      "control": "factoromp1_blas16 numericalPASS, factor81.8505 solve3.51627",
+      "two_thread_case": "actual CPU team2 reached; pthread OpenBLAS repeatedly warns to rebuild USE_OPENMP=1, producing45-57MiB logs per rank with no factor completion",
+      "action": "Cancelled own job before fourth-thread case to avoid repeating known incompatible BLAS threading path",
+      "four_thread_case": "NOT_RUN",
+      "completed_follow_up_job": 60479491
+    },
+    "omp_pthread_one_thread_control": {
+      "status": "PASS",
+      "factor_seconds": 81.8505,
+      "solve_seconds": 3.51627,
+      "factor_plus_solve_seconds": 85.36677,
+      "relative_error": 1.75642e-11,
+      "scaled_residual": 4.53374e-11
+    },
+    "omp_aligned_pilot": {
+      "job": 60479491,
+      "status": "PASS",
+      "source_summary": "profile_results/60479491-factor_omp_aligned150/tuning_summary.json",
+      "source_summary_sha256": "daebbe499e1c036b6b4b392a07274c51ffc866320d0ce9406b54645b27b6d296",
+      "manifest": {
+        "executable_sha256": "d21553f8ab11e243639f636f65e7585da6275a8bf48d639f9bf4f9c571dae0fc",
+        "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+        "blas_library_sha256": "782c56c0afd66431b0e4652d8e3282fd266a9de57da505414d9253855f0e4f12",
+        "grid": 150,
+        "rhs": 3,
+        "ranks": 4,
+        "nodes": 1,
+        "cpus_per_rank": 16,
+        "omp_threads": 1,
+        "accuracy": {
+          "relative_error": 1e-08,
+          "scaled_residual": 1e-06
+        }
+      },
+      "cases": [
+        {
+          "label": "aligned_factoromp16_blas1",
+          "status": "PASS",
+          "settings": {
+            "gpu_mode": 2,
+            "leaf": 1024,
+            "tol": 1e-05,
+            "min_sep": 20000,
+            "min_front": 26000,
+            "lr_leaf": 4,
+            "knn_hodlrbf": 0,
+            "knn_lrbf": 0,
+            "baca_batch": 64,
+            "image_cap": 0,
+            "panel_cap": 67108864,
+            "blas_threads": 1,
+            "heap_fraction": 0.85,
+            "maxit": 100,
+            "timeout_seconds": 600,
+            "extra_args": [
+              "--sp_abs_tol",
+              "1e-12",
+              "--hodlr_gpu_dense_schur",
+              "1",
+              "--hodlr_compact_extraction",
+              "1"
+            ],
+            "gpu_rectangular": 1,
+            "gpu_host_panels": 1,
+            "solver_tol": 1e-12,
+            "baca_residual_guard": 0,
+            "blas_thread_timeout": 28,
+            "private_factor_omp": 16
+          },
+          "factor_seconds": 96.1465,
+          "solve_seconds": 4.87387,
+          "factor_plus_solve_seconds": 101.02037,
+          "end_to_end_seconds": 113.13,
+          "relative_error": 1.59809e-11,
+          "scaled_residual": 4.29464e-11,
+          "refinement_iterations": 2.0,
+          "hodlr_fronts": 7.0,
+          "source_directory": "profile_results/60479491-factor_omp_aligned150/aligned_factoromp16_blas1"
+        }
+      ],
+      "tolerance_rows": [
+        {
+          "compression_tolerance": 1e-05,
+          "trials": 1,
+          "factor_seconds": {
+            "median": 96.1465,
+            "min": 96.1465,
+            "max": 96.1465
+          },
+          "solve_seconds": {
+            "median": 4.87387,
+            "min": 4.87387,
+            "max": 4.87387
+          },
+          "factor_plus_solve_seconds": {
+            "median": 101.02037,
+            "min": 101.02037,
+            "max": 101.02037
+          },
+          "refinement_iterations": [
+            2.0
+          ]
+        }
+      ]
+    },
+    "omp_aligned_build_provenance": {
+      "source_commit": "51ed30e6f47e411cfb8cd1760a9d0a2b07ad3488",
+      "source_archive_sha256": "a3e5874908145a3b462ee927616d431ef991db20b824e798aac19e0eb707c24e",
+      "patch_sha256": "d438df3964185c34f48bb5e60a3f1eceadd4ad0f097d5f6fdb9147d9871cf0b4",
+      "source_files": {
+        "src/HODLR/ExperimentFactorOMP.hpp": "dfcf21ebb42628f8eaec9e23d45ce09e884fd4e3e9bdca366736fd7a06ee2374",
+        "src/HODLR/GPUDenseSchur.cpp": "fe7b6400d4da0b7525be7058997273cd0ea879ba49ee0c54f8cea40ea2c89f44",
+        "src/sparse/EliminationTree.cpp": "7192ba070afd51faa0aad714953fd08087466adaa92ddf8fc858991e5afac004",
+        "src/sparse/fronts/FrontHODLR.cpp": "bb5efab23290935eabd1f42635a5ab5c93fb208d319e4c9bd4a0c10052795c23",
+        "src/sparse/fronts/FrontHODLRMPI.cpp": "69234dbbe70b19b49969614d81ac32848cc99b8e71fabb29e641395bd4680594",
+        "examples/sparse/testPoisson3dMPIDist.cpp": "a5c84c257041be98c93c79021f13ef9477ebc600c0a5bffae701aaab6758402f",
+        "src/sparse/fronts/FrontDense.cpp": "7be4c2364e322897db3d08df2faf7a241cb1fa40adaea14052238dfe6b95d548"
+      },
+      "executable_sha256": "d21553f8ab11e243639f636f65e7585da6275a8bf48d639f9bf4f9c571dae0fc",
+      "native_library_sha256": "66ebd85ba461d64bc840711661ad71ae400ec93fcea2677dcaa360b6be569bae",
+      "blas_library_sha256": "782c56c0afd66431b0e4652d8e3282fd266a9de57da505414d9253855f0e4f12",
+      "configure_status": "PASS",
+      "build_status": "PASS",
+      "cpu_fixture_status": "PASS: actual CPUteam16,16concurrent numericaloracles; effectiveOpenMPBLAS1;serialscope/restoration;7configurationcases;extendedreal+complexBLAS/SVD",
+      "baseline_untouched": true,
+      "baseline_sha256": {
+        "build_host_panels_release/libstrumpack.a": "45a4db12cfdda46cc9f045dc4a43ae6fde8fff3a39d1ea741aeeba8b67ed7617",
+        "build_host_panels_release/examples/sparse/testPoisson3dMPIDist": "ec93fbe4da78b7ffa6da1b7dd16c000cc3f8d8f03cc9ded9de984b6d74c9be81",
+        "build_host_panels_release/CMakeCache.txt": "4d2a0cab8555352c3037932639d927ce65cd457a97cc0cf72ee1b13d08a47d25",
+        "build_host_panels_release/StrumpackConfig.h": "01e10ca1c15f9a019585a35d06bd157f160b47b54fbc9158ec57d5b936f1d8fb"
+      },
+      "control": "factorOMP16+OpenMPBLAS1, maxlevels1, envOMP1, GPUscopes1, reorder/solveparams1/cutoff0, treeOFF, noGPUdensefactorychange",
+      "comparison_caveat": "Different BLAS/threadconfiguration from privateOMP1/pthreadBLAS16 productionreference60478954 (factor81.8505s/solve3.51627s); not isolatedOMPcausality. Single600s pilotplanned; no established speedup.",
+      "no_startup_cap_bypass": true,
+      "no_custom_blas_interposition": true,
+      "blas_queue_api_initialized_in_target": true,
+      "build_command": "cmake --build build_factor_omp_aligned --target testPoisson3dMPIDist -j4",
+      "source_provenance_sha256": "0fce2aecb1eb00411117fe9fa82129601ad836d3bfbe6a6d384be5da19c1eee3",
+      "scope": "Build-time facts; completed GPU runtime evidence is recorded in the control cases."
+    },
+    "omp_aligned_interpretation": "Private CPU factor team16/OpenMP BLAS1 configuration. Native GPU entries, reorder and entire solve remain serial with task cutoff0. Changes CPU scheduling and native-host/solve BLAS configuration; not isolated team-width causality or general OMP_NUM_THREADS>1 backend support."
+  },
+  "blas_diagnostic": {
+    "schema": "hodlr_dgesdd_diagnostic_study_v1",
+    "status": "PASS_DIAGNOSIS_AND_CPU_REPLAY",
+    "numerical_sources_modified": false,
+    "jobs_submitted_by_report_author": false,
+    "conclusion": "The Ofast-built local CPU LAPACK DGESDD path fails on finite nonzero Schur samples; existing native DGESVD fallback recovers. Same-source O3 -fno-fast-math BLAS succeeds on exact captured inputs.",
+    "limits": [
+      "Controlled BLAS build difference established; no specific compiler transformation isolated.",
+      "Traced runs excluded from performance cohorts.",
+      "Separate issue from historical multi-RHS fix; no GPU-value or RHS layout defect established by these samples.",
+      "IEEE sparse end-to-end validation is separate and ongoing."
+    ],
+    "trace": {
+      "job": 60478322,
+      "path": "profile_results/60478322/dlascl150v2",
+      "exit_code": 0,
+      "rhs": 3,
+      "layout": "150^3,4MPI/4GPU,16physical CPUcores/rank,OMP1,16pthread workers",
+      "failed_DGESDD_calls": 8,
+      "successful_fallbacks": 8,
+      "invalid_DLASCL_calls": 4,
+      "CFROM_classes": [
+        "nan"
+      ],
+      "relative_error": 1.88284e-10,
+      "scaled_residual": 6.12102e-10,
+      "cases": [
+        {
+          "rank": 0,
+          "m": 22500,
+          "n": 129,
+          "input_finite": true,
+          "norm": 3.1208439233849496,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank0.pid546680.call1.input.f64",
+          "input_sha256": "12db28c95937e60e461c8db26e38bf6a06bd6165f2134a9c62e2059cf032a208",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 1,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 0,
+          "m": 22500,
+          "n": 257,
+          "input_finite": true,
+          "norm": 3.257414754144894,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank0.pid546680.call3.input.f64",
+          "input_sha256": "7ac81cbad9f74678819e56676c0a2852724a0ee2bc6a67d88fb3a6d5b1e02423",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 0,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 1,
+          "m": 22350,
+          "n": 129,
+          "input_finite": true,
+          "norm": 3.1085603551234438,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank1.pid546681.call1.input.f64",
+          "input_sha256": "ae2fb291ef7d2530d8da35bd1123fde96c1d62aee51652f4744760a236db49d3",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 0,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 1,
+          "m": 22350,
+          "n": 257,
+          "input_finite": true,
+          "norm": 3.246287296899339,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank1.pid546681.call3.input.f64",
+          "input_sha256": "db0e8be64b656e94790c7b45037a454bacb367824fb87b50b377d371c9046415",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 0,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 2,
+          "m": 22350,
+          "n": 129,
+          "input_finite": true,
+          "norm": 3.091288672465671,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank2.pid546684.call1.input.f64",
+          "input_sha256": "6767b3ba77c12cae916cca2aefa8c999fad68659320b8a3ce1cde4625b465ba6",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 1,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 2,
+          "m": 22350,
+          "n": 257,
+          "input_finite": true,
+          "norm": 3.2312330604453123,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank2.pid546684.call3.input.f64",
+          "input_sha256": "9288ec79ad2d56f8d19a67b460453a92417c094c861a49e523caa18a17e78624",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 1,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 3,
+          "m": 22200,
+          "n": 129,
+          "input_finite": true,
+          "norm": 3.1003557162685005,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank3.pid546686.call1.input.f64",
+          "input_sha256": "7e7253dea8e7657ad219eee238a4cf9e75558252f3a8bd3408f3b3479a6a8353",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 1,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        },
+        {
+          "rank": 3,
+          "m": 22200,
+          "n": 257,
+          "input_finite": true,
+          "norm": 3.2355793196354266,
+          "input_path": "profile_results/60478322/dlascl150v2/panels.dlascl.rank3.pid546686.call3.input.f64",
+          "input_sha256": "45a08c92f5f844b4f45fe088168c2b2b2da0ee99738a4319c2cf8481dbfac0be",
+          "dgesdd_info": 1,
+          "bad_dlascl_calls": 0,
+          "fallback_info": 0,
+          "fallback_outputs_finite": true
+        }
+      ]
+    },
+    "call_chain": [
+      "FrontHODLR.cpp:754 Schur.compress(sample_Schur)",
+      "ButterflyMatrix.cpp:410 -> native matvec construction",
+      "Bplus_randomized.f90:1606 PQxSVDTruncate -> SVD_Truncate",
+      "MISC_utilities.f90:3221 -> gesvd_robust",
+      "MISC_DenseLA.f90:677 DGESDD, INFO!=0 fallback at679-684",
+      "DGESDD -> DBDSDC -> DLASD0 -> DLASD1 -> DLASD3",
+      "dlasd3.f:312 RHO=DNRM2(K,Z,1),:313 DLASCL(CFROM=RHO,CTO=1)"
+    ],
+    "replay": {
+      "path": "profile_results/dlascl_trace_v2/replay_oracle_v1/summary.json",
+      "sha256": "1265722fed4435b78ad5bd346a9ee9b4ee6c68d56a3274104a991738178c5d2b",
+      "fresh_process_per_case": true,
+      "matrices": 2,
+      "process_cases": 8,
+      "threads": [
+        1,
+        16
+      ],
+      "original_DGESDD_failures": 4,
+      "ieee_DGESDD_successes": 4,
+      "DGESVD_successes": 8,
+      "max_full_relative_residual": 4.826431409141911e-15,
+      "max_U_orthogonality_frobenius": 4.931496797308846e-14,
+      "max_VT_orthogonality_frobenius": 4.863164878396845e-14,
+      "max_independent_long_double_sampled_relative_residual": 5.707720113233924e-15,
+      "initial_MXCSR": [
+        8064
+      ],
+      "initial_FTZ": [
+        false
+      ],
+      "initial_DAZ": [
+        false
+      ]
+    },
+    "blas": {
+      "hashes": {
+        "original": "25181e6b2e566ee1e0ea4e0d0b6981b606e9527cc225289bf4e737c9cf25c8e3",
+        "ieee": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee"
+      },
+      "original_path": "profile_results/openblas_pthreads_snapshot_v1/lib/libopenblas.so.0.3",
+      "ieee_path": "profile_results/openblas_ieee_snapshot_v1/lib/libopenblas.so.0.3",
+      "original_flags": "C -Ofast; Fortran -Ofast -fallow-argument-mismatch",
+      "ieee_flags": "C -O3 -fno-fast-math; Fortran -O3 -fno-fast-math -fallow-argument-mismatch",
+      "common": "Same OpenBLAS0.3.30 source,LP64,ZEN,pthread64,NO_AFFINITY,USE_LOCKING,NUM_PARALLEL1"
+    },
+    "sanity": {
+      "path": "profile_results/dlascl_trace_v2/sanity_summary.json",
+      "sha256": "e49762a926ab75cecfc99cb64fd743c6f4314d11985e43fd782416871867a646",
+      "four_fresh_process_cases_PASS": true,
+      "actual_threads": [
+        1,
+        16
+      ],
+      "max_gemm_relative_error": 0,
+      "max_lu_solution_error": 1.1102230246251565e-16
+    },
+    "artifacts": {
+      "profile_results/dlascl_trace_v2/trace_lapack.c": "309bbe42d9c6db8c1deed697c7a757df36fef87a7e18d9d6dda4cfddf50a45df",
+      "profile_results/dlascl_trace_v2/liblapack_trace.so": "d053a98d44c6275102d2ce82146bfc58404cc568a706c0d3cc9e41987c5bf733",
+      "profile_results/dlascl_trace_v2/replay_svd.c": "b91a26868e15bd35a6c186fe12daab83c1063fcde6ed347bbf6a9e1582cba007",
+      "profile_results/dlascl_trace_v2/replay_svd": "052b70b7d085ae3899da2ef49256b981dc3c63a3955b74ffacc18b3300b54bcd",
+      "profile_results/dlascl_trace_v2/sanity_blas.c": "4d665be061305bc232361214fd818b7b0e11bc84ef1b9beb6cbc8dd3f0d7a4c7",
+      "profile_results/dlascl_trace_v2/sanity_blas": "5234d6aa550aea614352396450aca714cffa168f922113423f2de39dc6306a1b",
+      "profile_results/openblas_ieee_snapshot_v1/configure_build.sh": "b77f48a048f4a0148b4fb15ae47562392366446b2383dc3d67d358d4d34354b2",
+      "profile_results/openblas_pthreads_0_3_30/configure_build.sh": "93f98bd09b00079505326c7b3cd29f0ccd9422e536275039ff227448f9792953"
+    }
+  },
+  "metadata_erratum": {
+    "scope": [
+      "60478396",
+      "60478404"
+    ],
+    "kind": "metadata_correction",
+    "field": "blas_sha256",
+    "frozen_value": "25181e6b2e566ee1e0ea4e0d0b6981b606e9527cc225289bf4e737c9cf25c8e3",
+    "correct_value": "0df6859d4f84c4e2fd7a3a768d6ffe03a96d76159ca0f662487b087353a729ee",
+    "evidence": "Each case binary_hashes.txt, runtime BLAS probe and manifest record actual0df IEEE library. Frozen provenance also records same ieee_openblas_sha256. Original frozen files are preserved."
+  },
+  "excluded_attempts": {
+    "original_ofast_jobs": [
+      60477881,
+      60478174
+    ],
+    "instrumented_jobs": [
+      60478256,
+      60478322
+    ],
+    "mpi_bootstrap_job": 60478396,
+    "reasons": "Original Ofast SVD diagnostics, instrumented timing, partial/cancelled cases, and MPI/pre-exec startup failure are excluded from fixed baseline. Replacement1504 cohort60478521 is complete and never pooled with earlier attempts."
+  },
+  "artifact_policy": "Logs, binaries, build directories, job folders, and experimental source/harness snapshots are locally ignored; only report files are intended for commit."
+}
