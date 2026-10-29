@@ -361,6 +361,16 @@ namespace strumpack {
         gpu_dense_schur_=enable;
       }
       bool gpu_dense_schur() const { return gpu_dense_schur_; }
+      // Use STRUMPACK's CUDA dense factorization for exact local subtrees.
+      // Completed Schur contributions and solve factors remain on the host.
+      void set_gpu_dense_fronts(bool enable) {
+#if !defined(STRUMPACK_USE_CUDA) || defined(STRUMPACK_USE_MAGMA) || !defined(STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+        if (enable)
+          throw std::invalid_argument("GPU HODLR exact fronts require STRUMPACK CUDA, the ButterflyPACK GPU interface, and MAGMA disabled");
+#endif
+        gpu_dense_fronts_=enable;
+      }
+      bool gpu_dense_fronts() const { return gpu_dense_fronts_; }
       // Route compact child intersections to owner-local extraction panels.
       // This uses the existing CPU/native extraction ABI, also in GPU mode.
       void set_compact_extraction(bool enable) { compact_extraction_=enable; }
@@ -412,6 +422,7 @@ namespace strumpack {
       bool gpu_rectangular_ = false;
       bool gpu_host_panels_=false;
       bool gpu_dense_schur_=false;
+      bool gpu_dense_fronts_=false;
       bool compact_extraction_=false;
       std::size_t gpu_panel_max_bytes_=64u<<20;
       std::size_t gpu_front_max_bytes_ = 0;

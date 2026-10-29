@@ -66,6 +66,8 @@ namespace strumpack {
   (const SPOptions<scalar_t>& opts, integer_t s, integer_t sbegin,
    integer_t send, std::vector<integer_t>& upd,
    int level, FrontCounter& fc, bool root) {
+    const bool hodlr_gpu_exact = is_HODLR_GPU_dense(opts);
+    const bool gpu_exact = is_GPU(opts) || hodlr_gpu_exact;
     auto dsep = send - sbegin;
     auto dupd = upd.size();
     std::unique_ptr<Front<scalar_t,integer_t>> front;
@@ -143,7 +145,7 @@ namespace strumpack {
     } break;
     };
     if (front) return front;
-    if (is_GPU(opts)) {
+    if (gpu_exact) {
 #if defined(STRUMPACK_USE_CUDA)
       if (is_symmetric(opts) && is_positive_definite(opts))
         front = std::make_unique<FrontGPUSPD<scalar_t,integer_t>>
@@ -225,6 +227,9 @@ namespace strumpack {
   (const SPOptions<scalar_t>& opts, integer_t s,
    integer_t sbegin, integer_t send, std::vector<integer_t>& upd,
    int level, FrontCounter& fc, const MPIComm& comm, int P, bool root) {
+    // Validate the opt-in consistently; exact distributed fronts keep their
+    // existing CPU/ScaLAPACK backend. Only local subtrees use FrontGPU.
+    is_HODLR_GPU_dense(opts);
     auto dsep = send - sbegin;
     auto dupd = upd.size();
     std::unique_ptr<FrontMPI<scalar_t,integer_t>> front;

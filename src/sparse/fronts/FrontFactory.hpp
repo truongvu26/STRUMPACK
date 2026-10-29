@@ -30,6 +30,7 @@
 #define FRONT_FACTORY_HPP
 
 #include <array>
+#include <stdexcept>
 
 #include "StrumpackConfig.hpp"
 #if defined(STRUMPACK_USE_MPI)
@@ -62,6 +63,23 @@ namespace strumpack {
        opts.compression() == CompressionType::BLR);
 #else
     return false;
+#endif
+  }
+
+  template<typename scalar_t> bool is_HODLR_GPU_dense
+  (const SPOptions<scalar_t>& opts) {
+    if (!opts.HODLR_options().gpu_dense_fronts()) return false;
+#if defined(STRUMPACK_USE_CUDA) && !defined(STRUMPACK_USE_MAGMA) && defined(STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+    if (opts.compression() != CompressionType::HODLR ||
+        !opts.use_gpu() || !opts.HODLR_options().use_gpu() ||
+        opts.HODLR_options().butterfly_levels() ||
+        opts.gpu_streams() < 1 ||
+        opts.HODLR_options().compression_algorithm() !=
+          HODLR::CompressionAlgorithm::ELEMENT_EXTRACTION)
+      throw std::invalid_argument("GPU HODLR exact fronts require pure HODLR element extraction, GPU modes enabled, butterfly levels zero, and positive GPU streams");
+    return true;
+#else
+    throw std::invalid_argument("GPU HODLR exact fronts require STRUMPACK CUDA, the ButterflyPACK GPU interface, and MAGMA disabled");
 #endif
   }
 

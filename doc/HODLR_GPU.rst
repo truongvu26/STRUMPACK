@@ -1,5 +1,5 @@
 Hybrid ButterflyPACK HODLR GPU interface
-======================================
+========================================
 
 This feature branch is based on the shared-process-tree change (217972ad)
 and retains upstream's multi-RHS packing correction (8937587f).
@@ -24,7 +24,7 @@ installation instead of rebuilding ButterflyPACK::
 
 CMake supports both the combined ButterflyPACK::butterflypack target and
 older precision-specific targets. It compiles AND links a probe referencing
-all six d_/z_ availability, device-sharing and exchange-initialization
+all six ``d_``/``z_`` availability, device-sharing and exchange-initialization
 symbols. STRUMPACK_REQUIRE_BPACK_GPU=ON makes a missing GPU ABI a configure
 error. Exported CPU stubs are distinguished from a GPU-enabled library at
 runtime. An exported ButterflyPACK_USE_GPU=OFF suppresses CUDA discovery
@@ -79,7 +79,7 @@ Pure kernel time and separate upload/download timing require additional
 ButterflyPACK instrumentation; unavailable counters are not reported as zero.
 
 Next extension: GPU frontal evaluation
--------------------------------------
+--------------------------------------
 
 No device evaluator is registered by the hybrid sparse-front path. Device
 construction is a separate extension, not implemented by copying a Poisson
@@ -121,7 +121,12 @@ including its remaining host preparation and controlled timing evidence.
 An opt-in GPU Schur update for large exact local fronts is documented in
 HODLR_GPU_DENSE_SCHUR.rst. It keeps CPU pivoting/LU/TRSM and host child
 contributions, and replaces only the final Schur GEMM with bounded cuBLAS
-panels. STRUMPACK's separate dense CUDA backend remains disabled.
+panels. That configuration keeps STRUMPACK's separate dense CUDA backend
+disabled. The further ``--hodlr_gpu_dense_fronts 1`` option enables that
+backend for local exact subtrees in a CUDA-enabled build. Its additive host
+Schur bridge, memory fallback and matched-layout measurements are documented
+in HODLR_GPU_EXACT_FRONTS.rst. Exact distributed fronts and exact-front solves
+retain their host paths.
 
 The further opt-in ``--hodlr_compact_extraction 1`` route removes expanded
 child query matrices and their intermediate exchange, using the existing

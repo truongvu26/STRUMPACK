@@ -161,6 +161,13 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   EliminationTree<scalar_t,integer_t>::initialize_compression_backend
   (const SPOptions<scalar_t>& opts) const {
+    if (opts.HODLR_options().gpu_dense_fronts()) {
+      is_HODLR_GPU_dense(opts);
+#if defined(STRUMPACK_USE_OPENMP)
+      if (omp_get_max_threads() != 1)
+        throw std::invalid_argument("GPU HODLR exact fronts require OMP_NUM_THREADS=1");
+#endif
+    }
     if (opts.HODLR_options().compact_extraction()) {
       switch (opts.compression()) {
       case CompressionType::HODLR:

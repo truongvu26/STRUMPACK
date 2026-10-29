@@ -97,6 +97,7 @@ namespace strumpack {
          {"hodlr_gpu_panel_max_bytes",   required_argument, 0, 23},
          {"hodlr_gpu_dense_schur",       required_argument, 0, 24},
          {"hodlr_compact_extraction",    required_argument, 0, 25},
+         {"hodlr_gpu_dense_fronts",      required_argument, 0, 26},
          {"hodlr_verbose",               no_argument, 0, 'v'},
          {"hodlr_quiet",                 no_argument, 0, 'q'},
          {"help",                        no_argument, 0, 'h'},
@@ -233,11 +234,17 @@ namespace strumpack {
           if (std::string(optarg)!="0" && std::string(optarg)!="1")
             throw std::invalid_argument("--hodlr_compact_extraction requires 0 or 1");
           set_compact_extraction(std::string(optarg)=="1"); break;
+        case 26:
+          if (std::string(optarg)!="0" && std::string(optarg)!="1")
+            throw std::invalid_argument("--hodlr_gpu_dense_fronts requires 0 or 1");
+          set_gpu_dense_fronts(std::string(optarg)=="1"); break;
         case 'h': describe_options(); break;
         }
       }
       if (gpu_dense_schur() && !use_gpu())
         throw std::invalid_argument("GPU dense Schur update requires --hodlr_use_gpu 1 or 2");
+      if (gpu_dense_fronts() && !use_gpu())
+        throw std::invalid_argument("GPU HODLR exact fronts require --hodlr_use_gpu 1 or 2");
 #else
       std::cerr << "WARNING: no support for getopt.h, "
         "not parsing command line options." << std::endl;
@@ -295,6 +302,8 @@ namespace strumpack {
                 << gpu_dense_schur() << ")" << std::endl
                 << "#   --hodlr_compact_extraction 0|1 (compact child intersections routed to owner-local panels) (default "
                 << compact_extraction() << ")" << std::endl
+                << "#   --hodlr_gpu_dense_fronts 0|1 (CUDA exact local subtrees with host Schur extraction and solve; requires CUDA ON, MAGMA OFF, HODLR GPU mode and OMP=1) (default "
+                << gpu_dense_fronts() << ")" << std::endl
                 << "#   --hodlr_gpu_panel_max_bytes bytes (per-rank host panel staging budget) (default "
                 << gpu_panel_max_bytes() << ")" << std::endl
                 << "#   --hodlr_gpu_front_max_bytes bytes (experimental bounded assembly, 0: off) (default "

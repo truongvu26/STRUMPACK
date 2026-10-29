@@ -64,7 +64,7 @@ namespace strumpack {
 
     void extract_CB_sub_matrix(const std::vector<std::size_t>& I,
                                const std::vector<std::size_t>& J,
-                               DenseM_t& B, int task_depth) const override {}
+                               DenseM_t& B, int task_depth) const override;
 
     std::string type() const override { return "FrontGPU"; }
     bool isGPU() const override { return true; }
@@ -104,6 +104,10 @@ namespace strumpack {
 
     ReturnCode split_smaller(const SpMat_t& A, const SPOptions<scalar_t>& opts,
                              int etree_level=0, int task_depth=0);
+
+    // F11/F12/F21/F22 are pristine host fronts on entry. A memory fallback
+    // must keep FrontGPU's full-inverse F12 and original F21 representation.
+    ReturnCode factor_hodlr_node(const Opts_t& opts, int task_depth);
 
     void fwd_solve_phase2(DenseM_t& b, DenseM_t& bupd,
                           int etree_level, int task_depth) const override;

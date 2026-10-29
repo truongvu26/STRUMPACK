@@ -964,3 +964,10 @@ if(STRUMPACK_USE_HODLR_GPU_RECTANGULAR AND STRUMPACK_USE_HODLR_GPU_EVALUATOR)
   add_executable(test_HODLR_gpu_rectangular test_HODLR_gpu_rectangular.cpp)
   target_link_libraries(test_HODLR_gpu_rectangular PRIVATE strumpack)
 endif()
+
+# Requires an allocated CUDA GPU on every participating rank; run explicitly
+# with the same rank/GPU binding wrapper as the sparse solver.
+if(STRUMPACK_USE_CUDA AND STRUMPACK_USE_MPI AND STRUMPACK_USE_BPACK)
+  add_executable(test_HODLR_gpu_exact_front test_HODLR_gpu_exact_front.cpp)
+  target_link_libraries(test_HODLR_gpu_exact_front PRIVATE strumpack CUDA::cudart)
+endif()

@@ -30,6 +30,18 @@
 
 #include "FrontGPU.hpp"
 #include "FrontGPUKernels.hpp"
+#include "HODLR/StageProfile.hpp"
+#if defined(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+#include "HODLR/GPUDenseSchur.hpp"
+#endif
+
+#include <chrono>
+#include <limits>
+#include <stdexcept>
+#include <type_traits>
+#if defined(STRUMPACK_USE_CUDA)
+#include <cuda_runtime_api.h>
+#endif
 
 #if defined(STRUMPACK_USE_MPI)
 #include "ExtendAdd.hpp"
@@ -39,6 +51,93 @@
 
 
 namespace strumpack {
+
+  namespace {
+    using ExactFrontClock = std::chrono::steady_clock;
+    double exact_front_seconds(ExactFrontClock::time_point started) {
+      return std::chrono::duration<double>(ExactFrontClock::now()-started).count();
+    }
+    std::size_t exact_front_product(std::size_t a, std::size_t b) {
+      if (a && b>std::numeric_limits<std::size_t>::max()/a)
+        throw std::overflow_error("GPU exact front size exceeds addressable storage");
+      return a*b;
+    }
+    std::size_t exact_front_sum(std::size_t a, std::size_t b) {
+      if (b>std::numeric_limits<std::size_t>::max()-a)
+        throw std::overflow_error("GPU exact front size exceeds addressable storage");
+      return a+b;
+    }
+    // Keep space for CUDA/cuBLAS/cuSOLVER and native HODLR allocations. This
+    // is a local admission bound, not a reservation against another process.
+    std::size_t exact_front_device_budget(std::size_t free) {
+      const auto reserve=std::max(std::size_t(256)*1024*1024,free/8);
+      return free>reserve ? free-reserve : 0;
+    }
+    void exact_front_allocation_error() {
+#if defined(STRUMPACK_USE_CUDA)
+      // The generic allocator maps CUDA errors to bad_alloc. Only expected
+      // memory pressure permits CPU fallback; an execution error must escape.
+      const auto status=cudaGetLastError();
+      if (status!=cudaSuccess && status!=cudaErrorMemoryAllocation)
+        throw std::runtime_error(std::string("GPU exact front allocation: ")+
+                                 cudaGetErrorString(status));
+#endif
+    }
+    struct ExactFrontStats {
+      std::size_t batch_subtrees=0, batch_fronts=0, split_gpu_nodes=0;
+      std::size_t cpu_fallback_nodes=0, memory_splits=0, mixed_splits=0;
+      std::size_t allocation_fallbacks=0, upload_bytes=0, download_bytes=0;
+      std::size_t fallback_schur_gpu_nodes=0,fallback_schur_cpu_nodes=0;
+      std::size_t fallback_schur_upload_bytes=0,fallback_schur_download_bytes=0;
+      std::size_t fallback_schur_device_peak_bytes=0;
+      std::size_t device_peak_bytes=0;
+      double batch_seconds=0.,split_gpu_seconds=0.,cpu_fallback_seconds=0.;
+      double fallback_schur_seconds=0.,fallback_schur_device_seconds=0.;
+    };
+    thread_local ExactFrontStats* exact_front_stats=nullptr;
+    // Recursive splits accumulate into one summary for the outer GPU subtree.
+    class ExactFrontScope {
+    public:
+      ExactFrontScope(bool enabled,long long front,std::size_t rows,std::size_t upd)
+        : front_(front),rows_(rows),upd_(upd),started_(ExactFrontClock::now()) {
+        if (enabled && !exact_front_stats) { owner_=true;exact_front_stats=&stats_; }
+      }
+      ~ExactFrontScope() {
+        if (!owner_) return;
+        exact_front_stats=nullptr;
+        std::cout << "# HODLR exact dense subtree front=" << front_
+                  << " separator_rows=" << rows_ << " update_rows=" << upd_
+                  << " batch_subtrees=" << stats_.batch_subtrees
+                  << " batch_fronts=" << stats_.batch_fronts
+                  << " split_gpu_nodes=" << stats_.split_gpu_nodes
+                  << " cpu_fallback_nodes=" << stats_.cpu_fallback_nodes
+                  << " memory_splits=" << stats_.memory_splits
+                  << " mixed_splits=" << stats_.mixed_splits
+                  << " allocation_fallbacks=" << stats_.allocation_fallbacks
+                  << " fallback_schur_gpu_nodes=" << stats_.fallback_schur_gpu_nodes
+                  << " fallback_schur_cpu_nodes=" << stats_.fallback_schur_cpu_nodes
+                  << " wall_seconds_local=" << exact_front_seconds(started_)
+                  << " batch_seconds_local=" << stats_.batch_seconds
+                  << " split_gpu_seconds_local=" << stats_.split_gpu_seconds
+                  << " cpu_fallback_seconds_local=" << stats_.cpu_fallback_seconds
+                  << " upload_bytes_local=" << stats_.upload_bytes
+                  << " download_bytes_local=" << stats_.download_bytes
+                  << " explicit_device_peak_bytes_local=" << stats_.device_peak_bytes
+                  << " fallback_schur_seconds_local=" << stats_.fallback_schur_seconds
+                  << " fallback_schur_device_seconds_local=" << stats_.fallback_schur_device_seconds
+                  << " fallback_schur_upload_bytes_local=" << stats_.fallback_schur_upload_bytes
+                  << " fallback_schur_download_bytes_local=" << stats_.fallback_schur_download_bytes
+                  << " fallback_schur_device_peak_bytes_local=" << stats_.fallback_schur_device_peak_bytes
+                  << std::endl;
+      }
+    private:
+      bool owner_=false;
+      long long front_;
+      std::size_t rows_,upd_;
+      ExactFrontClock::time_point started_;
+      ExactFrontStats stats_;
+    };
+  }
 
   template<typename scalar_t, typename integer_t> class LevelInfo {
     using F_t = Front<scalar_t,integer_t>;
@@ -243,6 +342,26 @@ namespace strumpack {
     host_Schur_.reset(nullptr);
   }
 
+  template<typename scalar_t,typename integer_t> void
+  FrontGPU<scalar_t,integer_t>::extract_CB_sub_matrix
+  (const std::vector<std::size_t>& I, const std::vector<std::size_t>& J,
+   DenseM_t& B, int task_depth) const {
+    // Factorization retains this subtree root's Schur contribution on host.
+    // Add only the contribution: the parent extracts original sparse entries.
+    std::vector<std::size_t> lJ,oJ;
+    this->find_upd_indices(J,lJ,oJ);
+    if (lJ.empty()) return;
+    std::vector<std::size_t> lI,oI;
+    this->find_upd_indices(I,lI,oI);
+    if (lI.empty()) return;
+    assert(F22_.rows()==std::size_t(dim_upd()) &&
+           F22_.cols()==std::size_t(dim_upd()));
+    for (std::size_t j=0;j<lJ.size();++j)
+      for (std::size_t i=0;i<lI.size();++i)
+        B(oI[i],oJ[j])+=F22_(lI[i],lJ[j]);
+    STRUMPACK_FLOPS((is_complex<scalar_t>()?2:1)*lI.size()*lJ.size());
+  }
+
 #if defined(STRUMPACK_USE_MPI)
   template<typename scalar_t,typename integer_t> void
   FrontGPU<scalar_t,integer_t>::extend_add_copy_to_buffers
@@ -371,6 +490,143 @@ namespace strumpack {
   }
 
   template<typename scalar_t,typename integer_t> ReturnCode
+  FrontGPU<scalar_t,integer_t>::factor_hodlr_node
+  (const Opts_t& opts,int task_depth) {
+    const std::size_t n=dim_sep(),u=dim_upd();
+    if (!n) return ReturnCode::SUCCESS;
+    const auto nn=exact_front_product(n,n),nu=exact_front_product(n,u);
+    const auto uu=exact_front_product(u,u);
+    const auto base=exact_front_sum(nn,exact_front_sum(exact_front_product(2,nu),uu));
+    const auto pivbytes=exact_front_product(n+1,sizeof(int));
+    auto required=exact_front_sum(exact_front_product(base,sizeof(scalar_t)),pivbytes);
+    std::unique_ptr<gpu::Handle> handle;
+    gpu::DeviceMemory<scalar_t> memory;
+    gpu::DeviceMemory<int> pivots;
+    std::int64_t worksize=0;
+    bool admitted=false;
+    // Do not even initialize a new solver handle under severe pressure. All
+    // allocations in the try block precede GPU work and host factor mutation.
+    if (required<=exact_front_device_budget(gpu::available_memory())) {
+      try {
+        handle=std::make_unique<gpu::Handle>();
+        worksize=std::max(gpu::getrf_buffersize<scalar_t>(*handle,n),
+                         gpu::getrs_buffersize<scalar_t>(*handle,Trans::N,n,u,n,n));
+        if (worksize<0)
+          throw std::runtime_error("Negative GPU exact front workspace size");
+        const auto elements=exact_front_sum(base,std::size_t(worksize));
+        required=exact_front_sum(exact_front_product(elements,sizeof(scalar_t)),pivbytes);
+        if (required<=exact_front_device_budget(gpu::available_memory())) {
+          memory=gpu::DeviceMemory<scalar_t>(elements);
+          pivots=gpu::DeviceMemory<int>(n+1);
+          admitted=true;
+        }
+      } catch (const std::bad_alloc&) {
+        // No factor/Schur copies or kernels have run. CPU LU is still safe.
+        memory.release();pivots.release();handle.reset();
+        exact_front_allocation_error();
+        if (exact_front_stats) ++exact_front_stats->allocation_fallbacks;
+      }
+    }
+    const auto started=ExactFrontClock::now();
+    if (!admitted) {
+      handle.reset();
+      HODLR_STAGE_SCOPE(p_cpu,"front.gpu_exact.cpu_fallback",this->sep_begin_,n,u,1,0,0);
+      auto code=F11_.LU(pivot_mem_,task_depth) ?
+        ReturnCode::ZERO_PIVOT : ReturnCode::SUCCESS;
+      piv_=pivot_mem_.data();
+      if (opts.replace_tiny_pivots()) {
+        const auto threshold=opts.pivot_threshold();
+        for (std::size_t i=0;i<n;++i)
+          if (std::abs(F11_(i,i))<threshold)
+            F11_(i,i)=std::real(F11_(i,i))<0 ? -threshold : threshold;
+      }
+      if (u) {
+        // FrontGPU solves expect F12=A11^{-1}*A12 and an unmodified F21.
+        F11_.solve_LU_in_place(F12_,piv_,task_depth);
+        bool completed=false;
+#if defined(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+        if constexpr (std::is_same<scalar_t,double>::value) {
+          if (opts.HODLR_options().gpu_dense_schur() && n>=1000 &&
+              2.L*u*u*n>=1.e11L) {
+            HODLR::DenseSchurGPUStats stats;
+            HODLR_STAGE_SCOPE(p_schur,"front.gpu_exact.fallback_schur_gpu_attempt",this->sep_begin_,n,u,1,0,0);
+            completed=HODLR::gpu_dense_schur_update
+              (u,u,n,F21_.data(),F21_.ld(),F12_.data(),F12_.ld(),F22_.data(),F22_.ld(),stats);
+            if (exact_front_stats) {
+              exact_front_stats->fallback_schur_seconds+=stats.wall_seconds;
+              exact_front_stats->fallback_schur_device_seconds+=stats.device_gemm_seconds;
+              if (stats.used_gpu) {
+                ++exact_front_stats->fallback_schur_gpu_nodes;
+                exact_front_stats->fallback_schur_upload_bytes+=stats.upload_bytes;
+                exact_front_stats->fallback_schur_download_bytes+=stats.download_bytes;
+                exact_front_stats->fallback_schur_device_peak_bytes=std::max
+                  (exact_front_stats->fallback_schur_device_peak_bytes,stats.device_peak_bytes);
+                exact_front_stats->upload_bytes+=stats.upload_bytes;
+                exact_front_stats->download_bytes+=stats.download_bytes;
+                exact_front_stats->device_peak_bytes=std::max(exact_front_stats->device_peak_bytes,stats.device_peak_bytes);
+              }
+            }
+            if (completed) {
+              STRUMPACK_FLOPS(gemm_flops(Trans::N,Trans::N,scalar_t(-1.),F21_,F12_,scalar_t(1.)));
+              STRUMPACK_BYTES(8*blas::gemm_moves(u,u,n));
+            }
+          }
+        }
+#endif
+        if (!completed) {
+          gemm(Trans::N,Trans::N,scalar_t(-1.),F21_,F12_,scalar_t(1.),F22_,task_depth);
+          if (exact_front_stats) ++exact_front_stats->fallback_schur_cpu_nodes;
+        }
+      }
+      if (exact_front_stats) {
+        ++exact_front_stats->cpu_fallback_nodes;
+        exact_front_stats->cpu_fallback_seconds+=exact_front_seconds(started);
+      }
+      return code;
+    }
+
+    HODLR_STAGE_SCOPE(p_gpu,"front.gpu_exact.split_gpu",this->sep_begin_,n,u,1,0,required);
+    // Every explicit device buffer is now allocated. Execution errors must
+    // propagate; retrying CPU LU after these operations would corrupt factors.
+    auto work=memory+nn;
+    auto data12=work+worksize;
+    auto data21=data12+nu;
+    auto data22=data21+nu;
+    DenseMW_t dF11(n,n,memory,n),dF12(n,u,data12,n);
+    DenseMW_t dF21(u,n,data21,u),dF22(u,u,data22,u);
+    gpu::copy_host_to_device(dF11,F11_);
+    gpu::getrf(*handle,dF11,work,worksize,pivots,pivots+n);
+    if (opts.replace_tiny_pivots())
+      gpu::replace_pivots(n,dF11.data(),opts.pivot_threshold());
+    int info=0;
+    gpu::copy_device_to_host(&info,pivots+n,1);
+    auto code=info ? ReturnCode::ZERO_PIVOT : ReturnCode::SUCCESS;
+    if (u) {
+      gpu::copy_host_to_device(dF12,F12_);
+      gpu::getrs(*handle,Trans::N,dF11,pivots,dF12,pivots+n,work,worksize);
+      gpu::copy_device_to_host(&info,pivots+n,1);
+      if (info) code=ReturnCode::ZERO_PIVOT;
+      gpu::copy_host_to_device(dF21,F21_);
+      gpu::copy_host_to_device(dF22,F22_);
+      gpu::gemm(*handle,Trans::N,Trans::N,scalar_t(-1.),dF21,dF12,scalar_t(1.),dF22);
+      gpu::copy_device_to_host(F12_,dF12);
+      gpu::copy_device_to_host(F22_,dF22);
+    }
+    pivot_mem_.resize(n);piv_=pivot_mem_.data();
+    gpu::copy_device_to_host(piv_,pivots.template as<int>(),n);
+    gpu::copy_device_to_host(F11_,dF11);
+    if (exact_front_stats) {
+      ++exact_front_stats->split_gpu_nodes;
+      exact_front_stats->split_gpu_seconds+=exact_front_seconds(started);
+      exact_front_stats->device_peak_bytes=std::max(exact_front_stats->device_peak_bytes,required);
+      exact_front_stats->upload_bytes+=exact_front_product(base,sizeof(scalar_t));
+      exact_front_stats->download_bytes+=exact_front_product(nn+nu+uu,sizeof(scalar_t))+
+        (n+1+(u?1:0))*sizeof(int);
+    }
+    return code;
+  }
+
+  template<typename scalar_t,typename integer_t> ReturnCode
   FrontGPU<scalar_t,integer_t>::split_smaller
   (const SpMat_t& A, const SPOptions<scalar_t>& opts,
    int etree_level, int task_depth) {
@@ -385,6 +641,13 @@ namespace strumpack {
       auto er = rchild_->multifrontal_factorization
         (A, opts, etree_level+1, task_depth);
       if (er != ReturnCode::SUCCESS) err_code = er;
+    }
+    if (opts.HODLR_options().gpu_dense_fronts()) {
+      const auto limit=std::size_t(std::numeric_limits<int>::max());
+      if (dsep>limit || dupd>limit)
+        throw std::overflow_error("GPU exact front dimensions exceed the BLAS integer range");
+      exact_front_product(exact_front_product(dsep,exact_front_sum(dsep,2*dupd)),sizeof(scalar_t));
+      exact_front_product(exact_front_product(dupd,dupd),sizeof(scalar_t));
     }
     STRUMPACK_ADD_MEMORY(dsep*(dsep+2*dupd)*sizeof(scalar_t));
     STRUMPACK_ADD_MEMORY(dupd*dupd*sizeof(scalar_t));
@@ -414,7 +677,10 @@ namespace strumpack {
     }
     // TaskTimer tl("");
     // tl.start();
-    if (dsep) {
+    if (opts.HODLR_options().gpu_dense_fronts()) {
+      const auto local=factor_hodlr_node(opts,task_depth);
+      if (local!=ReturnCode::SUCCESS) err_code=local;
+    } else if (dsep) {
       gpu::Handle h;
       auto lwork = gpu::getrf_buffersize<scalar_t>(h, dsep);
       gpu::DeviceMemory<scalar_t> dm11(dsep*dsep + lwork);
@@ -471,6 +737,16 @@ namespace strumpack {
   FrontGPU<scalar_t,integer_t>::multifrontal_factorization
   (const SpMat_t& A, const SPOptions<scalar_t>& opts,
    int etree_level, int task_depth) {
+    const bool hodlr_exact=opts.HODLR_options().gpu_dense_fronts();
+    ExactFrontScope exact_scope(hodlr_exact,this->sep_begin_,dim_sep(),dim_upd());
+    HODLR_STAGE_SCOPE_IF(p_exact,hodlr_exact,"front.gpu_exact.subtree",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
+    const auto batch_started=ExactFrontClock::now();
+    // A low-memory leaf must reach CPU admission without initializing another
+    // cuSOLVER handle. Split traversal will make the same check per node.
+    if (hodlr_exact && !exact_front_device_budget(gpu::available_memory())) {
+      if (exact_front_stats) ++exact_front_stats->memory_splits;
+      return split_smaller(A,opts,etree_level,task_depth);
+    }
     ReturnCode err_code = ReturnCode::SUCCESS;
     const int max_streams = opts.gpu_streams();
     std::vector<gpu::Handle> handles(max_streams);
@@ -481,6 +757,7 @@ namespace strumpack {
       try {
         this->get_level_fronts_gpu(fp);
       } catch (...) {
+        if (exact_front_stats) ++exact_front_stats->mixed_splits;
         return split_smaller(A, opts, etree_level, task_depth);
       }
       for (int l=lvls-1; l>=0; l--)
@@ -488,7 +765,10 @@ namespace strumpack {
     }
 
     auto peak_dmem = peak_device_memory(ldata);
-    if (peak_dmem >= 0.9 * gpu::available_memory()) {
+    const auto free_device=gpu::available_memory();
+    if (hodlr_exact ? peak_dmem>exact_front_device_budget(free_device) :
+        peak_dmem>=0.9*free_device) {
+      if (exact_front_stats) ++exact_front_stats->memory_splits;
       if (opts.verbose())
         std::cout << "# Factorization does not fit in GPU memory, "
           "splitting in smaller traversals." << std::endl;
@@ -517,7 +797,21 @@ namespace strumpack {
     for (int l=lvls-1; l>=0; l--)
       peak_hea_mem = std::max(peak_hea_mem, ldata[l].ea_bytes);
     gpu::HostMemory<char> hea_mem(peak_hea_mem);
-    gpu::DeviceMemory<char> all_dmem(peak_dmem);
+    gpu::DeviceMemory<char> all_dmem;
+    if (hodlr_exact) {
+      try {
+        // No front pointers or host factors have been changed yet.
+        all_dmem=gpu::DeviceMemory<char>(peak_dmem);
+      } catch (const std::bad_alloc&) {
+        pinned.release();fdata.release();hea_mem.release();
+        handles.clear();streams.clear();
+        exact_front_allocation_error();
+        if (exact_front_stats) ++exact_front_stats->allocation_fallbacks;
+        return split_smaller(A,opts,etree_level,task_depth);
+      }
+      if (exact_front_stats)
+        exact_front_stats->device_peak_bytes=std::max(exact_front_stats->device_peak_bytes,peak_dmem);
+    } else all_dmem=gpu::DeviceMemory<char>(peak_dmem);
     char* old_work = nullptr;
     for (int l=lvls-1; l>=0; l--) {
       // TaskTimer tl("");
@@ -675,6 +969,13 @@ namespace strumpack {
       L.flops(level_flops, small_flops);
       STRUMPACK_FULL_RANK_FLOPS(level_flops);
       STRUMPACK_FLOPS(small_flops);
+      if (exact_front_stats) {
+        exact_front_stats->batch_fronts+=L.f.size();
+        exact_front_stats->upload_bytes+=L.ea_bytes+
+          L.small_fronts*sizeof(gpu::FrontData<scalar_t>);
+        exact_front_stats->download_bytes+=L.factor_size*sizeof(scalar_t)+
+          (L.piv_size+L.f.size())*sizeof(int);
+      }
       // if (opts.verbose()) {
       //   auto level_time = tl.elapsed();
       //   std::cout << "#   GPU Factorization complete, took: "
@@ -690,6 +991,12 @@ namespace strumpack {
       gpu::copy_device_to_host
         (host_Schur_.get(), reinterpret_cast<scalar_t*>(old_work), dupd*dupd);
       F22_ = DenseMW_t(dupd, dupd, host_Schur_.get(), dupd);
+      if (exact_front_stats)
+        exact_front_stats->download_bytes+=dupd*dupd*sizeof(scalar_t);
+    }
+    if (exact_front_stats) {
+      ++exact_front_stats->batch_subtrees;
+      exact_front_stats->batch_seconds+=exact_front_seconds(batch_started);
     }
     return err_code;
   }
