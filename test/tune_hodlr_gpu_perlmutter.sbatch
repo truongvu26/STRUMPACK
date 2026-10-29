@@ -58,6 +58,8 @@ started=$(date +%s);out="$PWD/profile_results/$SLURM_JOB_ID${label:+-$label}";mk
 cp "${BASH_SOURCE[0]}" "$out/job.sbatch"
 analyzer="$out/analyze_hodlr_gpu_tuning.py"
 cp test/analyze_hodlr_gpu_tuning.py "$analyzer"
+cp test/run_hodlr_stage_rank.sh "$out/run_rank_frozen.sh"
+cp test/probe_hodlr_blas_runtime.py "$out/probe_hodlr_blas_runtime.py"
 scontrol show job "$SLURM_JOB_ID" > "$out/slurm_job.txt"
 plan=${HODLR_TUNE_PLAN:-$out/default_plan.json}
 if [[ -z ${HODLR_TUNE_PLAN:-} ]];then
@@ -74,13 +76,13 @@ while IFS= read -r label;do
     printf 'Insufficient allocation budget: %s seconds remain\n' "$remaining" > "$dir/skipped_budget.txt"
     continue
   fi
-  read -r workers fraction case_limit residual_guard < <(python3 - "$dir/config.json" <<'PY'
+  read -r workers fraction case_limit residual_guard thread_timeout < <(python3 - "$dir/config.json" <<'PY'
 import json,sys
-c=json.load(open(sys.argv[1]));print(c['blas_threads'],c['heap_fraction'],c['timeout_seconds'],c.get('baca_residual_guard',0))
+c=json.load(open(sys.argv[1]));print(c['blas_threads'],c['heap_fraction'],c['timeout_seconds'],c.get('baca_residual_guard',0),c.get('blas_thread_timeout',28))
 PY
 )
   export OPENBLAS_NUM_THREADS="$workers" HODLR_OPENBLAS_THREADS="$workers" BPACK_GPU_HEAP_FRACTION="$fraction"
-  export BPACK_GPU_BACA_RESIDUAL_GUARD="$residual_guard"
+  export BPACK_GPU_BACA_RESIDUAL_GUARD="$residual_guard" OPENBLAS_THREAD_TIMEOUT="$thread_timeout"
   limit=$budget;(( case_limit>=limit )) || limit=$case_limit
   python3 - "$dir/argv.json" > "$dir/argv.nul" <<'PY'
 import json,sys
@@ -97,7 +99,9 @@ PY
     srun --nodelist="$node_list" -N "$nodes" -n "$HODLR_PROFILE_RANKS" --ntasks-per-node="$pernode" -c "$cpus" --gpus-per-node="$gpus" \
     --input=none --gpu-bind=none --cpu-bind=cores --kill-on-bad-exit=1 --wait=0 \
     --output="$dir/panels.rank%t.log" --error="$dir/panels.rank%t.log" \
-    bash test/run_hodlr_stage_rank.sh "$dir" panels 0 "${args[@]}" || status=$?
+    bash -c 'case_dir=$1; rank_wrapper=$2; shift 2
+      printf "%s\n" "${OPENBLAS_THREAD_TIMEOUT-unset}" > "$case_dir/panels.openblas_thread_timeout.rank${SLURM_PROCID}.txt"
+      exec bash "$rank_wrapper" "$case_dir" panels 0 "$@"' _ "$dir" "$out/run_rank_frozen.sh" "${args[@]}" || status=$?
   printf '%s\n' "$status" > "$dir/panels.exit_code"
   python3 "$analyzer" "$out"
 done < "$out/case_order.txt"

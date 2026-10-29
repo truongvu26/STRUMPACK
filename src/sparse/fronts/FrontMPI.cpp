@@ -30,6 +30,7 @@
 #include "FrontMPI.hpp"
 #include "FrontBLRMPI.hpp"
 #include "ExtendAdd.hpp"
+#include "HODLR/StageProfile.hpp"
 
 namespace strumpack {
 
@@ -55,20 +56,30 @@ namespace strumpack {
   FrontMPI<scalar_t,integer_t>::extract_2d
   (const SpMat_t& A, const VecVec_t& I, const VecVec_t& J,
    std::vector<DistMW_t>& B, bool skip_sparse) const {
+    HODLR_STAGE_SCOPE_IF(p_extract,this->dim_sep()>=1000,"front.extract.parent",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
     TIMER_TIME(TaskType::EXTRACT_2D, 1, t_ex);
     int rank = Comm().rank(), nprocs = P();
     std::vector<DistM_t> Bl, Br;
     std::vector<DenseM_t> Blseq, Brseq;
-    if (visit(lchild_)) lchild_->get_submatrix_2d(I, J, Bl, Blseq);
-    if (visit(rchild_)) rchild_->get_submatrix_2d(I, J, Br, Brseq);
+    if (visit(lchild_)) {
+      HODLR_STAGE_SCOPE_IF(p_left,this->dim_sep()>=1000,"front.extract.child_left",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      lchild_->get_submatrix_2d(I, J, Bl, Blseq);
+    }
+    if (visit(rchild_)) {
+      HODLR_STAGE_SCOPE_IF(p_right,this->dim_sep()>=1000,"front.extract.child_right",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      rchild_->get_submatrix_2d(I, J, Br, Brseq);
+    }
     std::vector<int> bgrid(3*I.size(), -1);
-    for (std::size_t i=0; i<I.size(); i++)
-      if (B[i].grid() && B[i].prow() == 0 && B[i].pcol() == 0) {
-        bgrid[3*i] = rank;
-        bgrid[3*i+1] = B[i].nprows();
-        bgrid[3*i+2] = B[i].npcols();
-      }
-    Comm().all_reduce(bgrid.data(), bgrid.size(), MPI_MAX);
+    {
+      HODLR_STAGE_SCOPE_IF(p_metadata,this->dim_sep()>=1000,"front.extract.metadata",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t i=0; i<I.size(); i++)
+        if (B[i].grid() && B[i].prow() == 0 && B[i].pcol() == 0) {
+          bgrid[3*i] = rank;
+          bgrid[3*i+1] = B[i].nprows();
+          bgrid[3*i+2] = B[i].npcols();
+        }
+      Comm().all_reduce(bgrid.data(), bgrid.size(), MPI_MAX);
+    }
     std::vector<std::vector<scalar_t>> sbuf(nprocs);
     std::size_t ssize = 0;
     for (std::size_t i=0; i<I.size(); i++)
@@ -78,13 +89,18 @@ namespace strumpack {
     bool vl = visit(lchild_), vr = visit(rchild_);
     for (std::size_t i=0; i<I.size(); i++) {
       if (!skip_sparse) {
+        HODLR_STAGE_SCOPE_IF(p_sparse,this->dim_sep()>=1000,"front.extract.sparse",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
         TIMER_TIME(TaskType::EXTRACT_SEP_2D, 2, t_ex_sep);
         DistM_t tmp(grid(), I[i].size(), J[i].size());
         A.extract_separator_2d(this->sep_end_, I[i], J[i], tmp);
-        subgrid_copy_to_buffers
-          (tmp, B[i], bgrid[3*i], bgrid[3*i+1], bgrid[3*i+2], sbuf);
+        {
+          HODLR_STAGE_SCOPE_IF(p_pack_sparse,this->dim_sep()>=1000,"front.extract.pack_sparse",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+          subgrid_copy_to_buffers
+            (tmp, B[i], bgrid[3*i], bgrid[3*i+1], bgrid[3*i+2], sbuf);
+        }
       }
       if (vl) {
+        HODLR_STAGE_SCOPE_IF(p_pack_left,this->dim_sep()>=1000,"front.extract.pack_child_left",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
         if (lchild_->isMPI())
           subgrid_copy_to_buffers
             (Bl[i], B[i], bgrid[3*i], bgrid[3*i+1], bgrid[3*i+2], sbuf);
@@ -93,6 +109,7 @@ namespace strumpack {
             (Blseq[i], B[i], bgrid[3*i], bgrid[3*i+1], bgrid[3*i+2], sbuf);
       }
       if (vr) {
+        HODLR_STAGE_SCOPE_IF(p_pack_right,this->dim_sep()>=1000,"front.extract.pack_child_right",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
         if (rchild_->isMPI())
           subgrid_copy_to_buffers
             (Br[i], B[i], bgrid[3*i], bgrid[3*i+1], bgrid[3*i+2], sbuf);
@@ -104,6 +121,7 @@ namespace strumpack {
     std::vector<scalar_t,NoInit<scalar_t>> rbuf;
     std::vector<scalar_t*> pbuf;
     {
+      HODLR_STAGE_SCOPE_IF(p_exchange,this->dim_sep()>=1000,"front.extract.exchange",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::EXTRACT_2D_A2A, 1, t_a2a);
       Comm().all_to_all_v(sbuf, rbuf, pbuf);
     }
@@ -111,12 +129,15 @@ namespace strumpack {
     if (lchild_) gl = lchild_->grid();
     if (rchild_) gr = rchild_->grid();
     int ml = master(lchild_), mr = master(rchild_);
-    for (std::size_t i=0; i<I.size(); i++) {
-      if (!B[i].active()) continue;
-      B[i].zero();
-      if (!skip_sparse) subgrid_add_from_buffers(grid(), 0, B[i], pbuf);
-      if (lchild_) subgrid_add_from_buffers(gl, ml, B[i], pbuf);
-      if (rchild_) subgrid_add_from_buffers(gr, mr, B[i], pbuf);
+    {
+      HODLR_STAGE_SCOPE_IF(p_unpack,this->dim_sep()>=1000,"front.extract.unpack",this->sep_begin_,this->dim_sep(),this->dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t i=0; i<I.size(); i++) {
+        if (!B[i].active()) continue;
+        B[i].zero();
+        if (!skip_sparse) subgrid_add_from_buffers(grid(), 0, B[i], pbuf);
+        if (lchild_) subgrid_add_from_buffers(gl, ml, B[i], pbuf);
+        if (rchild_) subgrid_add_from_buffers(gr, mr, B[i], pbuf);
+      }
     }
   }
 

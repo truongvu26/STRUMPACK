@@ -549,6 +549,24 @@ if(TPL_ENABLE_BPACK)
     if(STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
       find_package(CUDAToolkit REQUIRED)
       message(STATUS "ButterflyPACK GPU ABI found; runtime capability checked when requested")
+      cmake_push_check_state(RESET)
+      set(CMAKE_REQUIRED_LIBRARIES CUDA::cudart CUDA::cublas)
+      unset(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR CACHE)
+      check_cxx_source_compiles("
+        #include <cuda_runtime_api.h>
+        #include <cublas_v2.h>
+        int main() {
+          size_t free=0,total=0; cudaMemGetInfo(&free,&total);
+          cublasHandle_t h=nullptr; cublasCreate(&h);
+          const double alpha=-1.,beta=1.;
+          cublasDgemm(h,CUBLAS_OP_N,CUBLAS_OP_N,1,1,1,&alpha,
+                      nullptr,1,nullptr,1,&beta,nullptr,1);
+          return int(cublasDestroy(h));
+        }" STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+      cmake_pop_check_state()
+      if(NOT STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+        message(FATAL_ERROR "HODLR GPU dense Schur update requires CUDA runtime and cuBLAS DGEMM")
+      endif()
     endif()
 
   endif()
@@ -556,6 +574,9 @@ endif()
 
 if(NOT TPL_ENABLE_BPACK OR NOT ButterflyPACK_FOUND)
   set(STRUMPACK_HAVE_BPACK_GPU_INTERFACE OFF)
+endif()
+if(NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)
+  set(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR OFF)
 endif()
 
 if(STRUMPACK_REQUIRE_BPACK_GPU AND NOT STRUMPACK_HAVE_BPACK_GPU_INTERFACE)

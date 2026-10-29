@@ -161,6 +161,21 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   EliminationTree<scalar_t,integer_t>::initialize_compression_backend
   (const SPOptions<scalar_t>& opts) const {
+    if (opts.HODLR_options().gpu_dense_schur()) {
+      if (!opts.HODLR_options().use_gpu())
+        throw std::invalid_argument("GPU dense Schur update requires HODLR GPU mode 1 or 2");
+      switch (opts.compression()) {
+      case CompressionType::HODLR:
+      case CompressionType::BLR_HODLR:
+      case CompressionType::ZFP_BLR_HODLR: break;
+      default:
+        throw std::invalid_argument("GPU dense Schur update requires HODLR compression");
+      }
+#if defined(STRUMPACK_USE_OPENMP)
+      if (omp_get_max_threads() != 1)
+        throw std::invalid_argument("GPU dense Schur update requires OMP_NUM_THREADS=1");
+#endif
+    }
     if (!opts.HODLR_options().use_gpu()) return;
     switch (opts.compression()) {
     case CompressionType::HODLR:

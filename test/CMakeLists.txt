@@ -23,6 +23,13 @@ add_test("user_test_SPD_seq" ${CMAKE_CURRENT_BINARY_DIR}/test_SPD_seq bcsstm08/b
 add_test("user_test_SPD_mixedPrecision" ${CMAKE_CURRENT_BINARY_DIR}/test_SPD_mixedPrecision bcsstm08/bcsstm08.mtx)
 
 if(STRUMPACK_USE_MPI)
+  add_executable(test_PropMap_extract test_PropMap_extract.cpp)
+  target_link_libraries(test_PropMap_extract PRIVATE strumpack)
+  add_test(NAME PropMap_extract_mpi
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
+    ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_PropMap_extract> ${MPIEXEC_POSTFLAGS})
+  set_tests_properties(PropMap_extract_mpi PROPERTIES
+    ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
   if(STRUMPACK_USE_BPACK)
     add_executable(test_HODLR_gpu_interface_mpi test_HODLR_gpu_interface_mpi.cpp)
     target_link_libraries(test_HODLR_gpu_interface_mpi strumpack)
@@ -939,6 +946,11 @@ if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
   target_link_libraries(test_HODLR_gpu_front_integration PRIVATE strumpack)
   add_executable(test_HODLR_gpu_capture test_HODLR_gpu_capture.cpp)
   target_link_libraries(test_HODLR_gpu_capture PRIVATE strumpack)
+endif()
+
+if(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+  add_executable(test_HODLR_gpu_dense_schur test_HODLR_gpu_dense_schur.cpp)
+  target_link_libraries(test_HODLR_gpu_dense_schur PRIVATE strumpack CUDA::cudart)
 endif()
 
 if(STRUMPACK_USE_HODLR_GPU_RECTANGULAR AND STRUMPACK_USE_HODLR_GPU_EVALUATOR)

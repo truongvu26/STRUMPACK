@@ -45,16 +45,27 @@ trace_ranks=${HODLR_NSYS_TRACE_RANKS:-0,$((HODLR_PROFILE_RANKS-1))}
 if [[ "$trace" != 1 || ",$trace_ranks," != *",$SLURM_PROCID,"* ]]; then
   exec "$@"
 fi
+# Keep the profiler and its probe helpers free of application preloads.
+# Nsight's target-environment option preserves its own injection setup.
+target_preload=$LD_PRELOAD
+unset LD_PRELOAD
 local_dir=$(mktemp -d "${TMPDIR:-/tmp}/hodlr-stage-${SLURM_JOB_ID}-${SLURM_PROCID}.XXXXXX")
 trap 'rm -rf "$local_dir"' EXIT
 status=0
+if [[ ${HODLR_NSYS_LOCAL_EXECUTABLE:-0} == 1 ]]; then
+  [[ -f "$1" && -x "$1" ]] || { echo 'Local profiling copy requires an executable file' >&2; exit 1; }
+  cp "$1" "$local_dir/target"
+  sha256sum "$local_dir/target" > "$out/$variant.traced_driver.rank${SLURM_PROCID}.sha256"
+  shift
+  set -- "$local_dir/target" "$@"
+fi
 sampling=(--sample=none --cpuctxsw=none)
 if [[ ${HODLR_NSYS_CPU_SAMPLING:-0} == 1 ]]; then
   nsys status -e > "$out/rank${SLURM_PROCID}.nsys_environment.txt" 2>&1
   sampling=(--sample=process-tree --backtrace=dwarf --sampling-period=8000000
             --samples-per-backtrace=1 --cpuctxsw=process-tree --resolve-symbols=true)
 fi
-nsys profile --trace=cuda,nvtx,cublas,osrt --osrt-threshold=100000 "${sampling[@]}" \
+nsys profile --env-var "LD_PRELOAD=$target_preload" --trace=cuda,nvtx,cublas,osrt --osrt-threshold=100000 "${sampling[@]}" \
   --force-overwrite=false --output="$local_dir/rank${SLURM_PROCID}" "$@" || status=$?
 printf '%s\n' "$status" > "$out/rank${SLURM_PROCID}.target_exit_code"
 shopt -s nullglob

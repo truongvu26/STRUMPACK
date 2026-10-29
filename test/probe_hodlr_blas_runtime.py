@@ -32,12 +32,20 @@ lib.openblas_get_num_threads.restype=ctypes.c_int
 omp=ctypes.CDLL('libgomp.so.1');omp.omp_get_max_threads.restype=ctypes.c_int
 config=lib.openblas_get_config().decode();actual=lib.openblas_get_num_threads()
 parallel=lib.openblas_get_parallel();ompmax=omp.omp_get_max_threads()
+timeout_env=os.environ.get('OPENBLAS_THREAD_TIMEOUT')
+timeout_parsed=None
+if hasattr(lib,'openblas_thread_timeout'):
+    lib.openblas_thread_timeout.restype=ctypes.c_uint
+    timeout_parsed=lib.openblas_thread_timeout()
+timeout_exponent=(max(4,min(30,timeout_parsed)) if timeout_parsed else 28) if timeout_parsed is not None else None
 if parallel!=1 or actual!=a.threads or ompmax!=1 or 'USE64BITINT' in config:
     raise SystemExit('Expected pthread LP64 BLAS, requested workers and OMP1: '+repr((config,actual,parallel,ompmax)))
 d=dict(status='PASS',rank=int(os.environ.get('SLURM_PROCID','0')),node=os.uname().nodename,
     library=str(library),library_sha256=hashlib.sha256(library.read_bytes()).hexdigest(),
     config=config,parallel_kind=parallel,requested_threads=a.threads,reported_threads=actual,
-    omp_max_threads=ompmax,affinity_cpus=affinity,logical_cpu_count=len(affinity),physical_core_count=physical,
+    omp_max_threads=ompmax,openblas_thread_timeout_env=timeout_env,
+    openblas_thread_timeout_parsed=timeout_parsed,openblas_thread_timeout_exponent=timeout_exponent,
+    affinity_cpus=affinity,logical_cpu_count=len(affinity),physical_core_count=physical,
     physical_core_ids=sorted(cores) if physical is not None else None,
     workers_exceed_physical_cores=physical is not None and a.threads>physical,
     loader_openblas_dependencies=lines,

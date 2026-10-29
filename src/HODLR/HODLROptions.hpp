@@ -34,6 +34,7 @@
 
 #include "clustering/Clustering.hpp"
 #include "structured/StructuredOptions.hpp"
+#include "StrumpackConfig.hpp"
 
 #include <stdexcept>
 #include <limits>
@@ -350,6 +351,16 @@ namespace strumpack {
       bool gpu_rectangular() const { return gpu_rectangular_; }
       void set_gpu_host_panels(bool enable) { gpu_host_panels_=enable; }
       bool gpu_host_panels() const { return gpu_host_panels_; }
+      // Opt-in exact local FP64 Schur GEMM. LU/TRSM and the child contribution
+      // stay on the host; other scalar types retain their CPU Schur update.
+      void set_gpu_dense_schur(bool enable) {
+#if !defined(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+        if (enable)
+          throw std::invalid_argument("GPU dense Schur update requires the configured HODLR CUDA/cuBLAS interface");
+#endif
+        gpu_dense_schur_=enable;
+      }
+      bool gpu_dense_schur() const { return gpu_dense_schur_; }
       void set_gpu_panel_max_bytes(std::size_t bytes) {
         if (bytes<16 || bytes>std::size_t(std::numeric_limits<int>::max()))
           throw std::invalid_argument("GPU panel budget must be 16..INT_MAX bytes");
@@ -396,6 +407,7 @@ namespace strumpack {
       int use_gpu_ = 0;
       bool gpu_rectangular_ = false;
       bool gpu_host_panels_=false;
+      bool gpu_dense_schur_=false;
       std::size_t gpu_panel_max_bytes_=64u<<20;
       std::size_t gpu_front_max_bytes_ = 0;
 

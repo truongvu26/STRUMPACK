@@ -18,7 +18,7 @@ if a.prepare:
     defaults=dict(gpu_mode=1,leaf=256,tol=1e-5,min_sep=5000,min_front=100000,lr_leaf=5,
         knn_hodlrbf=64,knn_lrbf=128,baca_batch=16,image_cap=1073741824,panel_cap=67108864,
         blas_threads=workers,heap_fraction=.85,maxit=30,timeout_seconds=300,extra_args=[],
-        gpu_rectangular=1,gpu_host_panels=1,solver_tol=1e-10,baca_residual_guard=0)
+        gpu_rectangular=1,gpu_host_panels=1,solver_tol=1e-10,baca_residual_guard=0,blas_thread_timeout=28)
     flags={'gpu_mode':'hodlr_use_gpu','leaf':'hodlr_leaf_size','tol':'hodlr_rel_tol',
         'min_sep':'sp_compression_min_sep_size','min_front':'sp_compression_min_front_size',
         'gpu_rectangular':'hodlr_gpu_rectangular','gpu_host_panels':'hodlr_gpu_host_panels',
@@ -36,8 +36,9 @@ if a.prepare:
         label=c.pop('label','case-%02d'%index)
         assert re.fullmatch(r'[A-Za-z0-9_-]+',label) and label not in labels,'Invalid or duplicate label'
         labels.add(label)
-        for key in ('gpu_mode','leaf','min_sep','min_front','lr_leaf','knn_hodlrbf','knn_lrbf','baca_batch','image_cap','panel_cap','blas_threads','maxit','timeout_seconds','gpu_rectangular','gpu_host_panels','baca_residual_guard'):
+        for key in ('gpu_mode','leaf','min_sep','min_front','lr_leaf','knn_hodlrbf','knn_lrbf','baca_batch','image_cap','panel_cap','blas_threads','maxit','timeout_seconds','gpu_rectangular','gpu_host_panels','baca_residual_guard','blas_thread_timeout'):
             assert isinstance(c[key],int) and not isinstance(c[key],bool) and c[key]>=0,'Invalid '+key
+        assert 4<=c['blas_thread_timeout']<=30, 'BLAS thread timeout exponent must be in4..30'
         assert c['gpu_rectangular'] in (0,1) and c['gpu_host_panels'] in (0,1) and c['baca_residual_guard'] in (0,1)
         assert c['gpu_mode'] in (1,2) and c['lr_leaf'] in (4,5),'GPU HODLR requires mode1/2 and lr_leaf4/5'
         assert min(c[k] for k in ('leaf','baca_batch','panel_cap','blas_threads','maxit','timeout_seconds'))>0
@@ -155,6 +156,11 @@ for planned in manifest['plan']:
         if sum(bindings.values())!=ranks or len(bindings)!=ranks//sharing or set(bindings.values())!={sharing}:raise ValueError('GPU placement/sharing mismatch')
         if bindings0 is None:bindings0=bindings
         if bindings!=bindings0:raise ValueError('GPU placement changed')
+        if 'blas_thread_timeout' in planned['settings']:
+            exponent=planned['settings']['blas_thread_timeout']
+            if any((directory/('panels.openblas_thread_timeout.rank%d.txt'%r)).read_text().strip()!=str(exponent) for r in range(ranks)):
+                raise ValueError('Rank OPENBLAS_THREAD_TIMEOUT environment mismatch')
+            c['blas_thread_timeout_environment_verified']=True
         expected=[manifest['executable_sha256'],manifest['native_library_sha256']]
         if manifest['blas_library_sha256']:expected.append(manifest['blas_library_sha256'])
         if [s.split()[0] for s in (directory/'binary_hashes.txt').read_text().splitlines()]!=expected:raise ValueError('Binary hashes differ')
@@ -165,6 +171,12 @@ for planned in manifest['plan']:
                 if not (probe['status']=='PASS' and probe['rank']==rank and probe['library_sha256']==manifest['blas_library_sha256'] and
                     probe['reported_threads']==workers and probe['omp_max_threads']==1 and probe['parallel_kind']==1 and
                     len(probe['loader_openblas_dependencies'])==1 and probe['physical_core_count']>=workers):raise ValueError('BLAS runtime/CPU placement verification failed')
+                if 'blas_thread_timeout' in planned['settings'] and 'openblas_thread_timeout_env' in probe:
+                    exponent=planned['settings']['blas_thread_timeout']
+                    if not (probe['openblas_thread_timeout_env']==str(exponent) and
+                        probe.get('openblas_thread_timeout_parsed')==exponent and
+                        probe.get('openblas_thread_timeout_exponent')==exponent):
+                        raise ValueError('OpenBLAS parsed thread timeout/runtime environment mismatch')
                 cores={tuple(x) for x in probe['physical_core_ids']}
                 if used[probe['node']]&cores:raise ValueError('Physical CPU cores overlap')
                 used[probe['node']].update(cores);affinity.append((probe['node'],probe['affinity_cpus']))

@@ -24,6 +24,14 @@ if(STRUMPACK_USE_BPACK)
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/HODLR)
 endif()
 
+if(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+  target_sources(strumpack PRIVATE GPUDenseSchur.cpp GPUDenseSchur.hpp)
+  # This host-only helper uses the HODLR CUDA dependencies directly, without
+  # enabling STRUMPACK's separate CUDA dense-front backend.
+  target_link_libraries(strumpack PRIVATE CUDA::cudart CUDA::cublas)
+  install(FILES GPUDenseSchur.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/HODLR)
+endif()
+
 if(STRUMPACK_USE_HODLR_GPU_EVALUATOR)
   # Isolate CUDA compilation from the ordinary host compiler's flags.
   add_library(strumpack_hodlr_gpu_evaluator OBJECT GPUFrontEvaluator.cu)

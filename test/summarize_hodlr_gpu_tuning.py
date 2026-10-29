@@ -14,7 +14,7 @@ from pathlib import Path
 TARGETS = {100: 14.2, 150: 67.0, 200: 119.0}
 LAYOUT = ('grid', 'ranks', 'nodes', 'ranks_per_gpu')
 IMPLICIT_DEFAULTS = dict(gpu_rectangular=1, gpu_host_panels=1,
-                         solver_tol=1e-10, baca_residual_guard=0)
+                         solver_tol=1e-10, baca_residual_guard=0, blas_thread_timeout=28)
 BUILD_HASHES = ('executable_sha256', 'native_library_sha256', 'blas_library_sha256')
 TIMINGS = ('factor_seconds', 'solve_seconds', 'factor_plus_solve_seconds',
            'nd_seconds', 'symbolic_seconds', 'sep_reorder_seconds',

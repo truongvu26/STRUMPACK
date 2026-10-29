@@ -95,6 +95,7 @@ namespace strumpack {
          {"hodlr_gpu_rectangular",       required_argument, 0, 21},
          {"hodlr_gpu_host_panels",       required_argument, 0, 22},
          {"hodlr_gpu_panel_max_bytes",   required_argument, 0, 23},
+         {"hodlr_gpu_dense_schur",       required_argument, 0, 24},
          {"hodlr_verbose",               no_argument, 0, 'v'},
          {"hodlr_quiet",                 no_argument, 0, 'q'},
          {"help",                        no_argument, 0, 'h'},
@@ -223,9 +224,15 @@ namespace strumpack {
             throw std::invalid_argument("--hodlr_gpu_panel_max_bytes requires a byte count");
           set_gpu_panel_max_bytes(bytes);
         } break;
+        case 24:
+          if (std::string(optarg)!="0" && std::string(optarg)!="1")
+            throw std::invalid_argument("--hodlr_gpu_dense_schur requires 0 or 1");
+          set_gpu_dense_schur(std::string(optarg)=="1"); break;
         case 'h': describe_options(); break;
         }
       }
+      if (gpu_dense_schur() && !use_gpu())
+        throw std::invalid_argument("GPU dense Schur update requires --hodlr_use_gpu 1 or 2");
 #else
       std::cerr << "WARNING: no support for getopt.h, "
         "not parsing command line options." << std::endl;
@@ -279,6 +286,8 @@ namespace strumpack {
                 << gpu_rectangular() << ")" << std::endl
                 << "#   --hodlr_gpu_host_panels 0|1 (GPU BACA with bounded host preparation; requires hodlr_quiet) (default "
                 << gpu_host_panels() << ")" << std::endl
+                << "#   --hodlr_gpu_dense_schur 0|1 (experimental bounded exact local FP64 Schur GEMM; other scalar types use CPU, requires HODLR GPU mode and OMP=1) (default "
+                << gpu_dense_schur() << ")" << std::endl
                 << "#   --hodlr_gpu_panel_max_bytes bytes (per-rank host panel staging budget) (default "
                 << gpu_panel_max_bytes() << ")" << std::endl
                 << "#   --hodlr_gpu_front_max_bytes bytes (experimental bounded assembly, 0: off) (default "

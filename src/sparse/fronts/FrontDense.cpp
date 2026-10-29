@@ -28,6 +28,11 @@
  */
 
 #include "FrontDense.hpp"
+#include "HODLR/StageProfile.hpp"
+#if defined(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+#include "HODLR/GPUDenseSchur.hpp"
+#endif
+#include <type_traits>
 #if defined(STRUMPACK_USE_MPI)
 #include "ExtendAdd.hpp"
 #include "FrontMPI.hpp"
@@ -232,23 +237,36 @@ namespace strumpack {
     // TODO can we allocate the memory in one go??
     const auto dsep = dim_sep();
     const auto dupd = dim_upd();
-    F11_ = DenseM_t(dsep, dsep); F11_.zero();
-    F12_ = DenseM_t(dsep, dupd); F12_.zero();
-    F21_ = DenseM_t(dupd, dsep); F21_.zero();
-    A.extract_front
-      (F11_, F12_, F21_, this->sep_begin_, this->sep_end_,
-       this->upd_, task_depth);
+    // Profile local work after child recursion, and skip the numerous small
+    // fronts so diagnostic runs do not collect a scope for every tree leaf.
+    HODLR_STAGE_SCOPE_IF(p_assemble,dsep>=1000,"front.dense.assemble",this->sep_begin_,dsep,dupd,1,0,0);
+    {
+      HODLR_STAGE_SCOPE_IF(p_allocate,dsep>=1000,"front.dense.allocate",this->sep_begin_,dsep,dupd,1,0,0);
+      F11_ = DenseM_t(dsep, dsep); F11_.zero();
+      F12_ = DenseM_t(dsep, dupd); F12_.zero();
+      F21_ = DenseM_t(dupd, dsep); F21_.zero();
+    }
+    {
+      HODLR_STAGE_SCOPE_IF(p_extract,dsep>=1000,"front.dense.extract_sparse",this->sep_begin_,dsep,dupd,1,0,0);
+      A.extract_front
+        (F11_, F12_, F21_, this->sep_begin_, this->sep_end_,
+         this->upd_, task_depth);
+    }
     if (dupd) {
+      HODLR_STAGE_SCOPE_IF(p_cb,dsep>=1000,"front.dense.allocate_contribution",this->sep_begin_,dsep,dupd,1,0,0);
       CBstorage_ = workspace.get(std::size_t(dupd)*dupd);
       F22_ = DenseMW_t(dupd, dupd, CBstorage_.data(), dupd);
       F22_.zero();
     }
-    if (lchild_)
-      lchild_->extend_add_to_dense
-        (F11_, F12_, F21_, F22_, this, workspace, task_depth);
-    if (rchild_)
-      rchild_->extend_add_to_dense
-        (F11_, F12_, F21_, F22_, this, workspace, task_depth);
+    {
+      HODLR_STAGE_SCOPE_IF(p_children,dsep>=1000,"front.dense.extend_add",this->sep_begin_,dsep,dupd,1,0,0);
+      if (lchild_)
+        lchild_->extend_add_to_dense
+          (F11_, F12_, F21_, F22_, this, workspace, task_depth);
+      if (rchild_)
+        rchild_->extend_add_to_dense
+          (F11_, F12_, F21_, F22_, this, workspace, task_depth);
+    }
     if (etree_level == 0 && opts.write_root_front()) F11_.write("Froot");
     return err_code;
   }
@@ -257,10 +275,14 @@ namespace strumpack {
   FrontDense<scalar_t,integer_t>::factor_phase2
   (const SpMat_t& A, const Opts_t& opts,
    int etree_level, int task_depth) {
+    HODLR_STAGE_SCOPE_IF(p_factor,dim_sep()>=1000,"front.dense.factor",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
     ReturnCode err_code = ReturnCode::SUCCESS;
     if (dim_sep()) {
-      if (F11_.LU(piv_, task_depth))
-        err_code = ReturnCode::ZERO_PIVOT;
+      {
+        HODLR_STAGE_SCOPE_IF(p_lu,dim_sep()>=1000,"front.dense.LU",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
+        if (F11_.LU(piv_, task_depth))
+          err_code = ReturnCode::ZERO_PIVOT;
+      }
       if (opts.replace_tiny_pivots()) {
         auto thresh = opts.pivot_threshold();
         for (std::size_t i=0; i<F11_.rows(); i++)
@@ -269,12 +291,50 @@ namespace strumpack {
       }
       if (dim_upd()) {
         F12_.laswp(piv_, true);
-        trsm(Side::L, UpLo::L, Trans::N, Diag::U,
-             scalar_t(1.), F11_, F12_, task_depth);
-        trsm(Side::R, UpLo::U, Trans::N, Diag::N,
-             scalar_t(1.), F11_, F21_, task_depth);
-        gemm(Trans::N, Trans::N, scalar_t(-1.), F21_, F12_,
-             scalar_t(1.), F22_, task_depth);
+        {
+          HODLR_STAGE_SCOPE_IF(p_trsm,dim_sep()>=1000,"front.dense.TRSM",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
+          trsm(Side::L, UpLo::L, Trans::N, Diag::U,
+               scalar_t(1.), F11_, F12_, task_depth);
+          trsm(Side::R, UpLo::U, Trans::N, Diag::N,
+               scalar_t(1.), F11_, F21_, task_depth);
+        }
+        {
+          HODLR_STAGE_SCOPE_IF(p_gemm,dim_sep()>=1000,"front.dense.GEMM",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
+          bool completed = false;
+#if defined(STRUMPACK_HAVE_HODLR_GPU_DENSE_SCHUR)
+          if constexpr (std::is_same<scalar_t,double>::value) {
+            // Small updates remain on CPU. Full-solver initialization has
+            // already selected the device and shared its BPACK memory budget.
+            if (opts.HODLR_options().gpu_dense_schur() && dim_sep()>=1000 &&
+                2.L*dim_upd()*dim_upd()*dim_sep()>=1.e11L) {
+              HODLR::DenseSchurGPUStats stats;
+              {
+                HODLR_STAGE_SCOPE_IF(p_gpu,dim_sep()>=1000,"front.dense.GEMM.gpu_attempt",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
+                completed = HODLR::gpu_dense_schur_update
+                  (F22_.rows(),F22_.cols(),F11_.rows(),F21_.data(),F21_.ld(),
+                   F12_.data(),F12_.ld(),F22_.data(),F22_.ld(),stats);
+              }
+              std::cout << "# GPU dense Schur front=" << this->sep_begin_
+                << " rows=" << dim_upd() << " inner=" << dim_sep()
+                << " used_gpu=" << stats.used_gpu << " panels=" << stats.panels
+                << " panel_columns=" << stats.panel_columns
+                << " wall_seconds_local=" << stats.wall_seconds
+                << " device_gemm_seconds_local=" << stats.device_gemm_seconds
+                << " upload_bytes_local=" << stats.upload_bytes
+                << " download_bytes_local=" << stats.download_bytes
+                << " device_peak_bytes_local=" << stats.device_peak_bytes
+                << " fallback_reason=" << (stats.used_gpu?"none":stats.fallback_reason) << std::endl;
+              if (completed) {
+                STRUMPACK_FLOPS(gemm_flops(Trans::N,Trans::N,scalar_t(-1.),F21_,F12_,scalar_t(1.)));
+                STRUMPACK_BYTES(8*blas::gemm_moves(F22_.rows(),F22_.cols(),F11_.rows()));
+              }
+            }
+          }
+#endif
+          if (!completed)
+            gemm(Trans::N, Trans::N, scalar_t(-1.), F21_, F12_,
+                 scalar_t(1.), F22_, task_depth);
+        }
       }
     }
     STRUMPACK_FULL_RANK_FLOPS
@@ -288,6 +348,7 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontDense<scalar_t,integer_t>::fwd_solve_phase2
   (DenseM_t& b, DenseM_t& bupd, int etree_level, int task_depth) const {
+    HODLR_STAGE_SCOPE_IF(p_forward,dim_sep()>=1000,"solve.dense.forward",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
     if (dim_sep()) {
       DenseMW_t bloc(dim_sep(), b.cols(), b, this->sep_begin_, 0);
       bloc.laswp(piv_, true);
@@ -309,6 +370,7 @@ namespace strumpack {
   template<typename scalar_t,typename integer_t> void
   FrontDense<scalar_t,integer_t>::bwd_solve_phase1
   (DenseM_t& y, DenseM_t& yupd, int etree_level, int task_depth) const {
+    HODLR_STAGE_SCOPE_IF(p_backward,dim_sep()>=1000,"solve.dense.backward",this->sep_begin_,dim_sep(),dim_upd(),1,0,0);
     if (dim_sep()) {
       DenseMW_t yloc(dim_sep(), y.cols(), y, this->sep_begin_, 0);
       if (y.cols() == 1) {

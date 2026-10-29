@@ -174,38 +174,51 @@ namespace strumpack {
   FrontHODLRMPI<scalar_t,integer_t>::extract_CB_sub_matrix_2d
   (const VecVec_t& I, const VecVec_t& J, std::vector<DistM_t>& B) const {
     if (Comm().is_null() || !dim_upd()) return;
+    HODLR_STAGE_NATIVE_EXTRACTION_IF(p_native_stats,dim_sep()>=1000&&!I.empty(),"child.F22",*F22_,sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),I.size());
+    HODLR_STAGE_SCOPE_IF(p_child,dim_sep()>=1000,"front.child.extract",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
     // TIMER_TIME(TaskType::HSS_EXTRACT_SCHUR, 3, t_ex_schur);
     auto nB = I.size();
     std::vector<std::vector<std::size_t>> lI(nB), lJ(nB), oI(nB), oJ(nB);
     std::vector<DistM_t> Bloc(nB);
-    for (std::size_t i=0; i<nB; i++) {
-      this->find_upd_indices(I[i], lI[i], oI[i]);
-      this->find_upd_indices(J[i], lJ[i], oJ[i]);
+    {
+      HODLR_STAGE_SCOPE_IF(p_map,dim_sep()>=1000,"front.child.map",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t i=0; i<nB; i++) {
+        this->find_upd_indices(I[i], lI[i], oI[i]);
+        this->find_upd_indices(J[i], lJ[i], oJ[i]);
 #if defined(STRUMPACK_PERMUTE_CB)
-      if (CB_perm_.size() == std::size_t(this->dim_upd())) {
-        for (auto& li : lI[i]) li = CB_perm_[li];
-        for (auto& lj : lJ[i]) lj = CB_perm_[lj];
-      }
+        if (CB_perm_.size() == std::size_t(this->dim_upd())) {
+          for (auto& li : lI[i]) li = CB_perm_[li];
+          for (auto& lj : lJ[i]) lj = CB_perm_[lj];
+        }
 #endif
-      Bloc[i] = DistM_t(grid(), lI[i].size(), lJ[i].size());
+        Bloc[i] = DistM_t(grid(), lI[i].size(), lJ[i].size());
+      }
     }
     {
+      HODLR_STAGE_SCOPE_IF(p_native,dim_sep()>=1000,"front.child.native_extract",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::EXTRACT_ELEMS, 2, t_a2a);
       F22_->extract_elements(lI, lJ, Bloc);
     }
     std::vector<std::vector<scalar_t>> sbuf(this->P());
-    for (std::size_t i=0; i<nB; i++)
-      ExtendAdd<scalar_t,integer_t>::extend_copy_to_buffers
-        (Bloc[i], oI[i], oJ[i], B[i], sbuf);
+    {
+      HODLR_STAGE_SCOPE_IF(p_pack,dim_sep()>=1000,"front.child.pack",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t i=0; i<nB; i++)
+        ExtendAdd<scalar_t,integer_t>::extend_copy_to_buffers
+          (Bloc[i], oI[i], oJ[i], B[i], sbuf);
+    }
     std::vector<scalar_t,NoInit<scalar_t>> rbuf;
     std::vector<scalar_t*> pbuf;
     {
+      HODLR_STAGE_SCOPE_IF(p_exchange,dim_sep()>=1000,"front.child.exchange",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
       TIMER_TIME(TaskType::GET_SUBMATRIX_2D_A2A, 2, t_a2a);
       Comm().all_to_all_v(sbuf, rbuf, pbuf);
     }
-    for (std::size_t i=0; i<nB; i++)
-      ExtendAdd<scalar_t,integer_t>::extend_copy_from_buffers
-        (B[i], oI[i], oJ[i], Bloc[i], pbuf);
+    {
+      HODLR_STAGE_SCOPE_IF(p_unpack,dim_sep()>=1000,"front.child.unpack",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
+      for (std::size_t i=0; i<nB; i++)
+        ExtendAdd<scalar_t,integer_t>::extend_copy_from_buffers
+          (B[i], oI[i], oJ[i], Bloc[i], pbuf);
+    }
   }
 
   template<typename scalar_t,typename integer_t> ReturnCode
@@ -479,6 +492,8 @@ namespace strumpack {
 #endif
           this->extract_2d(A, I, J, B, true);
           TIMER_TIME(TaskType::HSS_EXTRACT_SCHUR, 3, t_ex_schur);
+          HODLR_STAGE_NATIVE_EXTRACTION_IF(p_schur_stats,dim_sep()>=1000&&!I.empty(),"current.Schur",Schur,sep_begin_,dim_upd(),dim_upd(),Comm().size(),Comm().rank(),I.size());
+          HODLR_STAGE_SCOPE_IF(p_current_schur,dim_sep()>=1000,"Schur.extract.current",sep_begin_,dim_sep(),dim_upd(),Comm().size(),Comm().rank(),0);
           Schur.extract_add_elements(e, B);
         };
 #if defined(STRUMPACK_USE_HODLR_GPU_EVALUATOR)

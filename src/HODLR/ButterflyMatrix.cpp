@@ -538,18 +538,24 @@ namespace strumpack {
     (ExtractionMeta& e, std::vector<DistMW_t>& B) {
       std::unique_ptr<scalar_t[]> alldat_loc(new scalar_t[e.Nalldat_loc]);
       auto ptr = alldat_loc.get();
-      LRBF_extract_elements<scalar_t>
-        (lr_bf_, options_, msh_, stats_, ptree_, e.Ninter,
-         e.Nallrows, e.Nallcols, e.Nalldat_loc, e.allrows, e.allcols,
-         ptr, e.rowids, e.colids, e.pgids, e.Npmap, e.pmaps);
-      for (auto& Bk : B) {
-        auto m = Bk.lcols();
-        auto n = Bk.lrows();
-        auto Bdata = Bk.data();
-        auto Bld = Bk.ld();
-        for (int j=0; j<m; j++)
-          for (int i=0; i<n; i++)
-            Bdata[i+j*Bld] += *ptr++;
+      {
+        HODLR_STAGE_SCOPE_IF(p_native,rows_>=1000,"BF.extract.native",-1,rows_,cols_,c_->size(),c_->rank(),0);
+        LRBF_extract_elements<scalar_t>
+          (lr_bf_, options_, msh_, stats_, ptree_, e.Ninter,
+           e.Nallrows, e.Nallcols, e.Nalldat_loc, e.allrows, e.allcols,
+           ptr, e.rowids, e.colids, e.pgids, e.Npmap, e.pmaps);
+      }
+      {
+        HODLR_STAGE_SCOPE_IF(p_add,rows_>=1000,"BF.extract.add_host",-1,rows_,cols_,c_->size(),c_->rank(),0);
+        for (auto& Bk : B) {
+          auto m = Bk.lcols();
+          auto n = Bk.lrows();
+          auto Bdata = Bk.data();
+          auto Bld = Bk.ld();
+          for (int j=0; j<m; j++)
+            for (int i=0; i<n; i++)
+              Bdata[i+j*Bld] += *ptr++;
+        }
       }
     }
 

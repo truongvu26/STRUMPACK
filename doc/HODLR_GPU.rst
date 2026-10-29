@@ -117,3 +117,8 @@ are a correctness bridge; general distributed construction remains separate.
 The further opt-in level-zero rectangular GPU, device Schur and bounded
 distributed-construction extension is documented in HODLR_GPU_RECTANGULAR.rst,
 including its remaining host preparation and controlled timing evidence.
+
+An opt-in GPU Schur update for large exact local fronts is documented in
+HODLR_GPU_DENSE_SCHUR.rst. It keeps CPU pivoting/LU/TRSM and host child
+contributions, and replaces only the final Schur GEMM with bounded cuBLAS
+panels. STRUMPACK's separate dense CUDA backend remains disabled.

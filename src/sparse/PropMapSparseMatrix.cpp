@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cmath>
 #include <tuple>
+#include <utility>
 
 #include "PropMapSparseMatrix.hpp"
 #include "dense/DistributedMatrix.hpp"
@@ -622,19 +623,27 @@ namespace strumpack {
     integer_t m = B.rows(), n = B.cols();
     if (m == 0 || n == 0) return;
     B.zero();
+    // Look up requested rows once, then visit the sparse entries of each
+    // requested column.  Scanning the column separately for every output
+    // row costs O(m * column_nnz), even when the requested block is sparse.
+    // Keep the output positions to support arbitrary order and duplicates.
+    std::vector<std::pair<std::size_t,integer_t>> rows(m);
+    for (integer_t i=0; i<m; i++) rows[i] = {I[i], i};
+    std::sort(rows.begin(), rows.end());
     for (integer_t j=0; j<n; j++) {
       integer_t jj = J[j];
       integer_t c = find_global(jj);
       if (c == local_cols_ || global_col_[c] != jj) continue;
-      for (integer_t i=0; i<m; i++) {
-        integer_t ii = I[i];
-        if (jj >= shi && ii >= shi) break;
-        for (integer_t k=ptr_[c]; k<ptr_[c+1]; k++) {
-          if (ind_[k] == ii) {
-            B.global(i, j, val_[k]);
-            break;
-          }
-        }
+      for (integer_t k=ptr_[c]; k<ptr_[c+1]; k++) {
+        const auto r = ind_[k];
+        if (jj >= shi && r >= shi) break;
+        // The previous implementation used the first stored occurrence.
+        if (k > ptr_[c] && r == ind_[k-1]) continue;
+        auto row = std::lower_bound
+          (rows.begin(), rows.end(), std::size_t(r),
+           [](const auto& x, std::size_t value) { return x.first < value; });
+        for (; row != rows.end() && row->first == std::size_t(r); row++)
+          B.global(row->second, j, val_[k]);
       }
     }
   }
