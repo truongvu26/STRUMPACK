@@ -283,9 +283,12 @@ one stream and fraction 0.35 are selected for independent confirmation.
 Neither the screen nor the finite threshold search establishes a global
 optimum for arbitrary sparse matrices.
 
-The screenshot gives factor times only (14.2, 67 and 119 seconds). Comparisons
-use the corresponding 4/4/8 GPU counts; its GPU model, command and timing
-boundaries were unavailable. A smaller factor number is a count-matched
+The original screenshot gave factor times only (14.2, 67 and 119 seconds).
+Those comparisons used the corresponding 4/4/8 GPU counts; its GPU model,
+commands and timing boundaries were unavailable at the time. The subsequently
+supplied 150- and 200-cubed commands establish a single-RHS/GMRES setup;
+``HODLR_GPU_SCREENSHOT_COMMANDS.rst`` records their defaults and a controlled
+current-code 150-cubed pilot. A smaller factor number is a count-matched
 comparison with the reported number, not a hardware-controlled reproduction.
 The controlled exact-backend comparisons use the same executable and controls.
 
